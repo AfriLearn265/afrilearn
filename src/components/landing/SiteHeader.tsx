@@ -25,12 +25,12 @@ export function SiteHeader() {
           <ul className="flex items-center gap-1">
             {nav.map((n) => (
               <li key={n.href}>
-                <Link href={n.href} className="rounded-lg px-3 py-2 text-[0.95rem] font-medium text-ink-soft hover:bg-wash hover:text-ink">{n.label}</Link>
+                <Link href={n.href} className="whitespace-nowrap rounded-lg px-2.5 py-2 text-[0.95rem] font-medium text-ink-soft hover:bg-wash hover:text-ink xl:px-3">{n.label}</Link>
               </li>
             ))}
           </ul>
         </nav>
-        <div className="hidden items-center gap-2 md:flex">
+        <div className="hidden shrink-0 items-center gap-2 md:flex">
           <ButtonLink href="/login?as=student" variant="ghost" size="sm">Student login</ButtonLink>
           <ButtonLink href="/login?as=teacher" variant="ghost" size="sm">Teacher login</ButtonLink>
           <ButtonLink href="/signup" size="sm">Get started</ButtonLink>
