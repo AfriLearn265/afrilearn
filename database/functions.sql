@@ -1247,3 +1247,31 @@ grant execute on function public.verify_certificate(text) to anon;
 -- Supabase Auth inserts users as supabase_auth_admin; let it fire the sign-up trigger.
 grant usage on schema private to supabase_auth_admin;
 grant execute on function private.handle_new_user() to supabase_auth_admin;
+
+-- ---------------------------------------------------------------------
+-- CBT Centre catalogue: which subjects and topics have practice questions.
+-- ---------------------------------------------------------------------
+create or replace function public.cbt_catalogue()
+returns table (exam_body text, subject_id uuid, subject_name text, topic text, question_count bigint)
+language sql stable security definer set search_path = '' as $$
+  select coalesce(q.exam_body, b.exam_body) as exam_body, q.subject_id, s.name, coalesce(q.topic, 'General'), count(*)
+  from public.questions q
+  join public.question_banks b on b.id = q.bank_id and b.is_shared
+  join public.subjects s on s.id = q.subject_id
+  where q.question_type in ('mcq', 'true_false')
+    and exists (select 1 from public.question_answer_keys k where k.question_id = q.id and cardinality(k.correct_option_ids) > 0)
+    and auth.uid() is not null
+  group by 1, 2, 3, 4
+  order by 3, 4
+$$;
+revoke execute on function public.cbt_catalogue() from public, anon;
+grant execute on function public.cbt_catalogue() to authenticated;
+
+-- Counts downloads of library and course materials the user can see.
+create or replace function public.touch_material_download(p_path text)
+returns void language sql security definer set search_path = '' as $$
+  update public.learning_materials set download_count = download_count + 1
+  where storage_path = p_path and public.can_view_material(id);
+$$;
+revoke execute on function public.touch_material_download(text) from public, anon;
+grant execute on function public.touch_material_download(text) to authenticated;

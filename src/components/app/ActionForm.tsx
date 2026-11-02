@@ -16,7 +16,7 @@ export function ActionForm({ action, submitLabel, pendingLabel, children, resetO
   const ref = useRef<HTMLFormElement>(null);
   const { state, pending, onSubmit } = useServerForm(async (fd: FormData) => {
     const r = await action(fd);
-    if (!r.error && resetOnSuccess) ref.current?.reset();
+    if (r && !r.error && resetOnSuccess) ref.current?.reset();
     return r;
   });
   return (

@@ -11,9 +11,14 @@ export type NavItem = { href: string; label: string; icon: IconName };
 export const navByRole: Record<Role, NavItem[]> = {
   student: [
     { href: "/student", label: "Overview", icon: "home" },
+    { href: "/student/exams", label: "Tests", icon: "exam" },
+    { href: "/student/cbt", label: "CBT Centre", icon: "spark" },
+    { href: "/student/results", label: "Results", icon: "results" },
   ],
   teacher: [
     { href: "/teacher", label: "Overview", icon: "home" },
+    { href: "/teacher/questions", label: "Question banks", icon: "bank" },
+    { href: "/teacher/exams", label: "Examinations", icon: "exam" },
   ],
   parent: [
     { href: "/parent", label: "Overview", icon: "home" },

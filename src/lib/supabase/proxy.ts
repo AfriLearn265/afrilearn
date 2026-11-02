@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL, isSupabaseConfigured } from "@/lib/env";
 
-const PROTECTED = ["/dashboard", "/student", "/teacher", "/parent", "/admin", "/pending", "/billing", "/account"];
+const PROTECTED = ["/dashboard", "/student", "/teacher", "/parent", "/admin", "/pending", "/billing", "/account", "/exam", "/live"];
 const GUEST_ONLY = ["/login", "/signup"];
 
 export async function updateSession(request: NextRequest) {
