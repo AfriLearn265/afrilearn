@@ -1,36 +1,98 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AfriLearn
 
-## Getting Started
+**Learning Without Limits.** A learning platform for the Nigerian school system: Nursery 1 to SS3 plus WAEC, NECO, JAMB, NABTEB and scholarship preparation, for students, teachers, parents and administrators.
 
-First, run the development server:
+> "AfriLearn" is a temporary brand. Change the name, tagline and contact email in `src/config/brand.ts` (and the `brand` row in `platform_settings`).
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Stack
+
+| Layer | Choice |
+| --- | --- |
+| Web app | Next.js 16 (App Router, Server Actions), React 19, TypeScript |
+| Styling | Tailwind CSS 4, self-hosted Bricolage Grotesque and Figtree fonts |
+| Backend | Supabase: Postgres, Auth, Storage, Row Level Security |
+| Hosting | Vercel |
+| Code | GitHub |
+
+## Project structure
+
+```
+database/            SQL to create the whole backend, run in this order:
+  schema.sql         tables, indexes, triggers
+  functions.sql      access helpers, sign-up trigger, secure RPCs (exams, grading, payments)
+  policies.sql       privileges, Row Level Security, storage buckets and rules
+  seed.sql           levels, classes, subjects, subject-to-class map, plans, badges, settings
+src/
+  app/               routes: landing, (auth), student, teacher, parent, admin, pending ...
+  components/        landing sections, app shell, UI kit
+  config/            brand, curriculum fallback, navigation
+  lib/               Supabase clients, auth guard, catalogue, formatting
+  proxy.ts           refreshes sessions and keeps signed-out users out of dashboards
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## How security works
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+* **Every table has Row Level Security.** A student only reads their own records, a teacher only students in their classrooms, a parent only linked children. Changing a URL or browser data cannot widen access.
+* **Roles are set by the database.** Sign-up can only create student, parent or teacher (pending) accounts. Only an administrator can approve teachers or change roles, through logged RPCs.
+* **Students never receive answer keys.** Questions reach students only through exam RPCs. Marking, deadlines, late flags, points and results are computed inside Postgres.
+* **Payments** are confirmed by a server-only function after the provider verifies them.
+* **Children:** Nursery and Primary sign-ups require guardian consent; there is no adult-to-child private messaging; leaderboards are opt-in and show first names only.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Run locally
 
-## Learn More
+```bash
+npm install
+cp .env.example .env.local     # fill in your Supabase URL and publishable key
+npm run dev                     # http://localhost:3000
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Connect Supabase (new project)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Create a project at supabase.com.
+2. In **SQL Editor**, run `database/schema.sql`, `functions.sql`, `policies.sql`, then `seed.sql`.
+3. **Authentication → Sign In / Providers → Email:** for a demo without custom email, turn off **Confirm email**. For production, add custom SMTP (for example Resend) and keep it on.
+4. **Authentication → URL Configuration:** set the Site URL to your Vercel address and add `https://YOUR-SITE/auth/callback` to the redirect URLs.
+5. Copy the Project URL and publishable key into `.env.local` and Vercel.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Make the first administrator
 
-## Deploy on Vercel
+Sign up normally, then in the SQL Editor run:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```sql
+update public.profiles set role = 'admin', status = 'active'
+where id = (select id from auth.users where email = 'you@example.com');
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deploy to Vercel
+
+1. Import the GitHub repository in Vercel (framework: Next.js, defaults are fine).
+2. Add the environment variables from `.env.example` (at least the two `NEXT_PUBLIC_SUPABASE_*` values and `NEXT_PUBLIC_SITE_URL`).
+3. Deploy. Every push to `main` redeploys automatically.
+
+> Free tiers: Supabase pauses free projects after 7 days without activity, so open the site the day before a demo. Vercel's free Hobby plan is for non-commercial use; move to Pro before taking real payments.
+
+## Upload to GitHub
+
+```bash
+git init && git add . && git commit -m "Initial commit"
+git remote add origin https://github.com/YOUR-USER/afrilearn.git
+git push -u origin main
+```
+
+## Integrations that need your keys
+
+| Feature | What to add | Without it |
+| --- | --- | --- |
+| Parent-created child accounts, Paystack webhook | `SUPABASE_SECRET_KEY` | Those two actions explain they are not configured |
+| AI learning companion | `ANTHROPIC_API_KEY` | Companion shows a "not configured" message |
+| Payments | `PAYSTACK_SECRET_KEY` (test key for the pilot) | Pricing stays informational; pilot mode keeps every feature free |
+| Live classes | `JAAS_APP_ID`, `JAAS_API_KEY_ID`, `JAAS_PRIVATE_KEY` | Falls back to public Jitsi, which limits embedded calls to 5 minutes |
+
+## Development phases
+
+1. Architecture, design system, landing page, authentication, database ✅
+2. Student, teacher, parent and administrator dashboards
+3. Classrooms, courses, lessons, materials, assignments
+4. Examination engine, CBT centre, results and grading
+5. Live classroom, AI companion, notifications, gamification
+6. Payments, security review, performance, deployment notes

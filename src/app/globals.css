@@ -1,26 +1,116 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+  AfriLearn design tokens
+  Adire indigo is the base, sun yellow is the single accent,
+  leaf and coral are reserved for meaning (mastered / needs revision).
+*/
+@theme {
+  --font-display: "Bricolage Grotesque Variable", "Segoe UI", system-ui, sans-serif;
+  --font-sans: "Figtree Variable", "Segoe UI", system-ui, sans-serif;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-ink: #10153f;
+  --color-ink-soft: #2a3063;
+  --color-muted: #5a6189;
+  --color-faint: #8b90b0;
+  --color-line: #e3e6f3;
+  --color-paper: #fbfbfd;
+  --color-wash: #eef1ff;
+  --color-wash-strong: #dfe4ff;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --color-adire-50: #f1f3ff;
+  --color-adire-100: #e1e5fd;
+  --color-adire-200: #c3cbfa;
+  --color-adire-300: #9ba6f2;
+  --color-adire-400: #6d79e3;
+  --color-adire-500: #4a56cf;
+  --color-adire-600: #3743b5;
+  --color-adire-700: #2b3a9f;
+  --color-adire-800: #222d7a;
+  --color-adire-900: #1a225c;
+
+  --color-sun-100: #fff3d6;
+  --color-sun-300: #fbd57f;
+  --color-sun-400: #f6b93b;
+  --color-sun-600: #c98a0c;
+
+  --color-leaf-100: #dcf5e8;
+  --color-leaf-500: #1c8c5e;
+  --color-leaf-700: #12613f;
+
+  --color-coral-100: #fde4e2;
+  --color-coral-500: #e2554f;
+  --color-coral-700: #a8302b;
+
+  --radius-pill: 999px;
+  --shadow-lift: 0 1px 2px rgb(16 21 63 / 0.06), 0 8px 24px -12px rgb(16 21 63 / 0.18);
+  --shadow-pop: 0 18px 48px -20px rgb(26 34 92 / 0.45);
+
+  --animate-rail-draw: rail-draw 1.4s cubic-bezier(0.65, 0, 0.35, 1) both;
+  --animate-stop-in: stop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-fade-in: fade-in 0.35s ease-out both;
+
+  @keyframes rail-draw {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+  @keyframes stop-in {
+    from { opacity: 0; transform: translateY(6px) scale(0.85); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: none; }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  html {
+    color-scheme: light;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.55;
+    text-rendering: optimizeLegibility;
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+  p { text-wrap: pretty; }
+  :focus-visible {
+    outline: 3px solid var(--color-sun-400);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  ::selection { background: var(--color-sun-300); color: var(--color-ink); }
+}
+
+@layer components {
+  .container-page {
+    width: 100%;
+    max-width: 76rem;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+  @media (min-width: 768px) {
+    .container-page { padding-inline: 2rem; }
+  }
+  .tabular { font-variant-numeric: tabular-nums; }
+  .scrollbar-none { scrollbar-width: none; }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
