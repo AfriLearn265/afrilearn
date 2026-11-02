@@ -14,6 +14,10 @@ export type FeaturedCourse = {
   id: string; title: string; slug: string; summary: string | null; difficulty: string;
   subject: { name: string; color: string } | null; klass: { name: string } | null; lessons: number;
 };
+type CourseRow = {
+  id: string; title: string; slug: string; summary: string | null; difficulty: string;
+  subject_name: string | null; subject_color: string | null; class_name: string | null; lesson_count: number | null;
+};
 export type SubjectOption = { code: string; name: string };
 
 export type Catalogue = {
@@ -50,8 +54,7 @@ export async function getCatalogue(): Promise<Catalogue> {
       db.from("subscription_plans").select("key, name, description, audience, price_kobo, billing_interval, features, is_featured")
         .eq("is_active", true).order("sort_order"),
       db.from("testimonials").select("id, author_name, author_role, quote").eq("is_published", true).order("sort_order"),
-      db.from("courses").select("id, title, slug, summary, difficulty, subjects(name, color), classes(name), lessons(count)")
-        .eq("is_published", true).is("classroom_id", null).order("is_featured", { ascending: false }).limit(6),
+      db.rpc("catalogue_courses", { p_limit: 6 }),
       db.from("platform_settings").select("key, value").eq("key", "paid_features_enabled"),
     ]);
     if (levels.error || classes.error) throw levels.error ?? classes.error;
@@ -66,9 +69,11 @@ export async function getCatalogue(): Promise<Catalogue> {
       subjects: (subjects.data ?? []) as SubjectOption[],
       plans: (plans.data ?? []) as Plan[],
       testimonials: (testimonials.data ?? []) as Testimonial[],
-      courses: ((courses.data ?? []) as unknown as Array<Omit<FeaturedCourse, "subject" | "klass" | "lessons"> & {
-        subjects: FeaturedCourse["subject"]; classes: FeaturedCourse["klass"]; lessons: { count: number }[];
-      }>).map((c) => ({ ...c, subject: c.subjects, klass: c.classes, lessons: c.lessons?.[0]?.count ?? 0 })),
+      courses: ((courses.data ?? []) as CourseRow[]).map((c) => ({
+        id: c.id, title: c.title, slug: c.slug, summary: c.summary, difficulty: c.difficulty,
+        subject: c.subject_name ? { name: c.subject_name, color: c.subject_color ?? "#2B3A9F" } : null,
+        klass: c.class_name ? { name: c.class_name } : null, lessons: c.lesson_count ?? 0,
+      })),
       paidFeatures: settings.data?.[0]?.value === true,
       live: true,
     };

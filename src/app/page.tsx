@@ -315,7 +315,7 @@ function Pricing({ plans, paidFeatures }: { plans: Catalogue["plans"]; paidFeatu
                   <p className="mt-5 font-display text-4xl font-bold tabular">
                     {p.price_kobo === 0 ? "Free" : formatNaira(p.price_kobo) ?? "Talk to us"}
                   </p>
-                  {p.price_kobo ? <p className={`text-sm ${p.is_featured ? "text-adire-100" : "text-muted"}`}>{per[p.billing_interval]}</p> : <p className="text-sm opacity-0">.</p>}
+                  {p.price_kobo ? <p className={`text-sm ${p.is_featured ? "text-adire-100" : "text-muted"}`}>{per[p.billing_interval]}</p> : <p className={`text-sm ${p.is_featured ? "text-adire-100" : "text-muted"}`}>forever</p>}
                   <ul className="mt-6 grid gap-2.5 text-[0.95rem]">
                     {p.features.map((f) => (
                       <li key={f} className="flex gap-2.5"><Check className={`mt-0.5 size-4 shrink-0 ${p.is_featured ? "text-sun-400" : "text-leaf-500"}`} aria-hidden="true" />{f}</li>

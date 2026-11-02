@@ -1291,3 +1291,21 @@ end $$;
 
 create trigger notify_message after insert on public.messages
   for each row execute function private.on_message();
+
+-- Public course catalogue for the landing page. Visitors see titles, summaries and
+-- lesson counts, but never lesson content, which stays behind sign-in.
+create or replace function public.catalogue_courses(p_limit int default 6)
+returns table (id uuid, title text, slug text, summary text, difficulty text,
+               subject_name text, subject_color text, class_name text, lesson_count int)
+language sql stable security definer set search_path = '' as $$
+  select c.id, c.title, c.slug, c.summary, c.difficulty, s.name, s.color, k.name,
+         (select count(*)::int from public.lessons l where l.course_id = c.id and l.is_published)
+  from public.courses c
+  left join public.subjects s on s.id = c.subject_id
+  left join public.classes k on k.id = c.class_id
+  where c.is_published and c.classroom_id is null
+  order by c.is_featured desc, c.created_at desc
+  limit least(greatest(coalesce(p_limit, 6), 1), 24)
+$$;
+revoke all on function public.catalogue_courses(int) from public;
+grant execute on function public.catalogue_courses(int) to anon, authenticated, service_role;

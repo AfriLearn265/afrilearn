@@ -91,8 +91,28 @@ git push -u origin main
 ## Development phases
 
 1. Architecture, design system, landing page, authentication, database ✅
-2. Student, teacher, parent and administrator dashboards
-3. Classrooms, courses, lessons, materials, assignments
-4. Examination engine, CBT centre, results and grading
-5. Live classroom, AI companion, notifications, gamification
-6. Payments, security review, performance, deployment notes
+2. Student, teacher, parent and administrator dashboards ✅
+3. Classrooms, courses, lessons, materials, assignments ✅
+4. Examination engine, CBT centre, results and grading ✅
+5. Live classroom, AI companion, notifications, gamification ✅
+6. Payments, security review, performance, deployment notes ✅
+
+## Demo accounts (pilot project only)
+
+The hosted pilot database contains demo accounts so every role can be shown without signing up. They all use the password `AfriLearn@2026`. Change or delete them before real users join.
+
+| Role | Email | What to show |
+| --- | --- | --- |
+| Administrator | admin@demo.afrilearn.ng | Overview charts, approve Grace's teacher application, users, settings |
+| Teacher | teacher@demo.afrilearn.ng | Tunde Bakare: SS1 Mathematics (join code `MATHS1`), Test 1, an essay waiting to be marked, a late assignment to grade |
+| Teacher | teacher2@demo.afrilearn.ng | Ngozi Eze: JSS2 English, SS1 Biology, Primary 4 Reading Club, a parent message to answer |
+| Teacher applicant | applicant@demo.afrilearn.ng | Grace Adebayo: sees the "application under review" page until an admin approves her |
+| Student (SS1) | student@demo.afrilearn.ng | Amina Yusuf: Learning Journey, 9-day streak, 85% on Test 1, a certificate, CBT practice |
+| Student (SS1) | chidi@demo.afrilearn.ng | Chidi Okonkwo: catching up, test result waiting for essay marking |
+| Student (JSS2) | fatima@demo.afrilearn.ng | Fatima Bello: finished Parts of Speech |
+| Pupil (Primary 4) | tobi@demo.afrilearn.ng | Tobi Adeyemi: account managed by his father |
+| JAMB candidate | emeka@demo.afrilearn.ng | Emeka Nwosu: mocks and practice in the CBT Centre |
+| Parent | parent@demo.afrilearn.ng | Halima Yusuf: Amina's results, attendance and a conversation with her teacher |
+| Parent | parent2@demo.afrilearn.ng | Kunle Adeyemi: Tobi's progress |
+
+All lessons and exam questions in the demo are original. The library links to openly licensed OpenStax textbooks.
