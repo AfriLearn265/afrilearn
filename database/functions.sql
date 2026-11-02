@@ -1275,3 +1275,19 @@ returns void language sql security definer set search_path = '' as $$
 $$;
 revoke execute on function public.touch_material_download(text) from public, anon;
 grant execute on function public.touch_material_download(text) to authenticated;
+
+-- Notify the other participant when a parent or teacher sends a message.
+create or replace function private.on_message()
+returns trigger language plpgsql security definer set search_path = '' as $$
+declare t public.message_threads; v_to uuid; v_link text;
+begin
+  select * into t from public.message_threads where id = new.thread_id;
+  update public.message_threads set updated_at = now() where id = new.thread_id;
+  v_to := case when new.sender_id = t.parent_id then t.teacher_id else t.parent_id end;
+  v_link := case when new.sender_id = t.parent_id then '/teacher/messages?t=' else '/parent/messages?t=' end || t.id;
+  perform private.notify(v_to, 'New message: ' || t.subject, left(new.body, 140), v_link, 'message');
+  return new;
+end $$;
+
+create trigger notify_message after insert on public.messages
+  for each row execute function private.on_message();

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireRole, firstName } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { greeting } from "@/lib/format";
@@ -48,7 +49,7 @@ export default async function TeacherHome() {
                 <li key={r.id} className="flex flex-wrap items-center gap-4 py-4">
                   <span className="size-3 shrink-0 rounded-full" style={{ background: r.subjects?.color ?? "#2B3A9F" }} aria-hidden="true" />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-semibold">{r.name}</p>
+                    <Link href={`/teacher/classrooms/${r.id}`} className="block truncate font-semibold hover:underline">{r.name}</Link>
                     <p className="text-sm text-muted">{[r.classes?.name, r.subjects?.name, `${r.enrollments?.[0]?.count ?? 0} students`].filter(Boolean).join(", ")}</p>
                   </div>
                   <p className="rounded-lg bg-wash px-3 py-1.5 font-display font-bold tracking-[0.2em] text-adire-800">{r.join_code}</p>

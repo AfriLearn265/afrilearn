@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireRole, firstName } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { greeting } from "@/lib/format";
@@ -28,14 +29,14 @@ export default async function ParentHome() {
       <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <Panel title="Your children">
           {children.length === 0 ? (
-            <EmptyState title="No children linked yet.">Ask your child to open their profile on {`their dashboard`} and read out their link code. Enter it on the right.</EmptyState>
+            <EmptyState title="No children linked yet.">Ask your child to open their dashboard or profile page and read out their link code, then enter it under Link a child.</EmptyState>
           ) : (
             <ul className="divide-y divide-line">
               {children.map((c) => (
                 <li key={c.profile_id} className="flex flex-wrap items-center gap-4 py-4">
                   <span className="grid size-11 place-items-center rounded-full bg-sun-400 font-display font-bold">{c.profiles?.full_name?.[0] ?? "?"}</span>
                   <div className="min-w-0 flex-1">
-                    <p className="font-semibold">{c.profiles?.full_name}</p>
+                    <Link href={`/parent/children/${c.profile_id}`} className="font-semibold hover:underline">{c.profiles?.full_name}</Link>
                     <p className="text-sm text-muted">{c.classes?.name ?? "Class not set"}, your {c.relationship}</p>
                   </div>
                   <dl className="flex gap-6 text-sm">
