@@ -7,7 +7,7 @@ import type { CatalogueClass, CatalogueLevel } from "@/config/curriculum";
 
 const shortLabel = (c: CatalogueClass) => (c.code === "SCHOLARSHIP" ? "Entrance" : c.code);
 
-export function JourneyRail({ levels, classes }: { levels: CatalogueLevel[]; classes: CatalogueClass[] }) {
+export function JourneyRail({ levels, classes, inset }: { levels: CatalogueLevel[]; classes: CatalogueClass[]; inset?: boolean }) {
   const [selected, setSelected] = useState(classes.find((c) => c.code === "JSS1")?.code ?? classes[0]?.code);
   const refs = useRef<Record<string, HTMLButtonElement | null>>({});
   const scroller = useRef<HTMLDivElement>(null);
@@ -89,7 +89,8 @@ export function JourneyRail({ levels, classes }: { levels: CatalogueLevel[]; cla
       </div>
 
       <div id={panelId} role="tabpanel" aria-live="polite"
-        className="mt-5 grid gap-6 rounded-[1.75rem] border border-line bg-white p-6 shadow-lift md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] md:p-8">
+        className={clsx("mt-5 grid gap-6 rounded-[1.75rem] p-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] md:p-8",
+          inset ? "bg-paper" : "border border-line bg-white shadow-lift")}>
         <div key={current.code} className="animate-fade-in">
           <p className="text-sm font-medium text-muted">{level?.name}</p>
           <h3 className="mt-1 text-[2rem] font-bold">{current.name}</h3>
@@ -104,7 +105,7 @@ export function JourneyRail({ levels, classes }: { levels: CatalogueLevel[]; cla
         </div>
         <ul key={`${current.code}-subjects`} className="flex flex-wrap content-start gap-2 animate-fade-in" aria-label={`Subjects in ${current.name}`}>
           {shown.map((s) => (
-            <li key={s} className="rounded-full border border-line bg-paper px-3 py-1.5 text-sm text-ink-soft">{s}</li>
+            <li key={s} className="rounded-full border border-line bg-white px-3 py-1.5 text-sm text-ink-soft">{s}</li>
           ))}
           {current.subjects.length > shown.length && (
             <li className="rounded-full px-3 py-1.5 text-sm text-muted">and {current.subjects.length - shown.length} more</li>

@@ -2,7 +2,7 @@ import Link from "next/link";
 import clsx from "clsx";
 import type { ComponentProps, ReactNode } from "react";
 
-type Variant = "primary" | "accent" | "outline" | "ghost" | "danger" | "light";
+type Variant = "primary" | "accent" | "outline" | "ghost" | "danger" | "light" | "onDark";
 type Size = "sm" | "md" | "lg";
 
 const variants: Record<Variant, string> = {
@@ -12,6 +12,7 @@ const variants: Record<Variant, string> = {
   ghost: "text-ink-soft hover:bg-wash hover:text-ink",
   danger: "bg-coral-500 text-white hover:bg-coral-700",
   light: "bg-white text-adire-800 hover:bg-adire-50",
+  onDark: "border border-white/30 text-white hover:border-white/60 hover:bg-white/10",
 };
 const sizes: Record<Size, string> = {
   sm: "h-9 px-3.5 text-sm gap-1.5",

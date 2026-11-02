@@ -49,6 +49,7 @@
   --animate-rail-draw: rail-draw 1.4s cubic-bezier(0.65, 0, 0.35, 1) both;
   --animate-stop-in: stop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   --animate-fade-in: fade-in 0.35s ease-out both;
+  --animate-hero-in: hero-in 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 
   @keyframes rail-draw {
     from { transform: scaleX(0); }
@@ -56,6 +57,10 @@
   }
   @keyframes stop-in {
     from { opacity: 0; transform: translateY(6px) scale(0.85); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes hero-in {
+    from { opacity: 0; transform: translateY(14px) scale(0.97); }
     to { opacity: 1; transform: none; }
   }
   @keyframes fade-in {

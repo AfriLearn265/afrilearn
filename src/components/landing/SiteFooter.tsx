@@ -3,9 +3,9 @@ import { Logo } from "@/components/brand/Logo";
 import { brand } from "@/config/brand";
 
 const columns = [
-  { title: "Learn", links: [["Classes", "/#classes"], ["Exam preparation", "/#exams"], ["Pricing", "/#pricing"], ["Questions", "/#faq"]] },
-  { title: "Join", links: [["Create a student account", "/signup?role=student"], ["Register as a parent", "/signup?role=parent"], ["Apply to teach", "/signup?role=teacher"], ["Log in", "/login"]] },
-  { title: "Trust", links: [["Privacy", "/privacy"], ["Terms of use", "/terms"], ["Child safety", "/privacy#children"], ["Verify a certificate", "/verify"]] },
+  { title: "Learn", links: [["Classes and subjects", "/classes"], ["Courses", "/courses"], ["Exam preparation", "/exam-prep"], ["Pricing", "/pricing"]] },
+  { title: "Join", links: [["Create a student account", "/signup?role=student"], ["For parents", "/parents"], ["For teachers", "/teachers"], ["Log in", "/login"]] },
+  { title: "Help", links: [["Questions people ask", "/faq"], ["Verify a certificate", "/verify"], ["Privacy and child safety", "/privacy"], ["Terms of use", "/terms"], ["Photo credits", "/credits"]] },
 ];
 
 export function SiteFooter() {

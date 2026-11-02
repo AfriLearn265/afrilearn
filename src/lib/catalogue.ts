@@ -69,11 +69,7 @@ export async function getCatalogue(): Promise<Catalogue> {
       subjects: (subjects.data ?? []) as SubjectOption[],
       plans: (plans.data ?? []) as Plan[],
       testimonials: (testimonials.data ?? []) as Testimonial[],
-      courses: ((courses.data ?? []) as CourseRow[]).map((c) => ({
-        id: c.id, title: c.title, slug: c.slug, summary: c.summary, difficulty: c.difficulty,
-        subject: c.subject_name ? { name: c.subject_name, color: c.subject_color ?? "#2B3A9F" } : null,
-        klass: c.class_name ? { name: c.class_name } : null, lessons: c.lesson_count ?? 0,
-      })),
+      courses: ((courses.data ?? []) as CourseRow[]).map(toCourse),
       paidFeatures: settings.data?.[0]?.value === true,
       live: true,
     };
@@ -85,4 +81,20 @@ export async function getCatalogue(): Promise<Catalogue> {
 export function formatNaira(kobo: number | null) {
   if (kobo === null) return null;
   return new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(kobo / 100);
+}
+
+/** Every published public course, for the /courses page. */
+export async function getCourses(limit = 24): Promise<FeaturedCourse[]> {
+  if (!isSupabaseConfigured) return [];
+  const { data, error } = await createPublicClient().rpc("catalogue_courses", { p_limit: limit });
+  if (error || !data) return [];
+  return (data as CourseRow[]).map(toCourse);
+}
+
+function toCourse(c: CourseRow): FeaturedCourse {
+  return {
+    id: c.id, title: c.title, slug: c.slug, summary: c.summary, difficulty: c.difficulty,
+    subject: c.subject_name ? { name: c.subject_name, color: c.subject_color ?? "#2B3A9F" } : null,
+    klass: c.class_name ? { name: c.class_name } : null, lessons: c.lesson_count ?? 0,
+  };
 }

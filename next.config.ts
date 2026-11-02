@@ -18,7 +18,14 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
-    remotePatterns: [{ protocol: "https", hostname: "*.supabase.co" }],
+    // Photos come from Unsplash's image CDN, which resizes them itself, so we skip Vercel's optimiser.
+    loader: "custom",
+    loaderFile: "./src/lib/image-loader.ts",
+    qualities: [60, 70, 75],
+    remotePatterns: [
+      { protocol: "https", hostname: "*.supabase.co" },
+      { protocol: "https", hostname: "images.unsplash.com" },
+    ],
   },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
