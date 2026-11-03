@@ -1,0 +1,86 @@
+name: Android prototype APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "android/**"
+      - ".github/workflows/android.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-apk
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      KS_PASS: afrilearn-prototype
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.11.1"
+
+      # The prototype signing key lives only in the Actions cache (never in this public repo),
+      # so every build is signed with the same key and installs over the previous one.
+      - name: Restore signing key
+        id: key
+        uses: actions/cache@v4
+        with:
+          path: android/signing/prototype.p12
+          key: afrilearn-prototype-signing-v1
+
+      - name: Create signing key (first build only)
+        if: steps.key.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p android/signing
+          keytool -genkeypair -noprompt -storetype PKCS12 -keystore android/signing/prototype.p12 \
+            -alias afrilearn -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass "$KS_PASS" -keypass "$KS_PASS" \
+            -dname "CN=AfriLearn Prototype, O=AfriLearn, C=NG"
+
+      - name: Build APK
+        working-directory: android
+        run: |
+          set -o pipefail
+          KS_FILE="$PWD/signing/prototype.p12" gradle assembleRelease --no-daemon --stacktrace 2>&1 | tee build.log
+
+      - name: Share the build log when the build fails
+        if: failure()
+        run: |
+          git config user.name "AfriLearn Builder"
+          git config user.email "AfriLearn265@users.noreply.github.com"
+          git checkout --orphan android-build-log
+          git rm -rf --cached . > /dev/null
+          tail -n 250 android/build.log > build-log.txt || echo "No log" > build-log.txt
+          git add build-log.txt
+          git commit -m "Android build log for ${GITHUB_SHA::7}"
+          git push -f origin android-build-log
+
+      - name: Publish the APK to the website
+        run: |
+          mkdir -p public/downloads
+          cp android/app/build/outputs/apk/release/app-release.apk public/downloads/afrilearn-prototype.apk
+          git config user.name "AfriLearn Builder"
+          git config user.email "AfriLearn265@users.noreply.github.com"
+          git add public/downloads/afrilearn-prototype.apk
+          git commit -m "Android prototype APK from ${GITHUB_SHA::7} [skip ci]"
+          git pull --rebase origin main
+          git push origin HEAD:main
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: afrilearn-prototype-apk
+          path: android/app/build/outputs/apk/release/app-release.apk

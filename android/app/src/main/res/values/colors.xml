@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="adire_900">#1A225C</color>
+    <color name="adire_700">#2B3A9F</color>
+    <color name="sun_400">#F6B93B</color>
+    <color name="paper">#FBFBFD</color>
+    <color name="ink">#10153F</color>
+    <color name="muted">#5B6185</color>
+</resources>

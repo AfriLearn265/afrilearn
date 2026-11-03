@@ -1,0 +1,61 @@
+plugins {
+    id "com.android.application"
+}
+
+android {
+    namespace "ng.afrilearn.app"
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "ng.afrilearn.app"
+        minSdk 26
+        targetSdk 35
+        versionCode 1
+        versionName "0.1.0-prototype"
+        // The live platform the app opens. Change this when the platform moves to its own domain.
+        buildConfigField "String", "START_URL", "\"https://afrilearn-ng.vercel.app/dashboard\""
+        buildConfigField "String", "APP_HOST", "\"afrilearn-ng.vercel.app\""
+    }
+
+    signingConfigs {
+        release {
+            // Supplied by the CI workflow. Local builds without it fall back to the debug key.
+            def ks = System.getenv("KS_FILE")
+            if (ks) {
+                storeFile file(ks)
+                storeType "pkcs12"
+                storePassword System.getenv("KS_PASS")
+                keyAlias "afrilearn"
+                keyPassword System.getenv("KS_PASS")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig System.getenv("KS_FILE") ? signingConfigs.release : signingConfigs.debug
+        }
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    lint {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+}
+
+dependencies {
+    implementation "androidx.activity:activity:1.9.3"
+    implementation "androidx.core:core:1.13.1"
+    implementation "androidx.core:core-splashscreen:1.0.1"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+}

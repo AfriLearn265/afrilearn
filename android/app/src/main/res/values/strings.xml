@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AfriLearn</string>
+    <string name="offline_title">You\'re offline</string>
+    <string name="offline_body">AfriLearn needs an internet connection. Check your data or Wi-Fi, then try again.</string>
+    <string name="retry">Try again</string>
+    <string name="downloading">Downloading %1$s. You\'ll find it in your Downloads.</string>
+    <string name="download_failed">That file couldn\'t be downloaded.</string>
+    <string name="no_app">No app on this phone can open that link.</string>
+    <string name="press_back_again">Press back again to close AfriLearn</string>
+</resources>

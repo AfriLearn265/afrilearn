@@ -41,3 +41,11 @@ yarn-error.log*
 next-env.d.ts
 
 !.env.example
+
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/signing/
+android/build.log
