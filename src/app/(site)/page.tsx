@@ -32,7 +32,7 @@ export default async function Home() {
               <ButtonLink href="/signup" size="lg" variant="accent">Get started free</ButtonLink>
               <ButtonLink href="/classes" size="lg" variant="onDark">Explore classes</ButtonLink>
             </div>
-            <p className="mt-5 text-sm text-adire-200">Free for every learner during the pilot term.</p>
+            <p className="mt-5 text-sm text-adire-200">Free for every learner during the pilot term. <a href="/app" className="font-semibold text-white underline-offset-4 hover:underline">Get the Android app</a></p>
           </div>
           <HeroCollage />
         </div>

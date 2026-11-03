@@ -4,7 +4,7 @@ import { getBrand } from "@/lib/brand";
 
 const columns = [
   { title: "Learn", links: [["Classes and subjects", "/classes"], ["Courses", "/courses"], ["Exam preparation", "/exam-prep"], ["Free downloads", "/resources"], ["Pricing", "/pricing"]] },
-  { title: "Join", links: [["Create a student account", "/signup?role=student"], ["For parents", "/parents"], ["For teachers", "/teachers"], ["Log in", "/login"]] },
+  { title: "Join", links: [["Create a student account", "/signup?role=student"], ["For parents", "/parents"], ["For teachers", "/teachers"], ["Get the Android app", "/app"], ["Log in", "/login"]] },
   { title: "Help", links: [["Questions people ask", "/faq"], ["Verify a certificate", "/verify"], ["Privacy and child safety", "/privacy"], ["Terms of use", "/terms"], ["Photo credits", "/credits"]] },
 ];
 
