@@ -37,8 +37,8 @@ export default async function LiveRoom({ params }: { params: Promise<{ id: strin
     : { domain: "meet.jit.si", scriptSrc: "https://meet.jit.si/external_api.js", roomName: room_name, jwt: null };
 
   return (
-    <div className="flex min-h-dvh flex-col bg-paper">
-      <header className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 border-b border-line bg-white px-4 py-3 md:px-6">
+    <div className="flex h-dvh flex-col overflow-hidden bg-paper">
+      <header className="grid shrink-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 border-b border-line bg-white px-4 py-3 md:px-6">
         <Link href={back} className="inline-flex items-center gap-1 text-sm font-semibold text-adire-700"><ChevronLeft className="size-4" aria-hidden="true" />Leave</Link>
         <div className="min-w-0 text-center">
           <p className="truncate font-display font-bold">{lc?.title}</p>
@@ -47,10 +47,13 @@ export default async function LiveRoom({ params }: { params: Promise<{ id: strin
         <span className="w-12 sm:w-14" aria-hidden="true" />
       </header>
       {p.kind === "public" && (
-        <div className="px-4 pt-3 md:px-6"><Notice tone="warning">Demo mode: this call uses the free public Jitsi server, which ends embedded calls after 5 minutes. Add JaaS keys in the server settings for unlimited classes.</Notice></div>
+        <div className="shrink-0 px-4 pt-3 md:px-6"><Notice tone="warning">Demo mode: this call uses the free public Jitsi server, which ends embedded calls after 5 minutes. Add JaaS keys in the server settings for unlimited classes.</Notice></div>
       )}
-      <div className="flex-1 p-2 sm:p-4 md:p-6">
-        <JitsiRoom {...cfg} displayName={session.profile.full_name} email={session.email} moderator={moderator} onLeaveHref={back} />
+      {/* The call needs a box with a real height, so it fills the rest of the screen exactly. */}
+      <div className="relative min-h-[22rem] flex-1">
+        <div className="absolute inset-2 sm:inset-4 md:inset-6">
+          <JitsiRoom {...cfg} title={lc?.title ?? "Live class"} displayName={session.profile.full_name} email={session.email} moderator={moderator} onLeaveHref={back} />
+        </div>
       </div>
     </div>
   );

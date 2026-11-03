@@ -8,8 +8,8 @@ declare global {
   interface Window { JitsiMeetExternalAPI?: new (domain: string, options: Record<string, unknown>) => JitsiApi }
 }
 
-export function JitsiRoom({ domain, scriptSrc, roomName, jwt, displayName, email, moderator, onLeaveHref }: {
-  domain: string; scriptSrc: string; roomName: string; jwt: string | null; displayName: string; email: string | null; moderator: boolean; onLeaveHref: string;
+export function JitsiRoom({ domain, scriptSrc, roomName, jwt, displayName, email, moderator, onLeaveHref, title }: {
+  domain: string; scriptSrc: string; roomName: string; jwt: string | null; displayName: string; email: string | null; moderator: boolean; onLeaveHref: string; title: string;
 }) {
   const box = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +23,9 @@ export function JitsiRoom({ domain, scriptSrc, roomName, jwt, displayName, email
         roomName, jwt: jwt ?? undefined, parentNode: box.current, width: "100%", height: "100%",
         userInfo: { displayName, email: email ?? undefined },
         configOverwrite: {
-          prejoinPageEnabled: false, startWithAudioMuted: !moderator, startWithVideoMuted: !moderator,
+          // Go straight into the class: names come from the account, so there is nothing to fill in first.
+          prejoinConfig: { enabled: false }, prejoinPageEnabled: false,
+          subject: title, startWithAudioMuted: !moderator, startWithVideoMuted: !moderator,
           disableDeepLinking: true, enableLobbyChat: false, disableInviteFunctions: true,
           toolbarButtons: moderator
             ? ["microphone", "camera", "desktop", "chat", "raisehand", "participants-pane", "tileview", "mute-everyone", "recording", "settings", "hangup"]
@@ -43,7 +45,8 @@ export function JitsiRoom({ domain, scriptSrc, roomName, jwt, displayName, email
       document.body.appendChild(s);
     }
     return () => { cancelled = true; api?.dispose(); };
-  }, [domain, scriptSrc, roomName, jwt, displayName, email, moderator, onLeaveHref]);
+  }, [domain, scriptSrc, roomName, jwt, displayName, email, moderator, onLeaveHref, title]);
 
-  return error ? <Notice tone="error">{error}</Notice> : <div ref={box} className="h-full min-h-[75dvh] w-full overflow-hidden rounded-xl bg-ink sm:min-h-[70vh] sm:rounded-[1.25rem]" />;
+  // The call fills whatever box the page gives it; Jitsi sizes its iframe to 100% of this element.
+  return error ? <Notice tone="error">{error}</Notice> : <div ref={box} className="size-full overflow-hidden rounded-xl bg-ink sm:rounded-[1.25rem] [&>iframe]:block" />;
 }
