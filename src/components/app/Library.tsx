@@ -3,10 +3,9 @@ import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/format";
 import { EmptyState } from "@/components/app/AppShell";
 
-export const libraryCategories: Record<string, string> = {
-  textbook: "Textbooks and learning materials", class_notes: "Class notes", revision_guide: "Revision guides",
-  video_lesson: "Video lessons", practice: "Practice exercises", exam_prep: "Examination preparation", teacher_resource: "Teacher resources",
-};
+import { libraryCategories } from "./libraryCategories";
+
+export { libraryCategories };
 
 type Item = { id: string; title: string; description: string | null; material_type: string; storage_path: string | null; external_url: string | null;
   library_category: string; is_downloadable: boolean; download_count: number; created_at: string; license_note: string | null;

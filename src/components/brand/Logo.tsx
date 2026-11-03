@@ -1,5 +1,7 @@
+"use client";
+
 import Link from "next/link";
-import { brand } from "@/config/brand";
+import { useBrand } from "./BrandProvider";
 
 /** Brand mark: a path climbing three steps toward a sun. Original artwork. */
 export function LogoMark({ className = "size-8" }: { className?: string }) {
@@ -12,12 +14,21 @@ export function LogoMark({ className = "size-8" }: { className?: string }) {
   );
 }
 
+/** The logo uploaded in Settings, or the built-in mark when there isn't one. */
+export function BrandMark({ className = "size-8" }: { className?: string }) {
+  const { logoUrl } = useBrand();
+  if (!logoUrl) return <LogoMark className={className} />;
+  // eslint-disable-next-line @next/next/no-img-element -- small uploaded logo, any size or format
+  return <img src={logoUrl} alt="" className={`${className} rounded-[9px] object-contain`} />;
+}
+
 export function Logo({ href = "/", tone = "dark", className = "" }: { href?: string; tone?: "dark" | "light"; className?: string }) {
+  const { name } = useBrand();
   return (
-    <Link href={href} className={`inline-flex items-center gap-2.5 rounded-lg ${className}`} aria-label={`${brand.name} home`}>
-      <LogoMark />
+    <Link href={href} className={`inline-flex items-center gap-2.5 rounded-lg ${className}`} aria-label={`${name} home`}>
+      <BrandMark />
       <span className={`font-display text-[1.35rem] font-bold tracking-tight ${tone === "light" ? "text-white" : "text-ink"}`}>
-        {brand.name}
+        {name}
       </span>
     </Link>
   );

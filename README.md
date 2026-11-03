@@ -97,6 +97,22 @@ git push -u origin main
 5. Live classroom, AI companion, notifications, gamification ✅
 6. Payments, security review, performance, deployment notes ✅
 
+## Free downloads
+
+The public **Free downloads** page (`/resources`) lists every library item an administrator marks for the public. The ten starter PDFs in `public/resources` are original AfriLearn material: practice papers in JAMB, WAEC and Common Entrance style (with answers and explanations), lesson notes, worksheets and a sample scheme of work. Real past papers belong to the exam bodies, so they are not copied here.
+
+To rebuild the PDFs after editing `scripts/resources/content.py`:
+
+```bash
+pip install reportlab fonttools
+python3 scripts/resources/build.py public/resources
+```
+
+## Builder console (administrators)
+
+- **Overview** shows every class with its students, active learners this week, teachers, classrooms and courses, plus what is happening right now (live classes and recent activity).
+- **Settings → Brand and website** changes the site name, tagline, support email and logo, and switches a banner on or off at the top of the public site. Changes appear across the site straight away.
+
 ## Demo accounts (pilot project only)
 
 The hosted pilot database contains demo accounts so every role can be shown without signing up. They all use the password `AfriLearn@2026`. Change or delete them before real users join.

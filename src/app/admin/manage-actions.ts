@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth";
 import type { ActionResult } from "@/components/app/ActionForm";
+import { SUPABASE_URL } from "@/lib/env";
 
 async function db() {
   await requireRole("admin");
@@ -130,4 +131,53 @@ export async function resolveReport(fd: FormData) {
   const { userId } = await requireRole("admin");
   await s.from("reports").update({ status: String(fd.get("status")), resolved_by: userId, resolved_at: new Date().toISOString() }).eq("id", String(fd.get("id")));
   revalidatePath("/admin/activity");
+}
+
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+/** Site name, tagline, contact address and the banner at the top of the public website. */
+export async function saveBrand(fd: FormData): Promise<ActionResult> {
+  const s = await db();
+  const { userId } = await requireRole("admin");
+  const name = String(fd.get("name") ?? "").trim().slice(0, 40);
+  const tagline = String(fd.get("tagline") ?? "").trim().slice(0, 90);
+  const email = String(fd.get("support_email") ?? "").trim().toLowerCase();
+  const text = String(fd.get("announcement_text") ?? "").trim().slice(0, 160);
+  const link = String(fd.get("announcement_link") ?? "").trim();
+  const enabled = fd.get("announcement_enabled") === "on";
+  const fieldErrors: Record<string, string> = {};
+  if (name.length < 2) fieldErrors.name = "Enter the site name.";
+  if (email && !EMAIL.test(email)) fieldErrors.support_email = "Enter a valid email address.";
+  if (link && !(link.startsWith("/") || link.startsWith("https://"))) fieldErrors.announcement_link = "Use a page on this site (starting with /) or an https:// address.";
+  if (enabled && !text) fieldErrors.announcement_text = "Write the banner message, or switch the banner off.";
+  if (Object.keys(fieldErrors).length) return { error: "Check the highlighted fields.", fieldErrors };
+
+  const { data: current } = await s.from("platform_settings").select("value").eq("key", "brand").maybeSingle();
+  const now = new Date().toISOString();
+  const rows = [
+    { key: "brand", value: { ...((current?.value as object) ?? {}), name, tagline }, description: "Brand name, tagline and logo", is_public: true },
+    { key: "support_email", value: email || "support@afrilearn.ng", description: "Contact address shown to users", is_public: true },
+    { key: "announcement", value: { enabled, text, link }, description: "Banner shown at the top of the public website", is_public: true },
+  ];
+  for (const r of rows) {
+    const { error } = await s.from("platform_settings").upsert({ ...r, updated_by: userId, updated_at: now }, { onConflict: "key" });
+    if (error) return { error: error.message };
+  }
+  revalidatePath("/", "layout");
+  return { message: "Saved. The website now uses these details." };
+}
+
+/** Saves (or clears) the uploaded logo, which must sit in the administrator's own avatars folder. */
+export async function saveBrandLogo(url: string | null): Promise<ActionResult> {
+  const s = await db();
+  const { userId } = await requireRole("admin");
+  const prefix = `${SUPABASE_URL}/storage/v1/object/public/avatars/${userId}/`;
+  if (url !== null && (!url.startsWith(prefix) || url.includes(".."))) return { error: "That logo couldn't be saved." };
+  const { data: current } = await s.from("platform_settings").select("value").eq("key", "brand").maybeSingle();
+  const { error } = await s.from("platform_settings").update({
+    value: { ...((current?.value as object) ?? {}), logo_url: url }, updated_by: userId, updated_at: new Date().toISOString(),
+  }).eq("key", "brand");
+  if (error) return { error: error.message };
+  revalidatePath("/", "layout");
+  return { message: url ? "Logo updated." : "Logo removed. The built-in mark is back." };
 }

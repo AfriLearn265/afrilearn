@@ -1,14 +1,15 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
-import { brand } from "@/config/brand";
+import { getBrand } from "@/lib/brand";
 
 const columns = [
-  { title: "Learn", links: [["Classes and subjects", "/classes"], ["Courses", "/courses"], ["Exam preparation", "/exam-prep"], ["Pricing", "/pricing"]] },
+  { title: "Learn", links: [["Classes and subjects", "/classes"], ["Courses", "/courses"], ["Exam preparation", "/exam-prep"], ["Free downloads", "/resources"], ["Pricing", "/pricing"]] },
   { title: "Join", links: [["Create a student account", "/signup?role=student"], ["For parents", "/parents"], ["For teachers", "/teachers"], ["Log in", "/login"]] },
   { title: "Help", links: [["Questions people ask", "/faq"], ["Verify a certificate", "/verify"], ["Privacy and child safety", "/privacy"], ["Terms of use", "/terms"], ["Photo credits", "/credits"]] },
 ];
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const brand = await getBrand();
   return (
     <footer className="mt-auto bg-adire-900 text-adire-100">
       <div className="container-page grid grid-cols-2 gap-x-6 gap-y-10 py-12 md:grid-cols-[1.3fr_repeat(3,1fr)] md:py-14">

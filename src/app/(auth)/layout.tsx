@@ -1,9 +1,10 @@
 import { Logo } from "@/components/brand/Logo";
-import { brand } from "@/config/brand";
+import { getBrand } from "@/lib/brand";
 
 const stops = ["Nursery", "Primary", "Junior Secondary", "Senior Secondary", "WAEC, NECO and JAMB"];
 
-export default function AuthLayout({ children }: { children: React.ReactNode }) {
+export default async function AuthLayout({ children }: { children: React.ReactNode }) {
+  const brand = await getBrand();
   return (
     <div className="grid min-h-dvh lg:grid-cols-[minmax(0,26rem)_1fr] xl:grid-cols-[minmax(0,30rem)_1fr]">
       <aside className="relative hidden flex-col justify-between overflow-hidden bg-adire-800 p-10 text-white lg:flex">

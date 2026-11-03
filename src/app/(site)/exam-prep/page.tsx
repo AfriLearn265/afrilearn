@@ -77,7 +77,10 @@ export default function ExamPrepPage() {
           <div>
             <SectionHeading title="Written by teachers, not copied."
               intro="Every question in our banks is written by an approved teacher or comes from a source we are licensed to use, with a worked explanation. We do not reproduce copyrighted past papers." />
-            <ButtonLink href="/teachers" variant="outline" size="lg" className="mt-8">Write questions as a teacher</ButtonLink>
+            <div className="mt-8 grid gap-3 sm:flex sm:flex-wrap">
+              <ButtonLink href="/resources#exam_prep" size="lg">Download practice papers</ButtonLink>
+              <ButtonLink href="/teachers" variant="outline" size="lg">Write questions as a teacher</ButtonLink>
+            </div>
           </div>
         </div>
       </section>

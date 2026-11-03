@@ -1,9 +1,10 @@
 import { ProsePage } from "@/components/landing/ProsePage";
-import { brand } from "@/config/brand";
+import { getBrand } from "@/lib/brand";
 
 export const metadata = { title: "Terms of use" };
 
-export default function Terms() {
+export default async function Terms() {
+  const brand = await getBrand();
   return (
     <ProsePage title="Terms of use" updated="November 2026">
       <p>These terms cover the {brand.name} pilot. By creating an account you agree to them. They are a working draft and will be finalised with legal review before public launch.</p>

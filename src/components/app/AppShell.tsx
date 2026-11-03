@@ -8,12 +8,14 @@ import { signOut } from "@/app/(auth)/actions";
 
 export function AppShell({ session, children }: { session: Session; children: ReactNode }) {
   const { profile } = session;
+  const profileHref = profile.role === "student" ? "/student/profile" : profile.role === "teacher" ? "/teacher/profile" : null;
+  const shell = { items: navByRole[profile.role], name: profile.full_name, roleLabel: roleLabel[profile.role], avatarUrl: profile.avatar_url, profileHref, signOut };
   return (
     <div className="flex min-h-dvh bg-paper">
-      <Sidebar items={navByRole[profile.role]} name={profile.full_name} roleLabel={roleLabel[profile.role]} signOut={signOut} />
+      <Sidebar {...shell} />
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-line bg-paper/90 px-4 backdrop-blur-md md:px-8">
-          <MobileNav items={navByRole[profile.role]} name={profile.full_name} roleLabel={roleLabel[profile.role]} signOut={signOut} />
+          <MobileNav {...shell} />
           <div className="ml-auto"><NotificationBell /></div>
         </div>
         <main id="main" className="w-full min-w-0 max-w-6xl flex-1 px-4 py-6 sm:py-8 md:px-8 md:py-10">{children}</main>

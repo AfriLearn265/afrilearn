@@ -1,16 +1,17 @@
-import { Check } from "lucide-react";
+import { Check, Download } from "lucide-react";
 import { JourneyRail } from "@/components/landing/JourneyRail";
 import { HeroCollage } from "@/components/landing/HeroCollage";
 import { CourseTile } from "@/components/landing/CourseTile";
 import { AdirePattern, CtaBand, Photo, PhotoTile, SectionHeading, Steps } from "@/components/landing/Marketing";
 import { ButtonLink } from "@/components/ui/Button";
-import { getCatalogue, type Catalogue } from "@/lib/catalogue";
-import { brand } from "@/config/brand";
+import { getCatalogue, getPublicResources, type Catalogue, type PublicResource } from "@/lib/catalogue";
+import { getBrand } from "@/lib/brand";
 
 export const revalidate = 300;
 
 export default async function Home() {
-  const catalogue = await getCatalogue();
+  const brand = await getBrand();
+  const [catalogue, resources] = await Promise.all([getCatalogue(), getPublicResources()]);
   const classCount = catalogue.classes.filter((c) => c.level !== "exam_prep").length;
   const subjectCount = new Set(catalogue.classes.flatMap((c) => c.subjects)).size;
 
@@ -83,6 +84,8 @@ export default async function Home() {
 
       <FeaturedCourses courses={catalogue.courses.slice(0, 3)} />
 
+      <FreeDownloads items={resources.filter((r) => r.material_type === "pdf").slice(0, 4)} />
+
       <section className="relative isolate overflow-hidden bg-adire-800 py-20 text-white md:py-28">
         <AdirePattern id="exam-adire" className="-z-10 text-adire-700/60 [mask-image:radial-gradient(60%_80%_at_100%_50%,black,transparent)]" />
         <div className="container-page grid items-center gap-12 lg:grid-cols-2">
@@ -144,7 +147,8 @@ function FeaturedCourses({ courses }: { courses: Catalogue["courses"] }) {
   );
 }
 
-function Community({ testimonials }: { testimonials: Catalogue["testimonials"] }) {
+async function Community({ testimonials }: { testimonials: Catalogue["testimonials"] }) {
+  const brand = await getBrand();
   return (
     <section className="container-page py-14 sm:py-20 md:py-28">
       <div className="grid items-center gap-12 lg:grid-cols-[0.9fr_1.1fr]">
@@ -178,6 +182,34 @@ function Community({ testimonials }: { testimonials: Catalogue["testimonials"] }
             </ul>
           </div>
         )}
+      </div>
+    </section>
+  );
+}
+
+function FreeDownloads({ items }: { items: PublicResource[] }) {
+  if (items.length === 0) return null;
+  return (
+    <section className="border-y border-line bg-white py-14 sm:py-20">
+      <div className="container-page grid items-start gap-10 lg:grid-cols-[0.8fr_1.2fr]">
+        <div>
+          <SectionHeading title="Free downloads" intro="Practice papers with answers, lesson notes and worksheets. Print them for class or revise at home." />
+          <ButtonLink href="/resources" variant="outline" size="lg" className="mt-8">See all downloads</ButtonLink>
+        </div>
+        <ul className="divide-y divide-line border-y border-line">
+          {items.map((r) => (
+            <li key={r.id} className="flex items-center gap-4 py-4">
+              <span aria-hidden="true" className="grid h-12 w-10 shrink-0 place-items-center rounded-lg bg-adire-700 font-display text-[0.65rem] font-bold text-white">PDF</span>
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold leading-snug">{r.title}</p>
+                <p className="text-sm text-muted">{[r.subject_name, r.class_name].filter(Boolean).join(", ")}</p>
+              </div>
+              <a href={`/api/resources/${r.id}`} download className="grid size-11 shrink-0 place-items-center rounded-xl border border-line text-adire-700 hover:border-adire-300 hover:bg-adire-50">
+                <Download className="size-5" aria-hidden="true" /><span className="sr-only">Download {r.title}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );

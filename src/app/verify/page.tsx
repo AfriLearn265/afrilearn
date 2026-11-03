@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/format";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Field";
+import { getBrand } from "@/lib/brand";
 
 export const metadata = { title: "Verify a certificate" };
 
@@ -11,6 +12,7 @@ type Cert = { certificate_no: string; title: string; issued_at: string; holder: 
 
 export default async function Verify({ searchParams }: { searchParams: Promise<{ no?: string }> }) {
   const { no } = await searchParams;
+  const brand = await getBrand();
   let cert: Cert = null;
   if (no) {
     const supabase = await createClient();
@@ -19,7 +21,7 @@ export default async function Verify({ searchParams }: { searchParams: Promise<{
   }
   return (
     <ProsePage title="Verify a certificate">
-      <p>Enter the certificate number printed at the bottom of an {`AfriLearn`} certificate to check that it is genuine.</p>
+      <p>Enter the certificate number printed at the bottom of a {brand.name} certificate to check that it is genuine.</p>
       <form className="flex flex-wrap gap-3" action="/verify">
         <label htmlFor="no" className="sr-only">Certificate number</label>
         <Input id="no" name="no" defaultValue={no} placeholder="AFL-XXXXXXXXXX" className="max-w-xs uppercase" />

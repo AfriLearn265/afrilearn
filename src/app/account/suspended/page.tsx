@@ -1,11 +1,12 @@
 import { Logo } from "@/components/brand/Logo";
-import { brand } from "@/config/brand";
+import { getBrand } from "@/lib/brand";
 import { signOut } from "@/app/(auth)/actions";
 import { Button } from "@/components/ui/Button";
 
 export const metadata = { title: "Account suspended" };
 
-export default function Suspended() {
+export default async function Suspended() {
+  const brand = await getBrand();
   return (
     <main id="main" className="container-page grid min-h-dvh max-w-xl content-center gap-6 py-16">
       <Logo />

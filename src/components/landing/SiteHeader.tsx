@@ -7,11 +7,13 @@ import clsx from "clsx";
 import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { ButtonLink } from "@/components/ui/Button";
+import { useBrand } from "@/components/brand/BrandProvider";
 
 const nav = [
   { href: "/classes", label: "Classes" },
   { href: "/courses", label: "Courses" },
   { href: "/exam-prep", label: "Exam prep" },
+  { href: "/resources", label: "Free downloads" },
   { href: "/teachers", label: "Teachers" },
   { href: "/parents", label: "Parents" },
   { href: "/pricing", label: "Pricing" },
@@ -20,13 +22,24 @@ const nav = [
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const { announcement } = useBrand();
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   return (
     <header className="sticky top-0 z-40 border-b border-line/70 bg-paper/90 backdrop-blur-md">
+      {announcement && (
+        <div className="bg-adire-700 text-white">
+          <p className="container-page flex flex-wrap items-center justify-center gap-x-3 gap-y-0.5 py-2 text-center text-sm">
+            <span>{announcement.text}</span>
+            {announcement.link && (
+              <Link href={announcement.link} className="font-semibold text-sun-300 underline-offset-4 hover:underline">Find out more</Link>
+            )}
+          </p>
+        </div>
+      )}
       <div className="container-page flex h-16 items-center justify-between gap-6">
         <Logo />
-        <nav aria-label="Main" className="hidden lg:block">
+        <nav aria-label="Main" className="hidden xl:block">
           <ul className="flex items-center gap-0.5">
             {nav.map((n) => (
               <li key={n.href}>
@@ -52,7 +65,7 @@ export function SiteHeader() {
         </button>
       </div>
       {/* Tablet widths keep the buttons in the bar but still need the page links. */}
-      <nav aria-label="Sections" className="hidden border-t border-line/70 md:block lg:hidden">
+      <nav aria-label="Sections" className="hidden border-t border-line/70 md:block xl:hidden">
         <ul className="container-page flex gap-1 overflow-x-auto py-1.5 scrollbar-none">
           {nav.map((n) => (
             <li key={n.href}>

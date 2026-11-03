@@ -1,9 +1,10 @@
 import { ProsePage } from "@/components/landing/ProsePage";
-import { brand } from "@/config/brand";
+import { getBrand } from "@/lib/brand";
 
 export const metadata = { title: "Privacy" };
 
-export default function Privacy() {
+export default async function Privacy() {
+  const brand = await getBrand();
   return (
     <ProsePage title="Privacy and child safety" updated="November 2026">
       <p>{brand.name} is used by children, so we collect as little as we can and protect it carefully. This page explains what we store, why, and who can see it. It is a working draft for our pilot and will be reviewed against the Nigeria Data Protection Act before public launch.</p>

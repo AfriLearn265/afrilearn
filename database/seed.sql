@@ -138,7 +138,8 @@ insert into public.platform_settings (key, value, description, is_public) values
   ('ai_companion_enabled', 'true', 'Show the AI learning companion to students', true),
   ('ai_daily_limit', '40', 'AI companion questions per student per 24 hours', false),
   ('live_classes_enabled', 'true', 'Allow teachers to schedule live classes', true),
-  ('support_email', '"support@afrilearn.ng"', 'Contact address shown to users', true)
+  ('support_email', '"support@afrilearn.ng"', 'Contact address shown to users', true),
+  ('announcement', '{"enabled": false, "text": "", "link": ""}', 'Banner shown at the top of the public website', true)
 on conflict (key) do nothing;
 
 insert into public.badges (key, name, description, icon, points) values

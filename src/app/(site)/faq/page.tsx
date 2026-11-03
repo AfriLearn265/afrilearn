@@ -2,17 +2,18 @@ import type { Metadata } from "next";
 import { CtaBand, PageHero } from "@/components/landing/Marketing";
 import { ButtonLink } from "@/components/ui/Button";
 import { faqs } from "@/config/faq";
-import { brand } from "@/config/brand";
+import { getBrand } from "@/lib/brand";
 
-export const metadata: Metadata = { title: "Questions people ask", description: `Answers about classes, safety, teachers, exams and payments on ${brand.name}.` };
+export const metadata: Metadata = { title: "Questions people ask", description: "Answers about classes, child safety, teachers, exams and payments." };
 
-export default function FaqPage() {
+export default async function FaqPage() {
+  const brand = await getBrand();
   return (
     <>
       <PageHero id="faq" title="Questions people ask" intro={`Short answers about classes, child safety, teachers, exams and payments. Something else on your mind? Write to ${brand.supportEmail}.`} />
       <section className="container-page max-w-4xl py-16 md:py-20">
         <div className="divide-y divide-line border-y border-line">
-          {faqs.map(([q, a], i) => (
+          {faqs.map(([q, a]) => [q.replaceAll("AfriLearn", brand.name), a.replaceAll("AfriLearn", brand.name)]).map(([q, a], i) => (
             <details key={q} className="group py-1" open={i === 0}>
               <summary className="flex cursor-pointer list-none items-center justify-between gap-6 rounded-lg py-4 text-lg font-semibold [&::-webkit-details-marker]:hidden">
                 {q}

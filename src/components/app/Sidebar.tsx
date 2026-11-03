@@ -11,6 +11,7 @@ import {
   Baby, UserRound, Users, Video, Wallet, X,
 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
+import { Avatar } from "@/components/app/Avatar";
 import type { IconName, NavItem } from "@/config/nav";
 
 const icons: Record<IconName, typeof Gauge> = {
@@ -42,21 +43,26 @@ function NavList({ items, onNavigate }: { items: NavItem[]; onNavigate?: () => v
   );
 }
 
-type ShellProps = { items: NavItem[]; name: string; roleLabel: string; signOut: () => Promise<void> };
+type ShellProps = { items: NavItem[]; name: string; roleLabel: string; avatarUrl: string | null; profileHref: string | null; signOut: () => Promise<void> };
 
-function Body({ items, name, roleLabel, signOut, onNavigate }: ShellProps & { onNavigate?: () => void }) {
-  const initials = name.split(/\s+/).map((p) => p[0]).slice(0, 2).join("").toUpperCase();
+function Body({ items, name, roleLabel, avatarUrl, profileHref, signOut, onNavigate }: ShellProps & { onNavigate?: () => void }) {
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-16 items-center px-5"><Logo href="/dashboard" /></div>
       <nav aria-label="Dashboard" className="flex-1 overflow-y-auto px-3 py-2"><NavList items={items} onNavigate={onNavigate} /></nav>
       <div className="border-t border-line p-3">
         <div className="flex items-center gap-3 rounded-xl px-2 py-2">
-          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-sun-400 font-display font-bold text-ink">{initials || "?"}</span>
-          <div className="min-w-0 flex-1">
-            <p className="truncate font-semibold leading-tight">{name}</p>
-            <p className="text-sm text-muted">{roleLabel}</p>
-          </div>
+          {profileHref ? (
+            <Link href={profileHref} onClick={onNavigate} className="flex min-w-0 flex-1 items-center gap-3 rounded-lg hover:opacity-80">
+              <Avatar name={name} url={avatarUrl} />
+              <span className="min-w-0"><span className="block truncate font-semibold leading-tight">{name}</span><span className="block text-sm text-muted">{roleLabel}, view profile</span></span>
+            </Link>
+          ) : (
+            <div className="flex min-w-0 flex-1 items-center gap-3">
+              <Avatar name={name} url={avatarUrl} />
+              <span className="min-w-0"><span className="block truncate font-semibold leading-tight">{name}</span><span className="block text-sm text-muted">{roleLabel}</span></span>
+            </div>
+          )}
           <form action={signOut}>
             <button type="submit" className="grid size-9 place-items-center rounded-lg text-muted hover:bg-wash hover:text-ink" aria-label="Log out">
               <LogOut className="size-4" />

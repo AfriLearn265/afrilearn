@@ -5,7 +5,10 @@ import { liveProvider } from "@/lib/live";
 import { PageHeader, Panel } from "@/components/app/AppShell";
 import { ActionForm } from "@/components/app/ActionForm";
 import { Field, Input, Select, Textarea } from "@/components/ui/Field";
-import { broadcast, savePlan, saveSettings } from "../manage-actions";
+import { broadcast, saveBrand, saveBrandLogo, savePlan, saveSettings } from "../manage-actions";
+import { getBrand } from "@/lib/brand";
+import { ImageUpload } from "@/components/app/ImageUpload";
+import { LogoMark } from "@/components/brand/Logo";
 
 export const metadata = { title: "Platform settings" };
 
@@ -18,8 +21,11 @@ const flags: [string, string, string][] = [
 ];
 
 export default async function Settings() {
-  await requireRole("admin");
+  const { userId } = await requireRole("admin");
   const supabase = await createClient();
+  const brand = await getBrand();
+  const { data: ann } = await supabase.from("platform_settings").select("value").eq("key", "announcement").maybeSingle();
+  const announcement = (ann?.value ?? {}) as { enabled?: boolean; text?: string; link?: string };
   const [{ data: settings }, { data: plans }] = await Promise.all([
     supabase.from("platform_settings").select("key, value"),
     supabase.from("subscription_plans").select("id, key, name, price_kobo, is_active, is_featured, features, billing_interval").order("sort_order"),
@@ -35,7 +41,41 @@ export default async function Settings() {
 
   return (
     <>
-      <PageHeader title="Platform settings" intro="Switch features on or off for everyone, edit plans and send announcements." />
+      <PageHeader title="Platform settings" intro="Change the name and logo, switch features on or off, edit plans and send announcements." />
+      <Panel title="Brand and website" className="mb-6">
+        <div className="grid gap-8 lg:grid-cols-[16rem_1fr]">
+          <div>
+            <p className="text-sm font-semibold text-ink-soft">Logo</p>
+            <div className="mt-3 flex items-center gap-3 rounded-2xl border border-line bg-paper p-4">
+              {brand.logoUrl
+                // eslint-disable-next-line @next/next/no-img-element -- uploaded logo preview
+                ? <img src={brand.logoUrl} alt="Current logo" className="size-14 rounded-xl object-contain" />
+                : <LogoMark className="size-14" />}
+              <div className="min-w-0">
+                <p className="truncate font-display text-xl font-bold">{brand.name}</p>
+                <p className="truncate text-sm text-muted">{brand.tagline}</p>
+              </div>
+            </div>
+            <div className="mt-3">
+              <ImageUpload userId={userId} kind="logo" hasImage={!!brand.logoUrl} save={saveBrandLogo} label="Upload a logo" removeLabel="Use built-in mark" />
+              <p className="mt-2 text-xs text-muted">A square PNG, JPG or WebP under 2 MB works best. It appears in the header, footer and dashboards.</p>
+            </div>
+          </div>
+          <ActionForm action={saveBrand} submitLabel="Save brand and website" resetOnSuccess={false}>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Site name" htmlFor="brand-name"><Input id="brand-name" name="name" defaultValue={brand.name} maxLength={40} required /></Field>
+              <Field label="Support email" htmlFor="brand-email"><Input id="brand-email" name="support_email" type="email" defaultValue={brand.supportEmail} /></Field>
+            </div>
+            <Field label="Tagline" htmlFor="brand-tagline"><Input id="brand-tagline" name="tagline" defaultValue={brand.tagline} maxLength={90} /></Field>
+            <fieldset className="grid gap-3 rounded-2xl border border-line p-4">
+              <legend className="px-1 text-sm font-semibold text-ink-soft">Banner on the public website</legend>
+              <label className="flex items-center gap-2.5 text-sm"><input type="checkbox" name="announcement_enabled" defaultChecked={!!announcement.enabled} className="size-4 accent-adire-700" />Show the banner</label>
+              <Field label="Message" htmlFor="ann-text"><Input id="ann-text" name="announcement_text" defaultValue={announcement.text ?? ""} maxLength={160} placeholder="Pilot term is open: every feature is free until July." /></Field>
+              <Field label="Link (optional)" htmlFor="ann-link" hint="A page like /pricing or an https:// address"><Input id="ann-link" name="announcement_link" defaultValue={announcement.link ?? ""} placeholder="/pricing" /></Field>
+            </fieldset>
+          </ActionForm>
+        </div>
+      </Panel>
       <div className="grid gap-6 xl:grid-cols-2">
         <div className="grid content-start gap-6">
           <Panel title="Features">

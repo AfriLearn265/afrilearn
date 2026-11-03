@@ -98,3 +98,15 @@ function toCourse(c: CourseRow): FeaturedCourse {
     klass: c.class_name ? { name: c.class_name } : null, lessons: c.lesson_count ?? 0,
   };
 }
+
+export type PublicResource = {
+  id: string; title: string; description: string | null; material_type: string; url: string; library_category: string;
+  subject_name: string | null; class_name: string | null; class_sort: number | null; file_size_bytes: number | null; license_note: string | null;
+};
+
+/** Approved library items marked for the public, for the free downloads page. */
+export async function getPublicResources(): Promise<PublicResource[]> {
+  if (!isSupabaseConfigured) return [];
+  const { data, error } = await createPublicClient().rpc("public_resources");
+  return error || !data ? [] : (data as PublicResource[]);
+}

@@ -32,6 +32,7 @@ export const navByRole: Record<Role, NavItem[]> = {
     { href: "/teacher/live", label: "Live classes", icon: "video" },
     { href: "/teacher/messages", label: "Messages", icon: "message" },
     { href: "/teacher/library", label: "Library", icon: "library" },
+    { href: "/teacher/profile", label: "My profile", icon: "user" },
   ],
   parent: [
     { href: "/parent", label: "My children", icon: "child" },

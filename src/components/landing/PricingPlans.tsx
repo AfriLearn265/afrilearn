@@ -1,9 +1,10 @@
 import { Check } from "lucide-react";
 import { ButtonLink } from "@/components/ui/Button";
 import { formatNaira, type Catalogue } from "@/lib/catalogue";
-import { brand } from "@/config/brand";
+import { getBrand } from "@/lib/brand";
 
-export function PricingPlans({ plans, paidFeatures }: { plans: Catalogue["plans"]; paidFeatures: boolean }) {
+export async function PricingPlans({ plans, paidFeatures }: { plans: Catalogue["plans"]; paidFeatures: boolean }) {
+  const brand = await getBrand();
   const studentPlans = plans.filter((p) => p.audience === "student");
   const otherPlans = plans.filter((p) => p.audience !== "student");
   const per: Record<string, string> = { month: "per month", term: "per term", year: "per year", once: "one-off" };

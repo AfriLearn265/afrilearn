@@ -4,7 +4,7 @@ import { PricingPlans } from "@/components/landing/PricingPlans";
 import { CtaBand, PageHero, SectionHeading } from "@/components/landing/Marketing";
 import { ButtonLink } from "@/components/ui/Button";
 import { getCatalogue } from "@/lib/catalogue";
-import { brand } from "@/config/brand";
+import { getBrand } from "@/lib/brand";
 
 export const revalidate = 300;
 export const metadata: Metadata = {
@@ -13,6 +13,7 @@ export const metadata: Metadata = {
 };
 
 export default async function PricingPage() {
+  const brand = await getBrand();
   const { plans, paidFeatures } = await getCatalogue();
 
   return (

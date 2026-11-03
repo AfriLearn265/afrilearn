@@ -1317,3 +1317,57 @@ language sql stable security definer set search_path = '' as $$
 $$;
 revoke all on function public.catalogue_courses(int) from public;
 grant execute on function public.catalogue_courses(int) to anon, authenticated, service_role;
+
+-- Free downloads shown on the public Resources page: approved library items marked for the public.
+create or replace function public.public_resources()
+returns table (id uuid, title text, description text, material_type text, url text, library_category text,
+               subject_name text, class_name text, class_sort int, file_size_bytes bigint, license_note text, created_at timestamptz)
+language sql stable security definer set search_path = '' as $$
+  select m.id, m.title, m.description, m.material_type,
+         coalesce(m.external_url, '/api/files/materials?path=' || m.storage_path || '&download=1'),
+         m.library_category, s.name, k.name, k.sort_order, m.file_size_bytes, m.license_note, m.created_at
+  from public.learning_materials m
+  left join public.subjects s on s.id = m.subject_id
+  left join public.classes k on k.id = m.class_id
+  where m.audience = 'public' and m.is_approved and m.course_id is null and m.classroom_id is null
+  order by m.library_category, k.sort_order nulls last, m.title
+$$;
+revoke all on function public.public_resources() from public;
+grant execute on function public.public_resources() to anon, authenticated, service_role;
+
+-- Count opens of free downloads too (they are not in storage, so the storage counter never sees them).
+create or replace function public.touch_public_resource(p_id uuid)
+returns void language sql security definer set search_path = '' as $$
+  update public.learning_materials set download_count = download_count + 1
+  where id = p_id and audience = 'public' and is_approved;
+$$;
+revoke all on function public.touch_public_resource(uuid) from public;
+grant execute on function public.touch_public_resource(uuid) to anon, authenticated, service_role;
+-- The builder's view: how many students, teachers and classrooms each class has.
+create or replace function public.admin_class_breakdown()
+returns table (code text, name text, level_name text, sort_order int, students bigint, active_7d bigint,
+               teachers bigint, classrooms bigint, courses bigint)
+language plpgsql stable security definer set search_path = '' as $$
+begin
+  if not public.is_admin() then raise exception 'Administrators only.'; end if;
+  return query
+  select k.code, k.name, l.name, k.sort_order,
+    (select count(*) from public.students s join public.profiles p on p.id = s.profile_id
+      where s.class_id = k.id and p.status <> 'suspended'),
+    (select count(distinct s.profile_id) from public.students s
+      where s.class_id = k.id and (
+        exists (select 1 from public.lesson_progress lp where lp.student_id = s.profile_id and lp.updated_at > now() - interval '7 days')
+        or exists (select 1 from public.exam_attempts a where a.student_id = s.profile_id and a.started_at > now() - interval '7 days')
+        or s.last_active_on >= ((now() at time zone 'Africa/Lagos')::date - 7))),
+    (select count(distinct tc.teacher_id) from public.teacher_classes tc
+      join public.teachers t on t.profile_id = tc.teacher_id and t.application_status = 'approved'
+      where tc.class_id = k.id),
+    (select count(*) from public.classrooms c where c.class_id = k.id and not c.is_archived),
+    (select count(*) from public.courses c where c.class_id = k.id and c.is_published)
+  from public.classes k
+  left join public.education_levels l on l.id = k.level_id
+  where k.is_active
+  order by k.sort_order;
+end $$;
+revoke all on function public.admin_class_breakdown() from public, anon;
+grant execute on function public.admin_class_breakdown() to authenticated, service_role;
