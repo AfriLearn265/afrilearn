@@ -70,6 +70,11 @@
 }
 
 @layer base {
+  /* Grid columns may shrink below their content, so a long title or a truncated line can
+     never push a page wider than a phone screen. Any grid-cols-* utility still overrides this. */
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
   html {
     color-scheme: light;
     -webkit-text-size-adjust: 100%;

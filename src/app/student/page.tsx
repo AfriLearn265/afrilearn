@@ -70,13 +70,13 @@ export default async function StudentHome({ searchParams }: { searchParams: Prom
         ))}
       </ul>
 
-      <section aria-labelledby="journey" className="mt-6 rounded-[1.5rem] bg-adire-800 p-6 text-white md:p-8">
+      <section aria-labelledby="journey" className="mt-6 rounded-[1.5rem] bg-adire-800 p-5 text-white sm:p-6 md:p-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h2 id="journey" className="text-2xl font-bold md:text-3xl">My learning journey</h2>
             <p className="mt-1 text-adire-100">{completed} lessons completed, {inProgress.length} in progress, {mastered} topics mastered, {revise} to revise.</p>
           </div>
-          <p className="font-display text-5xl font-bold tabular">{overall}%</p>
+          <p className="font-display text-4xl font-bold tabular sm:text-5xl">{overall}%</p>
         </div>
         <div className="mt-5 h-3 overflow-hidden rounded-full bg-white/15" role="progressbar" aria-label="Overall progress" aria-valuenow={overall} aria-valuemin={0} aria-valuemax={100}>
           <div className="h-full rounded-full bg-sun-400" style={{ width: `${Math.max(overall, 2)}%` }} />
@@ -86,7 +86,7 @@ export default async function StudentHome({ searchParams }: { searchParams: Prom
             <p className="text-sm font-semibold text-adire-100">In progress</p>
             {inProgress.length === 0 ? <p className="mt-2 text-sm text-adire-200">Nothing half-finished. Pick something from Up next.</p> : (
               <ul className="mt-2 grid gap-2">{inProgress.slice(0, 4).map((l) => (
-                <li key={l.id}><Link href={`/student/lessons/${l.id}`} className="flex items-center gap-2 hover:underline"><CircleDot className="size-4 shrink-0 text-sun-400" aria-hidden="true" /><span className="truncate">{l.title}</span><span className="shrink-0 text-sm text-adire-200">{l.course.subject?.name}</span></Link></li>
+                <li key={l.id}><Link href={`/student/lessons/${l.id}`} className="group flex items-start gap-2"><CircleDot className="mt-1 size-4 shrink-0 text-sun-400" aria-hidden="true" /><span className="min-w-0"><span className="block truncate group-hover:underline">{l.title}</span><span className="block text-sm text-adire-200">{l.course.subject?.name}</span></span></Link></li>
               ))}</ul>
             )}
           </div>
@@ -94,7 +94,7 @@ export default async function StudentHome({ searchParams }: { searchParams: Prom
             <p className="text-sm font-semibold text-adire-100">Up next</p>
             {upNext.length === 0 ? <p className="mt-2 text-sm text-adire-200">No new lessons waiting. <Link href="/student/courses" className="font-semibold text-white underline">Browse courses</Link></p> : (
               <ul className="mt-2 grid gap-2">{upNext.map((l) => (
-                <li key={l.id}><Link href={`/student/lessons/${l.id}`} className="flex items-center gap-2 hover:underline"><ArrowUpRight className="size-4 shrink-0 text-sun-400" aria-hidden="true" /><span className="truncate">{l.title}</span><span className="shrink-0 text-sm text-adire-200">{l.course.subject?.name}</span></Link></li>
+                <li key={l.id}><Link href={`/student/lessons/${l.id}`} className="group flex items-start gap-2"><ArrowUpRight className="mt-1 size-4 shrink-0 text-sun-400" aria-hidden="true" /><span className="min-w-0"><span className="block truncate group-hover:underline">{l.title}</span><span className="block text-sm text-adire-200">{l.course.subject?.name}</span></span></Link></li>
               ))}</ul>
             )}
           </div>

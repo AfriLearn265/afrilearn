@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import clsx from "clsx";
 import {
   Award, BookOpen, CalendarDays, ChartColumn, ClipboardCheck, FileText, Flag, Gauge, GraduationCap, Landmark,
@@ -80,6 +81,14 @@ export function Sidebar(props: ShellProps) {
 export function MobileNav(props: ShellProps) {
   const [open, setOpen] = useState(false);
   const path = usePathname();
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", close);
+    return () => { document.body.style.overflow = overflow; window.removeEventListener("keydown", close); };
+  }, [open]);
   const current = props.items.filter((i) => path === i.href || path.startsWith(i.href + "/"))
     .sort((a, b) => b.href.length - a.href.length)[0];
 
@@ -91,16 +100,18 @@ export function MobileNav(props: ShellProps) {
       </button>
       <span className="hidden sm:block"><Logo href="/dashboard" /></span>
       {current && <p className="truncate font-semibold sm:hidden">{current.label}</p>}
-      {open && (
-        <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="Menu">
+      {/* Rendered on <body>: the top bar's blur would otherwise trap a fixed drawer inside the bar. */}
+      {open && createPortal(
+        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
           <button type="button" className="absolute inset-0 bg-ink/40" aria-label="Close menu" onClick={() => setOpen(false)} />
-          <div className="absolute inset-y-0 left-0 w-72 max-w-[85vw] animate-fade-in bg-white shadow-pop">
-            <button type="button" onClick={() => setOpen(false)} aria-label="Close menu" className="absolute right-3 top-3 grid size-10 place-items-center rounded-lg hover:bg-wash">
+          <div className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] animate-fade-in flex-col bg-white shadow-pop">
+            <button type="button" onClick={() => setOpen(false)} aria-label="Close menu" className="absolute right-3 top-3 z-10 grid size-10 place-items-center rounded-lg hover:bg-wash">
               <X className="size-5" />
             </button>
             <Body {...props} onNavigate={() => setOpen(false)} />
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );
