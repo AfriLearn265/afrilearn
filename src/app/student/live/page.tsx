@@ -21,27 +21,31 @@ export default async function StudentLive() {
   ]);
   const seen = new Map((attended ?? []).map((a) => [a.live_class_id, a.status]));
   const list = (data ?? []) as unknown as Live[];
-  const upcoming = list.filter((l) => new Date(l.starts_at).getTime() + l.duration_minutes * 60000 > now && l.status !== "cancelled");
+  const live = (l: Live) => l.status === "live";
+  // A class the teacher is running stays joinable for an hour past its slot.
+  const endsAt = (l: Live) => new Date(l.starts_at).getTime() + (l.duration_minutes + (live(l) ? 60 : 0)) * 60000;
+  const upcoming = list.filter((l) => endsAt(l) > now && l.status !== "cancelled" && l.status !== "ended")
+    .sort((a, b) => Number(live(b)) - Number(live(a)));
   const past = list.filter((l) => !upcoming.includes(l)).reverse();
 
   return (
     <>
-      <PageHeader title="Live classes" intro="Join from here when your teacher starts. Your attendance is recorded automatically when you join." />
+      <PageHeader title="Live classes" intro="A Join button appears here as soon as your teacher starts the class. Your attendance is recorded when you join." />
       <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <Panel title="Upcoming">
           {upcoming.length === 0 ? <EmptyState title="No live classes scheduled.">You&apos;ll get a notification when your teacher schedules one.</EmptyState> : (
             <ul className="divide-y divide-line">
               {upcoming.map((l) => {
                 const start = new Date(l.starts_at).getTime();
-                const open = now >= start - 15 * 60000;
+                const open = live(l) || now >= start - 15 * 60000;
                 return (
                   <li key={l.id} className="flex flex-wrap items-center gap-4 py-4">
                     <span className={`grid size-11 place-items-center rounded-xl ${open ? "bg-coral-500 text-white" : "bg-wash text-adire-700"}`}><Video className="size-5" aria-hidden="true" /></span>
                     <div className="min-w-0 flex-1">
-                      <p className="font-semibold">{l.title}</p>
+                      <p className="font-semibold">{l.title}{live(l) && <span className="ml-2 inline-flex rounded-full bg-coral-500 px-2 py-0.5 align-middle text-xs font-bold text-white">Live now</span>}</p>
                       <p className="text-sm text-muted">{l.classrooms?.name}, {formatDateTime(l.starts_at)}, {l.duration_minutes} min</p>
                     </div>
-                    {open ? <ButtonLink href={`/live/${l.id}`} variant="accent">Join now</ButtonLink> : <span className="text-sm text-muted">Opens 15 min before</span>}
+                    {open ? <ButtonLink href={`/live/${l.id}`} variant="accent">Join now</ButtonLink> : <span className="text-sm text-muted">Opens when your teacher starts</span>}
                   </li>
                 );
               })}

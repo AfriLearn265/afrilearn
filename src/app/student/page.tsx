@@ -15,7 +15,7 @@ export const metadata = { title: "Student dashboard" };
 
 type Enrollment = { classrooms: { id: string; name: string; subjects: { name: string; color: string } | null; profiles: { full_name: string } | null } | null };
 type Due = { id: string; title: string; due_at: string; classrooms: { name: string } | null; assignment_submissions: { status: string }[] };
-type Live = { id: string; title: string; starts_at: string; duration_minutes: number; classrooms: { name: string } | null };
+type Live = { id: string; title: string; starts_at: string; duration_minutes: number; status: string; classrooms: { name: string } | null };
 
 const clock = () => Date.now();
 
@@ -31,7 +31,7 @@ export default async function StudentHome({ searchParams }: { searchParams: Prom
     getStudentCourses(userId),
     supabase.rpc("student_topic_mastery", { p_student: userId }),
     supabase.from("assignments").select("id, title, due_at, classrooms(name), assignment_submissions(status)").gte("due_at", new Date(now - 86400000 * 3).toISOString()).order("due_at").limit(6),
-    supabase.from("live_classes").select("id, title, starts_at, duration_minutes, classrooms(name)").neq("status", "cancelled").gte("starts_at", new Date(now - 3600000 * 2).toISOString()).order("starts_at").limit(3),
+    supabase.from("live_classes").select("id, title, starts_at, duration_minutes, status, classrooms(name)").neq("status", "cancelled").gte("starts_at", new Date(now - 3600000 * 2).toISOString()).order("starts_at").limit(3),
     supabase.from("weekly_challenges").select("title, description, target, points, metric, starts_on, ends_on").eq("is_active", true).order("starts_on", { ascending: false }).limit(1).maybeSingle(),
   ]);
   const klass = me?.classes as unknown as { name: string; education_levels: { name: string } | null } | null;
@@ -139,7 +139,7 @@ export default async function StudentHome({ searchParams }: { searchParams: Prom
           {(live ?? []).length > 0 && (
             <Panel title="Live classes" action={<Link href="/student/live" className="text-sm font-semibold text-adire-700">Join</Link>}>
               <ul className="grid gap-3 text-sm">{((live ?? []) as unknown as Live[]).map((l) => (
-                <li key={l.id}><p className="font-semibold">{l.title}</p><p className="text-muted">{l.classrooms?.name}, {formatDateTime(l.starts_at)}</p></li>
+                <li key={l.id}><p className="font-semibold">{l.title}{l.status === "live" && <span className="ml-2 inline-flex rounded-full bg-coral-500 px-2 py-0.5 align-middle text-xs font-bold text-white">Live now</span>}</p><p className="text-muted">{l.classrooms?.name}, {formatDateTime(l.starts_at)}</p></li>
               ))}</ul>
             </Panel>
           )}

@@ -496,24 +496,32 @@ begin
   return jsonb_build_object('status', 'graded', 'score', p_score);
 end $$;
 
+-- Students can join as soon as their teacher starts a class, even if that is earlier than
+-- scheduled, and a class the teacher is still running stays open for an hour past its slot.
 create or replace function public.check_in_live_class(p_live uuid)
 returns jsonb language plpgsql security definer set search_path = '' as $$
-declare lc public.live_classes; v_status text;
+declare lc public.live_classes; v_status text; v_live boolean;
 begin
   select * into lc from public.live_classes where id = p_live;
   if not found then raise exception 'Live class not found.'; end if;
   if public.is_classroom_teacher(lc.classroom_id) then
-    update public.live_classes set status = 'live' where id = p_live and status = 'scheduled';
+    if lc.status = 'scheduled' then
+      update public.live_classes set status = 'live', updated_at = now() where id = p_live;
+      perform private.notify_classroom(lc.classroom_id, 'Live now: ' || lc.title,
+        'Your teacher has started the class. Open Live classes to join.', '/student/live', 'live_class');
+    end if;
     return jsonb_build_object('room_name', lc.room_name, 'role', 'teacher');
   end if;
   if not public.is_classroom_member(lc.classroom_id) then
     raise exception 'This live class is for another classroom.';
   end if;
   if lc.status = 'cancelled' then raise exception 'This live class was cancelled.'; end if;
-  if now() < lc.starts_at - interval '15 minutes' then
-    raise exception 'This class opens 15 minutes before it starts.';
+  if lc.status = 'ended' then raise exception 'This class has ended.'; end if;
+  v_live := lc.status = 'live';
+  if not v_live and now() < lc.starts_at - interval '15 minutes' then
+    raise exception 'This class opens 15 minutes before it starts, or as soon as your teacher starts it.';
   end if;
-  if now() > lc.starts_at + make_interval(mins => lc.duration_minutes) then
+  if now() > lc.starts_at + make_interval(mins => lc.duration_minutes + case when v_live then 60 else 0 end) then
     raise exception 'This class has ended.';
   end if;
   v_status := case when now() > lc.starts_at + interval '10 minutes' then 'late' else 'present' end;
