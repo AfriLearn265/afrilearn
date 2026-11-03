@@ -32,7 +32,7 @@ export default function ParentsPage() {
         <ButtonLink href="/login" size="lg" variant="onDark">Log in</ButtonLink>
       </PageHero>
 
-      <section className="container-page py-20 md:py-28">
+      <section className="container-page py-14 sm:py-20 md:py-28">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <div className="relative aspect-[4/3] overflow-hidden rounded-[2rem]">
             <Photo name="primary" sizes="(min-width: 1024px) 45vw, 100vw" />
@@ -50,7 +50,7 @@ export default function ParentsPage() {
         </div>
       </section>
 
-      <section className="border-y border-line bg-white py-20 md:py-28">
+      <section className="border-y border-line bg-white py-14 sm:py-20 md:py-28">
         <div className="container-page">
           <SectionHeading title="Linking your child takes a minute" />
           <Steps className="mt-12" steps={[
@@ -61,7 +61,7 @@ export default function ParentsPage() {
         </div>
       </section>
 
-      <section className="container-page py-20 md:py-28">
+      <section className="container-page py-14 sm:py-20 md:py-28">
         <SectionHeading title="Child safety comes first" intro="These rules are enforced by the platform itself, not left to good intentions." />
         <ul className="mt-12 grid gap-x-10 gap-y-8 md:grid-cols-2">
           {safety.map(({ icon: Icon, title, text }) => (

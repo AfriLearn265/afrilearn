@@ -33,7 +33,7 @@ export default async function TeacherHome() {
   return (
     <>
       <PageHeader title={`${greeting()}, ${firstName(profile.full_name)}.`} intro="Create a classroom, share its code, and your students appear here as they join." />
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+      <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
         <Stat label="Classrooms" value={list.length} />
         <Stat label="Students enrolled" value={students} />
         <Stat label="Subjects you teach" value={mine.size} />
@@ -46,14 +46,16 @@ export default async function TeacherHome() {
           ) : (
             <ul className="divide-y divide-line">
               {list.map((r) => (
-                <li key={r.id} className="flex flex-wrap items-center gap-4 py-4">
+                <li key={r.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-4">
                   <span className="size-3 shrink-0 rounded-full" style={{ background: r.subjects?.color ?? "#2B3A9F" }} aria-hidden="true" />
                   <div className="min-w-0 flex-1">
                     <Link href={`/teacher/classrooms/${r.id}`} className="block truncate font-semibold hover:underline">{r.name}</Link>
                     <p className="text-sm text-muted">{[r.classes?.name, r.subjects?.name, `${r.enrollments?.[0]?.count ?? 0} students`].filter(Boolean).join(", ")}</p>
                   </div>
-                  <p className="rounded-lg bg-wash px-3 py-1.5 font-display font-bold tracking-[0.2em] text-adire-800">{r.join_code}</p>
-                  <CopyButton value={r.join_code} label="Copy code" />
+                  <div className="flex basis-full items-center gap-2 pl-7 sm:basis-auto sm:pl-0">
+                    <p className="rounded-lg bg-wash px-3 py-1.5 font-display font-bold tracking-[0.2em] text-adire-800">{r.join_code}</p>
+                    <CopyButton value={r.join_code} label="Copy code" />
+                  </div>
                 </li>
               ))}
             </ul>

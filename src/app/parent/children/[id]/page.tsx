@@ -42,7 +42,7 @@ export default async function ChildPage({ params }: { params: Promise<{ id: stri
   return (
     <>
       <PageHeader title={name} intro={`${(child.classes as unknown as { name: string } | null)?.name ?? "Class not set"}. Everything below is updated as ${name.split(" ")[0]} learns.`} />
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-5 max-lg:[&>:last-child]:col-span-2">
         <Stat label="Average test score" value={pct(avg)} note={`${graded.length} completed`} />
         <Stat label="Attendance" value={attendance.length ? `${Math.round((present / attendance.length) * 100)}%` : "–"} note={`${attendance.length} records`} />
         <Stat label="Lessons completed" value={lessons ?? 0} />

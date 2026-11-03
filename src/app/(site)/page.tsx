@@ -18,16 +18,16 @@ export default async function Home() {
     <>
       <section className="relative isolate overflow-hidden bg-adire-900 text-white">
         <AdirePattern id="home-adire" className="-z-10 text-adire-700/70 [mask-image:radial-gradient(70%_85%_at_78%_30%,black,transparent)]" />
-        <div className="container-page grid items-center gap-12 pb-32 pt-12 md:pt-16 lg:grid-cols-[1.05fr_0.95fr] lg:pb-40 lg:pt-16">
+        <div className="container-page grid items-center gap-10 pb-28 pt-10 sm:gap-12 md:pt-16 lg:grid-cols-[1.05fr_0.95fr] lg:pb-40 lg:pt-16">
           <div className="animate-hero-in">
             <h1 className="max-w-[13ch] text-[2.9rem] font-extrabold leading-[0.98] tracking-[-0.04em] text-white sm:text-6xl lg:text-[5.4rem]">
               One school journey, from Nursery 1 to JAMB.
             </h1>
-            <p className="mt-7 max-w-[34rem] text-lg leading-relaxed text-adire-100 md:text-xl">
+            <p className="mt-6 max-w-[34rem] text-lg leading-relaxed text-adire-100 md:mt-7 md:text-xl">
               Lessons, live classes, assignments and CBT practice for every Nigerian class, taught by approved teachers,
               with progress reports parents can actually read.
             </p>
-            <div className="mt-9 flex flex-wrap gap-3">
+            <div className="mt-8 grid gap-3 sm:mt-9 sm:flex sm:flex-wrap">
               <ButtonLink href="/signup" size="lg" variant="accent">Get started free</ButtonLink>
               <ButtonLink href="/classes" size="lg" variant="onDark">Explore classes</ButtonLink>
             </div>
@@ -38,7 +38,7 @@ export default async function Home() {
       </section>
 
       <section aria-labelledby="find-class" className="container-page relative z-10 -mt-20 lg:-mt-24">
-        <div className="rounded-[2rem] border border-line bg-white p-5 shadow-pop md:p-8">
+        <div className="rounded-[1.75rem] border border-line bg-white p-4 shadow-pop sm:p-5 md:rounded-[2rem] md:p-8">
           <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
             <h2 id="find-class" className="text-2xl font-bold md:text-3xl">Find your class</h2>
             <p className="text-sm text-muted">{classCount} classes, {subjectCount} subjects and five exam tracks</p>
@@ -47,7 +47,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="container-page py-20 md:py-28">
+      <section className="container-page py-14 sm:py-20 md:py-28">
         <SectionHeading title="Everyone around the learner, in one place."
           intro={`${brand.name} connects the people around a learner, so the lesson, the homework, the test and the report card all live together.`} />
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
@@ -69,7 +69,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="border-y border-line bg-white py-20 md:py-24">
+      <section className="border-y border-line bg-white py-14 sm:py-20 md:py-24">
         <div className="container-page">
           <SectionHeading title="How it works" intro="Four steps from sign-up to your first result." />
           <Steps className="mt-12" steps={[
@@ -104,7 +104,7 @@ export default async function Home() {
                 </li>
               ))}
             </ul>
-            <div className="mt-9 flex flex-wrap gap-3">
+            <div className="mt-9 grid gap-3 sm:flex sm:flex-wrap">
               <ButtonLink href="/exam-prep" variant="accent" size="lg">Explore exam preparation</ButtonLink>
               <ButtonLink href="/exam-prep#sample" variant="onDark" size="lg">Try a sample question</ButtonLink>
             </div>
@@ -124,7 +124,7 @@ export default async function Home() {
 
 function FeaturedCourses({ courses }: { courses: Catalogue["courses"] }) {
   return (
-    <section className="container-page py-20 md:py-28">
+    <section className="container-page py-14 sm:py-20 md:py-28">
       <div className="flex flex-wrap items-end justify-between gap-6">
         <SectionHeading title="Start a course today" intro="Self-paced courses written by approved teachers, open to every learner at the right level." />
         <ButtonLink href="/courses" variant="outline">See all courses</ButtonLink>
@@ -146,7 +146,7 @@ function FeaturedCourses({ courses }: { courses: Catalogue["courses"] }) {
 
 function Community({ testimonials }: { testimonials: Catalogue["testimonials"] }) {
   return (
-    <section className="container-page py-20 md:py-28">
+    <section className="container-page py-14 sm:py-20 md:py-28">
       <div className="grid items-center gap-12 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="grid grid-cols-[1.2fr_1fr] gap-4">
           <div className="relative row-span-2 min-h-[22rem] overflow-hidden rounded-[2rem] sm:min-h-[26rem]">

@@ -50,11 +50,11 @@ export function PageHero({ id, title, intro, photo, children }: {
   return (
     <section className="relative isolate overflow-hidden bg-adire-900 text-white">
       <AdirePattern id={`${id}-adire`} className="-z-10 text-adire-700/70 [mask-image:radial-gradient(75%_90%_at_85%_40%,black,transparent)]" />
-      <div className={clsx("container-page grid items-center gap-12 py-14 md:py-20", photo && "lg:grid-cols-[1.15fr_0.85fr]")}>
+      <div className={clsx("container-page grid items-center gap-10 py-12 md:gap-12 md:py-20", photo && "lg:grid-cols-[1.15fr_0.85fr]")}>
         <div>
           <h1 className="max-w-[17ch] text-[2.5rem] font-extrabold leading-[1.04] tracking-[-0.03em] sm:text-5xl lg:text-[3.9rem]">{title}</h1>
           <p className="mt-5 max-w-xl text-lg leading-relaxed text-adire-100 md:text-xl">{intro}</p>
-          {children && <div className="mt-8 flex flex-wrap gap-3">{children}</div>}
+          {children && <div className="mt-8 grid gap-3 sm:flex sm:flex-wrap">{children}</div>}
         </div>
         {photo && <ArchPhoto name={photo} />}
       </div>
@@ -88,7 +88,7 @@ export function PhotoTile({ href, photo, title, text, cta, sizes, className }: {
 }) {
   return (
     <Link href={href} className={clsx(
-      "group relative isolate flex min-h-[17rem] flex-col justify-end overflow-hidden rounded-[1.75rem] p-6 text-white md:p-7",
+      "group relative isolate flex min-h-[25rem] flex-col justify-end overflow-hidden rounded-[1.75rem] p-6 text-white sm:min-h-[20rem] md:p-7",
       "focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-sun-400", className)}>
       <Photo name={photo} sizes={sizes} className="-z-10 transition-transform duration-700 group-hover:scale-[1.03]" />
       <span aria-hidden="true" className="absolute inset-0 -z-10 bg-linear-to-t from-adire-900/95 via-adire-900/45 to-adire-900/0" />
@@ -103,10 +103,12 @@ export function PhotoTile({ href, photo, title, text, cta, sizes, className }: {
 export function Steps({ steps, className }: { steps: [string, string][]; className?: string }) {
   return (
     <ol className={clsx("relative grid gap-8 md:gap-6", steps.length === 3 ? "md:grid-cols-3" : "md:grid-cols-4", className)}>
-      <span aria-hidden="true" className="absolute left-[1.3rem] top-0 h-full w-[3px] rounded-full bg-adire-100 md:left-0 md:top-[1.3rem] md:h-[3px] md:w-full" />
       {steps.map(([title, text], i) => (
         <li key={title} className="relative flex gap-5 md:block">
-          <span className="relative z-10 grid size-11 shrink-0 place-items-center rounded-full bg-adire-700 font-display text-lg font-bold text-white ring-8 ring-paper">{i + 1}</span>
+          {i < steps.length - 1 && (
+            <span aria-hidden="true" className="absolute left-[1.3rem] top-11 h-[calc(100%-0.75rem)] w-[3px] rounded-full bg-adire-100 md:left-11 md:top-[1.3rem] md:h-[3px] md:w-[calc(100%-1.25rem)]" />
+          )}
+          <span className="relative z-10 grid size-11 shrink-0 place-items-center rounded-full bg-adire-700 font-display text-lg font-bold text-white">{i + 1}</span>
           <div className="md:mt-6">
             <h3 className="font-sans text-lg font-semibold tracking-normal">{title}</h3>
             <p className="mt-1.5 text-muted">{text}</p>
@@ -120,13 +122,13 @@ export function Steps({ steps, className }: { steps: [string, string][]; classNa
 /** Closing call to action with a photo bleeding off the right edge. */
 export function CtaBand({ title, text, photo = "joy", children }: { title: string; text: string; photo?: PhotoKey; children: ReactNode }) {
   return (
-    <section className="container-page py-20">
+    <section className="container-page py-14 sm:py-20">
       <div className="relative isolate grid overflow-hidden rounded-[2rem] bg-adire-700 text-white md:grid-cols-[1.2fr_0.8fr]">
         <AdirePattern id="cta-adire" className="-z-10 text-adire-600/60 [mask-image:linear-gradient(to_right,black,transparent_70%)]" />
-        <div className="px-7 py-10 md:px-12 md:py-14">
+        <div className="px-6 py-9 sm:px-7 sm:py-10 md:px-12 md:py-14">
           <h2 className="text-3xl font-bold text-white md:text-4xl">{title}</h2>
           <p className="mt-3 max-w-md text-lg text-adire-100">{text}</p>
-          <div className="mt-7 flex flex-wrap gap-3">{children}</div>
+          <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap">{children}</div>
         </div>
         <div className="relative hidden min-h-[16rem] md:block">
           <Photo name={photo} sizes="(min-width: 768px) 40vw, 0px" />

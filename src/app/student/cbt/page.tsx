@@ -38,7 +38,7 @@ export default async function CbtCentre({ searchParams }: { searchParams: Promis
   return (
     <>
       <PageHeader title="CBT Examination Centre" intro="Build a fresh paper from our question banks. Practice mode shows the answer after each question; mock mode is timed and marked at the end, like the real hall." />
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+      <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
         <Stat label="Sessions completed" value={graded.length} />
         <Stat label="Average score" value={pct(avg)} />
         <Stat label="Questions available" value={rows.reduce((n, r) => n + Number(r.question_count), 0)} />

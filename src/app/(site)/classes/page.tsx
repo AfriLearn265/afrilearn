@@ -34,13 +34,13 @@ export default async function ClassesPage() {
       </PageHero>
 
       <section aria-labelledby="pick-class" className="container-page relative z-10 -mt-10">
-        <div className="rounded-[2rem] border border-line bg-white p-5 shadow-pop md:p-8">
+        <div className="rounded-[1.75rem] border border-line bg-white p-4 shadow-pop sm:p-5 md:rounded-[2rem] md:p-8">
           <h2 id="pick-class" className="text-2xl font-bold md:text-3xl">Pick a class</h2>
           <JourneyRail inset levels={levels} classes={classes} />
         </div>
       </section>
 
-      <div className="container-page grid gap-20 py-20 md:gap-28 md:py-28">
+      <div className="container-page grid gap-16 py-14 sm:gap-20 sm:py-20 md:gap-28 md:py-28">
         {groups.map((g, i) => {
           const detail = levelDetail[g.key] ?? levelDetail.primary;
           const subjects = [...new Set(g.items.flatMap((c) => c.subjects))].sort();

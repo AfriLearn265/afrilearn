@@ -26,7 +26,7 @@ export default function TeachersPage() {
         <ButtonLink href="/login?as=teacher" size="lg" variant="onDark">Teacher login</ButtonLink>
       </PageHero>
 
-      <section className="container-page py-20 md:py-28">
+      <section className="container-page py-14 sm:py-20 md:py-28">
         <SectionHeading title="Everything a class needs" intro="The tools you already use in school, joined up so marking, records and parent updates take less of your evening." />
         <ul className="mt-12 grid gap-x-10 gap-y-9 sm:grid-cols-2 lg:grid-cols-3">
           {tools.map(({ icon: Icon, title, text }) => (
@@ -39,7 +39,7 @@ export default function TeachersPage() {
         </ul>
       </section>
 
-      <section className="border-y border-line bg-white py-20 md:py-28">
+      <section className="border-y border-line bg-white py-14 sm:py-20 md:py-28">
         <div className="container-page">
           <SectionHeading title="From application to first class" intro="Every teacher is reviewed by an administrator before they can teach, so parents know who is in the room." />
           <Steps className="mt-12" steps={[
@@ -51,7 +51,7 @@ export default function TeachersPage() {
         </div>
       </section>
 
-      <section className="container-page py-20 md:py-28">
+      <section className="container-page py-14 sm:py-20 md:py-28">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <div className="relative aspect-[4/3] overflow-hidden rounded-t-[14rem] rounded-b-[2rem] lg:order-2">
             <Photo name="lab" sizes="(min-width: 1024px) 45vw, 100vw" />

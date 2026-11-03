@@ -11,8 +11,8 @@ const columns = [
 export function SiteFooter() {
   return (
     <footer className="mt-auto bg-adire-900 text-adire-100">
-      <div className="container-page grid gap-10 py-14 md:grid-cols-[1.3fr_repeat(3,1fr)]">
-        <div>
+      <div className="container-page grid grid-cols-2 gap-x-6 gap-y-10 py-12 md:grid-cols-[1.3fr_repeat(3,1fr)] md:py-14">
+        <div className="col-span-2 md:col-span-1">
           <Logo tone="light" />
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-adire-200">{brand.tagline} Lessons, live classes and exam practice for every Nigerian learner.</p>
           <a href={`mailto:${brand.supportEmail}`} className="mt-4 inline-block text-sm font-semibold text-white underline-offset-4 hover:underline">{brand.supportEmail}</a>

@@ -12,8 +12,11 @@ export function JourneyRail({ levels, classes, inset }: { levels: CatalogueLevel
   const refs = useRef<Record<string, HTMLButtonElement | null>>({});
   const scroller = useRef<HTMLDivElement>(null);
 
-  // On narrow screens, bring the selected stop into view without moving the page.
+  // On narrow screens, bring a newly chosen stop into view without moving the page.
+  // Skip the first render so the rail starts at Nursery 1, where the journey begins.
+  const firstRender = useRef(true);
   useEffect(() => {
+    if (firstRender.current) { firstRender.current = false; return; }
     const box = scroller.current;
     const btn = refs.current[selected];
     if (!box || !btn || box.scrollWidth <= box.clientWidth) return;
@@ -104,11 +107,14 @@ export function JourneyRail({ levels, classes, inset }: { levels: CatalogueLevel
           </ButtonLink>
         </div>
         <ul key={`${current.code}-subjects`} className="flex flex-wrap content-start gap-2 animate-fade-in" aria-label={`Subjects in ${current.name}`}>
-          {shown.map((s) => (
-            <li key={s} className="rounded-full border border-line bg-white px-3 py-1.5 text-sm text-ink-soft">{s}</li>
+          {shown.map((s, i) => (
+            <li key={s} className={clsx("rounded-full border border-line bg-white px-3 py-1.5 text-sm text-ink-soft", i >= 8 && "max-sm:hidden")}>{s}</li>
           ))}
+          {current.subjects.length > 8 && (
+            <li className="rounded-full px-3 py-1.5 text-sm text-muted sm:hidden">and {current.subjects.length - 8} more</li>
+          )}
           {current.subjects.length > shown.length && (
-            <li className="rounded-full px-3 py-1.5 text-sm text-muted">and {current.subjects.length - shown.length} more</li>
+            <li className="rounded-full px-3 py-1.5 text-sm text-muted max-sm:hidden">and {current.subjects.length - shown.length} more</li>
           )}
         </ul>
       </div>

@@ -12,9 +12,9 @@ export function LogoMark({ className = "size-8" }: { className?: string }) {
   );
 }
 
-export function Logo({ href = "/", tone = "dark" }: { href?: string; tone?: "dark" | "light" }) {
+export function Logo({ href = "/", tone = "dark", className = "" }: { href?: string; tone?: "dark" | "light"; className?: string }) {
   return (
-    <Link href={href} className="inline-flex items-center gap-2.5 rounded-lg" aria-label={`${brand.name} home`}>
+    <Link href={href} className={`inline-flex items-center gap-2.5 rounded-lg ${className}`} aria-label={`${brand.name} home`}>
       <LogoMark />
       <span className={`font-display text-[1.35rem] font-bold tracking-tight ${tone === "light" ? "text-white" : "text-ink"}`}>
         {brand.name}

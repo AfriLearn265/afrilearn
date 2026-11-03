@@ -21,7 +21,7 @@ export function HeroCollage() {
         <Photo name="pupils" sizes="(min-width: 1024px) 14rem, 40vw" preload />
       </div>
       <div aria-hidden="true">
-        <Moment className="left-[20%] top-[47%]" delay={750} icon={CircleCheck} tone="bg-leaf-100 text-leaf-700"
+        <Moment className="left-[14%] top-[46%] sm:left-[20%] sm:top-[47%]" delay={750} icon={CircleCheck} tone="bg-leaf-100 text-leaf-700"
           title="Test 1 marked" detail="85%, grade A1" />
         <Moment className="bottom-[5%] right-[2%]" delay={950} icon={Video} tone="bg-sun-100 text-sun-600"
           title="Live class at 4:00 pm" detail="Completing the square" />
@@ -34,12 +34,12 @@ function Moment({ className, delay, icon: Icon, tone, title, detail }: {
   className: string; delay: number; icon: ComponentType<{ className?: string }>; tone: string; title: string; detail: string;
 }) {
   return (
-    <div className={clsx("absolute z-10 flex items-center gap-3 rounded-2xl bg-white py-2.5 pl-2.5 pr-4 text-ink shadow-pop animate-hero-in", className)}
+    <div className={clsx("absolute z-10 flex items-center gap-2.5 rounded-2xl bg-white py-2 pl-2 pr-3 text-ink shadow-pop animate-hero-in sm:gap-3 sm:py-2.5 sm:pl-2.5 sm:pr-4", className)}
       style={{ animationDelay: `${delay}ms` }}>
-      <span className={clsx("grid size-9 shrink-0 place-items-center rounded-xl", tone)}><Icon className="size-[1.15rem]" /></span>
+      <span className={clsx("grid size-8 shrink-0 place-items-center rounded-xl sm:size-9", tone)}><Icon className="size-4 sm:size-[1.15rem]" /></span>
       <span className="leading-tight">
-        <span className="block whitespace-nowrap text-sm font-semibold">{title}</span>
-        <span className="block whitespace-nowrap text-[0.8rem] text-muted">{detail}</span>
+        <span className="block whitespace-nowrap text-[0.8rem] font-semibold sm:text-sm">{title}</span>
+        <span className="block whitespace-nowrap text-xs text-muted sm:text-[0.8rem]">{detail}</span>
       </span>
     </div>
   );

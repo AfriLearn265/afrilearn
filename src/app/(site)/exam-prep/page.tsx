@@ -26,7 +26,7 @@ export default function ExamPrepPage() {
         <ButtonLink href="#sample" size="lg" variant="onDark">Try a sample question</ButtonLink>
       </PageHero>
 
-      <section className="container-page py-20 md:py-28">
+      <section className="container-page py-14 sm:py-20 md:py-28">
         <SectionHeading title="Five exam tracks" intro="Choose your track when you sign up, then practise any subject in the CBT Centre." />
         <ul className="mt-10 divide-y divide-line border-y border-line">
           {tracks.map((t) => (
@@ -59,7 +59,7 @@ export default function ExamPrepPage() {
         </div>
       </section>
 
-      <section className="container-page py-20 md:py-28">
+      <section className="container-page py-14 sm:py-20 md:py-28">
         <SectionHeading title="How a practice session works" />
         <Steps className="mt-12" steps={[
           ["Pick a subject", "Choose the exam, the subject and, if you like, one topic you want to fix."],
@@ -69,7 +69,7 @@ export default function ExamPrepPage() {
         ]} />
       </section>
 
-      <section className="border-t border-line bg-white py-20 md:py-28">
+      <section className="border-t border-line bg-white py-14 sm:py-20 md:py-28">
         <div className="container-page grid items-center gap-12 lg:grid-cols-2">
           <div className="relative aspect-[4/3] overflow-hidden rounded-[2rem]">
             <Photo name="lab" sizes="(min-width: 1024px) 45vw, 100vw" />

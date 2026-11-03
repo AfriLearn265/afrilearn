@@ -45,5 +45,5 @@ export function JitsiRoom({ domain, scriptSrc, roomName, jwt, displayName, email
     return () => { cancelled = true; api?.dispose(); };
   }, [domain, scriptSrc, roomName, jwt, displayName, email, moderator, onLeaveHref]);
 
-  return error ? <Notice tone="error">{error}</Notice> : <div ref={box} className="h-full min-h-[70vh] w-full overflow-hidden rounded-[1.25rem] bg-ink" />;
+  return error ? <Notice tone="error">{error}</Notice> : <div ref={box} className="h-full min-h-[75dvh] w-full overflow-hidden rounded-xl bg-ink sm:min-h-[70vh] sm:rounded-[1.25rem]" />;
 }
