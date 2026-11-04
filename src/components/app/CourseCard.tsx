@@ -14,7 +14,7 @@ export function CourseCard({ course }: { course: CourseWithProgress }) {
   return (
     <Link href={`/student/courses/${course.slug}`} className="flex h-full flex-col rounded-[1.25rem] border border-line bg-white p-5 transition-colors hover:border-adire-300">
       <p className="flex items-center gap-2 text-sm">
-        <span className="size-2.5 rounded-full" style={{ background: course.subject?.color ?? "#2B3A9F" }} aria-hidden="true" />
+        <span className="size-2.5 rounded-full" style={{ background: course.subject?.color ?? "#4A1FB8" }} aria-hidden="true" />
         <span className="font-medium text-ink-soft">{course.subject?.name ?? "General"}</span>
         {course.klass && <span className="text-muted">{course.klass.name}</span>}
       </p>

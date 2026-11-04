@@ -8,7 +8,7 @@ import clsx from "clsx";
 import {
   Award, BookOpen, CalendarDays, ChartColumn, ClipboardCheck, FileText, Flag, Gauge, GraduationCap, Landmark,
   Library, LogOut, Menu, MessagesSquare, NotebookPen, ScrollText, Settings, ShieldCheck, Sparkles, SquareLibrary,
-  Baby, UserRound, Users, Video, Wallet, X,
+  Baby, UserRound, Users, Video, Wallet, X, MonitorPlay, Puzzle,
 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { Avatar } from "@/components/app/Avatar";
@@ -19,6 +19,7 @@ const icons: Record<IconName, typeof Gauge> = {
   results: ChartColumn, library: Library, spark: Sparkles, award: Award, user: UserRound, users: Users,
   bank: SquareLibrary, grade: FileText, video: Video, calendar: CalendarDays, child: Baby, message: MessagesSquare,
   settings: Settings, shield: ShieldCheck, chart: ChartColumn, subjects: Landmark, money: Wallet, flag: Flag, log: ScrollText,
+  play: MonitorPlay, quiz: Puzzle,
 };
 
 function NavList({ items, onNavigate }: { items: NavItem[]; onNavigate?: () => void }) {
@@ -32,8 +33,8 @@ function NavList({ items, onNavigate }: { items: NavItem[]; onNavigate?: () => v
         return (
           <li key={item.href}>
             <Link href={item.href} onClick={onNavigate} aria-current={active ? "page" : undefined}
-              className={clsx("flex items-center gap-3 rounded-xl px-3 py-2.5 text-[0.95rem] font-medium transition-colors",
-                active ? "bg-adire-700 text-white" : "text-ink-soft hover:bg-wash hover:text-ink")}>
+              className={clsx("flex items-center gap-3 rounded-full px-3.5 py-2.5 font-display text-[1rem] font-medium transition-colors",
+                active ? "bg-grape-600 text-white shadow-[0_3px_0_var(--color-grape-900)]" : "text-ink-soft hover:bg-wash hover:text-ink")}>
               <Icon className="size-[1.15rem] shrink-0" aria-hidden="true" />{item.label}
             </Link>
           </li>
@@ -50,7 +51,7 @@ function Body({ items, name, roleLabel, avatarUrl, profileHref, signOut, onNavig
     <div className="flex h-full flex-col">
       <div className="flex h-16 items-center px-5"><Logo href="/dashboard" /></div>
       <nav aria-label="Dashboard" className="flex-1 overflow-y-auto px-3 py-2"><NavList items={items} onNavigate={onNavigate} /></nav>
-      <div className="border-t border-line p-3">
+      <div className="border-t-2 border-line p-3">
         <div className="flex items-center gap-3 rounded-xl px-2 py-2">
           {profileHref ? (
             <Link href={profileHref} onClick={onNavigate} className="flex min-w-0 flex-1 items-center gap-3 rounded-lg hover:opacity-80">
@@ -77,7 +78,7 @@ function Body({ items, name, roleLabel, avatarUrl, profileHref, signOut, onNavig
 /** The fixed sidebar on large screens. */
 export function Sidebar(props: ShellProps) {
   return (
-    <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 border-r border-line bg-white lg:block">
+    <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 border-r-2 border-line bg-white lg:block">
       <Body {...props} />
     </aside>
   );

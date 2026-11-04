@@ -30,7 +30,7 @@ export default async function TeacherCourses() {
               {courses.map((c) => (
                 <li key={c.id}>
                   <Link href={`/teacher/courses/${c.id}`} className="flex items-center gap-3 py-3.5 hover:opacity-80">
-                    <span className="size-3 shrink-0 rounded-full" style={{ background: c.subjects?.color ?? "#2B3A9F" }} aria-hidden="true" />
+                    <span className="size-3 shrink-0 rounded-full" style={{ background: c.subjects?.color ?? "#4A1FB8" }} aria-hidden="true" />
                     <div className="min-w-0 flex-1">
                       <p className="font-semibold">{c.title}</p>
                       <p className="text-sm text-muted">{[c.subjects?.name, c.classes?.name, c.classrooms ? `for ${c.classrooms.name}` : "public catalogue", `${c.lessons?.[0]?.count ?? 0} lessons`].filter(Boolean).join(", ")}</p>

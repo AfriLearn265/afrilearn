@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { Download, ShieldCheck, Smartphone, Wifi } from "lucide-react";
 import { PageHero, SectionHeading, Steps } from "@/components/landing/Marketing";
-import { ButtonLink } from "@/components/ui/Button";
+import { ButtonLink, buttonClass } from "@/components/ui/Button";
 import { getBrand } from "@/lib/brand";
 
 export const metadata: Metadata = {
   title: "Get the Android app",
-  description: "Install the AfriLearn app on your Android phone: lessons, CBT practice, live classes and results in one tap.",
+  description: "Install the AfriLearn app on your Android phone: class videos, quizzes, live classes and results in one tap.",
 };
 
 const APK = "/downloads/afrilearn-prototype.apk";
@@ -15,9 +15,9 @@ export default async function AppPage() {
   const brand = await getBrand();
   return (
     <>
-      <PageHero id="app" photo="heroLearner" title={`${brand.name} on your Android phone.`}
-        intro="Lessons, CBT practice, live classes, assignments and results, one tap from your home screen. Your login and progress are the same as on the website.">
-        <a href={APK} download className="inline-flex h-13 items-center justify-center gap-2.5 rounded-xl bg-sun-400 px-7 font-semibold text-ink hover:bg-sun-300">
+      <PageHero id="app" mascot={{ pose: "wave", prop: "star" }} title={`${brand.name} on your Android phone.`}
+        intro="Class videos, quizzes, live classes and results, one tap from your home screen. Your login and progress are the same as on the website.">
+        <a href={APK} download className={buttonClass("accent", "lg")}>
           <Download className="size-5" aria-hidden="true" />Download for Android
         </a>
         <ButtonLink href="#install" size="lg" variant="onDark">How to install</ButtonLink>
@@ -30,14 +30,14 @@ export default async function AppPage() {
             <ul className="mt-8 grid gap-6 sm:grid-cols-2">
               {[
                 { icon: Smartphone, title: "Made for phones", text: "Opens straight to your dashboard, full screen, with no browser bars." },
-                { icon: Wifi, title: "Light on data", text: "Pages load fast on mobile data, and test answers save as you go." },
-                { icon: Download, title: "Downloads that stay", text: "Practice papers and notes save to your phone's Downloads folder." },
+                { icon: Wifi, title: "Light on data", text: "Pages load fast on mobile data, and quiz answers save as you go." },
+                { icon: Download, title: "Downloads that stay", text: "Worksheets and notes save to your phone's Downloads folder." },
                 { icon: ShieldCheck, title: "Same safe account", text: "Your login, results and parent links are exactly as on the website." },
               ].map(({ icon: Icon, title, text }) => (
                 <li key={title} className="flex gap-4">
-                  <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-wash text-adire-700"><Icon className="size-5" aria-hidden="true" /></span>
+                  <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-grape-100 text-grape-700"><Icon className="size-5" aria-hidden="true" /></span>
                   <div>
-                    <h3 className="font-sans text-lg font-semibold tracking-normal">{title}</h3>
+                    <h3 className="text-xl font-semibold">{title}</h3>
                     <p className="mt-1 text-muted">{text}</p>
                   </div>
                 </li>

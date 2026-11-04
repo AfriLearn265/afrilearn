@@ -16,7 +16,7 @@ export function DailyBars({ data, label }: { data: { day: string; count: number 
           <YAxis allowDecimals={false} tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: "#5A6189" }} />
           <Tooltip cursor={{ fill: "#EEF1FF" }} contentStyle={{ borderRadius: 12, border: "1px solid #E3E6F3", fontSize: 13 }}
             formatter={(v) => [v, label]} labelFormatter={(_, p) => p?.[0]?.payload?.short ?? ""} />
-          <Bar dataKey="count" fill="#2B3A9F" radius={[6, 6, 0, 0]} maxBarSize={28} />
+          <Bar dataKey="count" fill="#4A1FB8" radius={[6, 6, 0, 0]} maxBarSize={28} />
         </BarChart>
       </ResponsiveContainer>
     </div>

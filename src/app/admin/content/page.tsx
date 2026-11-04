@@ -26,7 +26,7 @@ export default async function Content() {
 
   return (
     <>
-      <PageHeader title="Content and moderation" intro="Publish or pull courses, approve library uploads, choose which question banks feed the CBT Centre, and manage testimonials." />
+      <PageHeader title="Content and moderation" intro="Publish or pull courses, approve library uploads, choose which question banks feed the practice quizzes, and manage testimonials." />
       <div className="grid gap-6 xl:grid-cols-2">
         <Panel title="Courses">
           {(courses ?? []).length === 0 ? <EmptyState title="No courses yet." /> : (
@@ -47,7 +47,7 @@ export default async function Content() {
               {(banks ?? []).map((b) => (
                 <li key={b.id} className="flex flex-wrap items-center gap-2 py-2.5">
                   <span className="min-w-0 flex-1"><span className="block font-semibold">{b.name}</span><span className="text-muted">{name(b.profiles)}, {(b.questions as { count: number }[])?.[0]?.count ?? 0} questions{b.exam_body ? `, ${b.exam_body}` : ""}, source: {b.source_license}</span></span>
-                  <Toggle action={setBankShared} id={b.id} field="on" on={b.is_shared} labels={["In CBT Centre", "Private"]} />
+                  <Toggle action={setBankShared} id={b.id} field="on" on={b.is_shared} labels={["In practice quizzes", "Private"]} />
                 </li>
               ))}
             </ul>

@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import "@fontsource-variable/bricolage-grotesque";
-import "@fontsource-variable/figtree";
+import "@fontsource-variable/fredoka";
+import "@fontsource-variable/nunito";
 import "./globals.css";
 import { getBrand } from "@/lib/brand";
 import { BrandProvider } from "@/components/brand/BrandProvider";
@@ -16,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#2B3A9F",
+  themeColor: "#4A1FB8",
   width: "device-width",
   initialScale: 1,
 };

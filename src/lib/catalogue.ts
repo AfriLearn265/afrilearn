@@ -59,13 +59,15 @@ export async function getCatalogue(): Promise<Catalogue> {
     ]);
     if (levels.error || classes.error) throw levels.error ?? classes.error;
 
+    const offered: CatalogueClass[] = ((classes.data ?? []) as unknown as ClassRow[]).map((c) => ({
+      code: c.code, name: c.name, level: c.education_levels?.key ?? "primary",
+      subjects: c.class_subjects.map((cs) => cs.subjects).filter((s): s is { name: string; is_active: boolean } => !!s && s.is_active)
+        .map((s) => s.name).sort(),
+    }));
     return {
-      levels: (levels.data ?? []) as CatalogueLevel[],
-      classes: ((classes.data ?? []) as unknown as ClassRow[]).map((c) => ({
-        code: c.code, name: c.name, level: c.education_levels?.key ?? "primary",
-        subjects: c.class_subjects.map((cs) => cs.subjects).filter((s): s is { name: string; is_active: boolean } => !!s && s.is_active)
-          .map((s) => s.name).sort(),
-      })),
+      // Only levels that still have classes on offer (this edition: Primary).
+      levels: ((levels.data ?? []) as CatalogueLevel[]).filter((l) => offered.some((c) => c.level === l.key)),
+      classes: offered,
       subjects: (subjects.data ?? []) as SubjectOption[],
       plans: (plans.data ?? []) as Plan[],
       testimonials: (testimonials.data ?? []) as Testimonial[],
@@ -94,7 +96,7 @@ export async function getCourses(limit = 24): Promise<FeaturedCourse[]> {
 function toCourse(c: CourseRow): FeaturedCourse {
   return {
     id: c.id, title: c.title, slug: c.slug, summary: c.summary, difficulty: c.difficulty,
-    subject: c.subject_name ? { name: c.subject_name, color: c.subject_color ?? "#2B3A9F" } : null,
+    subject: c.subject_name ? { name: c.subject_name, color: c.subject_color ?? "#4A1FB8" } : null,
     klass: c.class_name ? { name: c.class_name } : null, lessons: c.lesson_count ?? 0,
   };
 }

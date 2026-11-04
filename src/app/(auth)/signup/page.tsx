@@ -12,7 +12,7 @@ export default async function SignupPage({ searchParams }: { searchParams: Promi
   const role = sp.role === "teacher" || sp.role === "parent" ? sp.role : "student";
   return (
     <div>
-      <h1 className="text-4xl font-bold">Create your account</h1>
+      <h1 className="text-4xl font-semibold">Create your account</h1>
       <p className="mt-2 text-muted">
         Already have one? <Link href="/login" className="font-semibold text-adire-700 hover:underline">Log in</Link>
       </p>
@@ -28,7 +28,7 @@ export default async function SignupPage({ searchParams }: { searchParams: Promi
         initialClass={sp.class}
         levels={catalogue.levels}
         classes={catalogue.classes.map(({ code, name, level }) => ({ code, name, level }))}
-        subjects={catalogue.subjects}
+        subjects={catalogue.subjects.filter((s) => catalogue.classes.some((c) => c.subjects.includes(s.name)))}
       />
     </div>
   );

@@ -29,7 +29,7 @@ export async function addSubject(fd: FormData): Promise<ActionResult> {
   const name = String(fd.get("name") ?? "").trim();
   if (!name) return { error: "Enter a subject name." };
   const code = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-  const { error } = await s.from("subjects").insert({ name, code, color: String(fd.get("color") ?? "#2B3A9F") });
+  const { error } = await s.from("subjects").insert({ name, code, color: String(fd.get("color") ?? "#4A1FB8") });
   return error ? { error: error.code === "23505" ? "That subject already exists." : error.message } : done("/admin/academics", `${name} added.`);
 }
 

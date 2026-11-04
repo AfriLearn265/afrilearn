@@ -1,48 +1,58 @@
 import type { Metadata } from "next";
-import { BellRing, Check, MessageSquareLock, ShieldCheck, UserRoundCheck } from "lucide-react";
-import { CtaBand, PageHero, Photo, SectionHeading, Steps } from "@/components/landing/Marketing";
+import { BellRing, Check, MessageSquareLock, Play, ShieldCheck, Trophy, UserRoundCheck, Video } from "lucide-react";
+import { CtaBand, PageHero, SectionHeading, Steps } from "@/components/landing/Marketing";
 import { ButtonLink } from "@/components/ui/Button";
 
 export const metadata: Metadata = {
   title: "For parents",
-  description: "Follow your child's results, attendance, assignments and teacher feedback, with child safety built in.",
+  description: "Follow your Primary 1 to 6 child's videos, quizzes, results and teacher feedback, with child safety built in.",
 };
 
 const safety = [
-  { icon: UserRoundCheck, title: "You set up young learners", text: "Nursery and Primary accounts are created or approved by a parent or guardian." },
+  { icon: UserRoundCheck, title: "You set up young learners", text: "Every pupil account is created or approved by a parent or guardian." },
   { icon: MessageSquareLock, title: "No private chat with children", text: "Teachers message parents, never pupils, and every conversation can be reviewed by moderators." },
   { icon: ShieldCheck, title: "Children's details stay private", text: "Profiles are never public. Leaderboards are off unless a class opts in, and show first names only." },
   { icon: BellRing, title: "You hear about results first", text: "Graded work, test results and new assignments reach your dashboard as they happen." },
 ];
 
 const sees = [
-  "Test and exam results, with grades and the teacher's comments",
+  "Which class videos they watched, and when",
+  "Quiz and test results, with the teacher's comments",
   "Assignments that are due, handed in, late or marked",
-  "Attendance for classes and live lessons",
-  "Courses finished, certificates earned and learning streaks",
+  "Attendance for live classes",
+  "Badges, points and learning streaks",
   "Strong and weak topics, so you know where to help",
 ];
 
 export default function ParentsPage() {
   return (
     <>
-      <PageHero id="parents" photo="parent" title="See exactly how your child is doing."
-        intro="Link each child with a secure code from their profile. You see their results, attendance, assignments and teacher feedback, and nothing that belongs to anyone else.">
+      <PageHero id="parents" mascot={{ pose: "wave", prop: "book" }} title="See exactly how your child is doing."
+        intro="Set up your child's account, or link it with a secure code. You see their videos, quizzes, results and teacher feedback, and nothing that belongs to anyone else.">
         <ButtonLink href="/signup?role=parent" size="lg" variant="accent">Create a parent account</ButtonLink>
         <ButtonLink href="/login" size="lg" variant="onDark">Log in</ButtonLink>
       </PageHero>
 
       <section className="container-page py-14 sm:py-20 md:py-28">
         <div className="grid items-center gap-12 lg:grid-cols-2">
-          <div className="relative aspect-[4/3] overflow-hidden rounded-[2rem]">
-            <Photo name="primary" sizes="(min-width: 1024px) 45vw, 100vw" />
-          </div>
+          <ul className="mx-auto grid w-full max-w-md gap-4" aria-label="Example updates a parent receives">
+            {[
+              { icon: Video, tone: "bg-tangerine-400", title: "Amina watched a new video", text: "What are equivalent fractions? Primary 5 Maths", tilt: "-rotate-2" },
+              { icon: Trophy, tone: "bg-sun-400", title: "Result: Science Check, 83%", text: "Mr Bakare: \u201cWell done on plant parts!\u201d", tilt: "rotate-1" },
+              { icon: Play, tone: "bg-sky-400", title: "Live class tomorrow, 4:00 pm", text: "Fractions with pizza. Paper and scissors ready!", tilt: "-rotate-1" },
+            ].map(({ icon: Icon, tone, title, text, tilt }) => (
+              <li key={title} className={`sticker flex items-center gap-4 rounded-[1.4rem] bg-white p-4 ${tilt}`}>
+                <span className={`grid size-12 shrink-0 place-items-center rounded-2xl border-2 border-ink ${tone}`}><Icon className="size-5" aria-hidden="true" /></span>
+                <span className="leading-snug"><span className="block font-display text-lg font-semibold">{title}</span><span className="text-sm text-muted">{text}</span></span>
+              </li>
+            ))}
+          </ul>
           <div>
             <SectionHeading title="What you will see" />
             <ul className="mt-8 grid gap-3.5">
               {sees.map((s) => (
                 <li key={s} className="flex gap-3 text-lg">
-                  <Check className="mt-1 size-5 shrink-0 text-leaf-500" aria-hidden="true" />{s}
+                  <span className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-full border-2 border-ink bg-lime-400"><Check className="size-4" strokeWidth={3} aria-hidden="true" /></span>{s}
                 </li>
               ))}
             </ul>
@@ -50,12 +60,12 @@ export default function ParentsPage() {
         </div>
       </section>
 
-      <section className="border-y border-line bg-white py-14 sm:py-20 md:py-28">
+      <section className="bg-white py-14 sm:py-20 md:py-28">
         <div className="container-page">
           <SectionHeading title="Linking your child takes a minute" />
           <Steps className="mt-12" steps={[
             ["Create your parent account", "Sign up as a parent or guardian with your own email address."],
-            ["Get your child's link code", "Your child finds it on their profile page. Nursery and Primary pupils sign up with you named as their guardian."],
+            ["Add your child", "Create their pupil account with you as the guardian, or enter the link code from their profile page."],
             ["Enter the code", "Add it on your dashboard. Repeat for each child; there is no limit."],
           ]} />
         </div>
@@ -66,9 +76,9 @@ export default function ParentsPage() {
         <ul className="mt-12 grid gap-x-10 gap-y-8 md:grid-cols-2">
           {safety.map(({ icon: Icon, title, text }) => (
             <li key={title} className="flex gap-4">
-              <Icon className="mt-1 size-6 shrink-0 text-leaf-500" aria-hidden="true" />
+              <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-grape-100 text-grape-700"><Icon className="size-6" aria-hidden="true" /></span>
               <div>
-                <h3 className="font-sans text-lg font-semibold tracking-normal">{title}</h3>
+                <h3 className="text-xl font-semibold">{title}</h3>
                 <p className="mt-1 text-muted">{text}</p>
               </div>
             </li>
@@ -76,8 +86,8 @@ export default function ParentsPage() {
         </ul>
       </section>
 
-      <CtaBand title="Stay close to their learning." text="Create a free parent account and link your first child today." photo="smiling">
-        <ButtonLink href="/signup?role=parent" size="lg" variant="accent">Create a parent account</ButtonLink>
+      <CtaBand title="Stay close to their learning." text="Create a free parent account and add your first child today.">
+        <ButtonLink href="/signup?role=parent" size="lg">Create a parent account</ButtonLink>
       </CtaBand>
     </>
   );

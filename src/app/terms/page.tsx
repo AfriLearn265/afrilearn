@@ -11,7 +11,7 @@ export default async function Terms() {
       <h2>Accounts</h2>
       <ul>
         <li>Give accurate details and keep your password private. You are responsible for activity on your account.</li>
-        <li>Pupils in Nursery and Primary must have a parent or guardian&apos;s consent.</li>
+        <li>Every pupil must have a parent or guardian&apos;s consent.</li>
         <li>Teacher accounts are opened only after an administrator approves the application.</li>
       </ul>
       <h2>Content</h2>

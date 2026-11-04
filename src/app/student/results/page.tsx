@@ -26,11 +26,11 @@ export default async function Results() {
 
   return (
     <>
-      <PageHeader title="Results" intro="Every test, examination and practice session you have completed, with a full review of each." />
+      <PageHeader title="Results" intro="Every test and practice quiz you have finished, with a full review of each." />
       <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
         <Panel>
           {rows.length === 0 ? (
-            <EmptyState title="No results yet.">Take a test from your classroom or a session in the CBT Centre.</EmptyState>
+            <EmptyState title="No results yet.">Take a test from your classroom or a practice quiz.</EmptyState>
           ) : (
             <div className="-mx-5 overflow-x-auto md:-mx-6">
               <table className="w-full min-w-[34rem] text-left text-sm">
@@ -43,7 +43,7 @@ export default async function Results() {
                     <tr key={r.id}>
                       <td className="px-5 py-3 md:px-6">
                         <p className="font-semibold">{r.examinations?.title}</p>
-                        <p className="text-muted">{r.examinations?.subjects?.name}{r.examinations?.owner_student_id ? ", CBT Centre" : ""}</p>
+                        <p className="text-muted">{r.examinations?.subjects?.name}{r.examinations?.owner_student_id ? ", practice quiz" : ""}</p>
                       </td>
                       <td className="px-3 py-3 text-muted">{r.submitted_at ? formatDate(r.submitted_at) : "–"}</td>
                       <td className="px-3 py-3 font-semibold tabular">{r.status === "graded" ? pct(r.percentage) : "Marking"}</td>

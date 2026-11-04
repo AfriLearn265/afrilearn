@@ -2,7 +2,7 @@ import clsx from "clsx";
 import type { ComponentProps, ReactNode } from "react";
 
 const control =
-  "w-full rounded-xl border border-line bg-white px-3.5 text-[0.95rem] text-ink placeholder:text-faint " +
+  "w-full rounded-2xl border-2 border-line bg-white px-3.5 text-[0.95rem] text-ink placeholder:text-faint " +
   "transition-colors hover:border-adire-200 focus:border-adire-500 focus:outline-none focus:ring-4 focus:ring-adire-100 " +
   "disabled:bg-wash disabled:text-muted aria-[invalid=true]:border-coral-500";
 
@@ -22,7 +22,7 @@ export function Input({ className, ...props }: ComponentProps<"input">) {
 export function Select({ className, children, ...props }: ComponentProps<"select">) {
   return (
     <select className={clsx(control, "h-11 appearance-none bg-[length:1.1rem] bg-[right_0.8rem_center] bg-no-repeat pr-10", className)}
-      style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235A6189' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")" }}
+      style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23625884' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")" }}
       {...props}>
       {children}
     </select>

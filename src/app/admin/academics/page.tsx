@@ -27,7 +27,7 @@ export default async function Academics({ searchParams }: { searchParams: Promis
 
   return (
     <>
-      <PageHeader title="Classes and subjects" intro="Decide which subjects belong to each class. Students see only their class's subjects; teachers and the CBT Centre use the same map." />
+      <PageHeader title="Classes and subjects" intro="Decide which subjects belong to each class. Pupils see only their class's subjects; teachers and the practice quizzes use the same map." />
       <div className="grid gap-6 xl:grid-cols-[16rem_1fr_20rem]">
         <Panel title="Classes">
           <nav aria-label="Classes" className="grid gap-4">
@@ -64,7 +64,7 @@ export default async function Academics({ searchParams }: { searchParams: Promis
           <Panel title="Add a subject">
             <ActionForm action={addSubject} submitLabel="Add subject">
               <Field label="Name" htmlFor="sname"><Input id="sname" name="name" placeholder="e.g. Data Processing" /></Field>
-              <Field label="Colour" htmlFor="scolor"><Input id="scolor" name="color" type="color" defaultValue="#2B3A9F" className="h-11 w-20 p-1" /></Field>
+              <Field label="Colour" htmlFor="scolor"><Input id="scolor" name="color" type="color" defaultValue="#4A1FB8" className="h-11 w-20 p-1" /></Field>
             </ActionForm>
           </Panel>
           <Panel title="All subjects">

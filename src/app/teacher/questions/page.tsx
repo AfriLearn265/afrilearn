@@ -38,7 +38,7 @@ export default async function QuestionBanks({ searchParams }: { searchParams: Pr
 
   return (
     <>
-      <PageHeader title="Question banks" intro="Write questions once and reuse them in tests and examinations. Shared banks also feed the CBT Centre for every student." />
+      <PageHeader title="Question banks" intro="Write questions once and reuse them in tests and examinations. Shared banks also feed the practice quizzes for every pupil." />
       <div className="grid gap-6 lg:grid-cols-[19rem_1fr]">
         <div className="grid content-start gap-6">
           <Panel title="Banks">
@@ -66,13 +66,11 @@ export default async function QuestionBanks({ searchParams }: { searchParams: Pr
               <Field label="Class" htmlFor="bclass">
                 <Select id="bclass" name="class_id" defaultValue=""><option value="">Any class</option>{(classes ?? []).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</Select>
               </Field>
-              <Field label="Exam track" htmlFor="bbody">
-                <Select id="bbody" name="exam_body" defaultValue=""><option value="">None (school tests)</option>{["WAEC", "NECO", "JAMB", "NABTEB", "SCHOLARSHIP"].map((b) => <option key={b} value={b}>{b}</option>)}</Select>
-              </Field>
+              <input type="hidden" name="exam_body" value="" />
               <Field label="Source" htmlFor="bsrc" hint="Only original or licensed questions">
                 <Input id="bsrc" name="source_license" defaultValue="Original content" />
               </Field>
-              <label className="flex items-start gap-2.5 text-sm"><input type="checkbox" name="is_shared" className="mt-0.5 size-4 accent-adire-700" />Share with other teachers and the CBT Centre</label>
+              <label className="flex items-start gap-2.5 text-sm"><input type="checkbox" name="is_shared" className="mt-0.5 size-4 accent-adire-700" />Share with other teachers and the practice quizzes</label>
             </ActionForm>
           </Panel>
         </div>

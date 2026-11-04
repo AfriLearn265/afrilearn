@@ -9,7 +9,7 @@ import { getBrand } from "@/lib/brand";
 export const revalidate = 300;
 export const metadata: Metadata = {
   title: "Pricing",
-  description: "Simple plans in naira for students, exam candidates and schools. Free for teachers.",
+  description: "Simple plans in naira for families and primary schools. Free for teachers.",
 };
 
 export default async function PricingPage() {
@@ -18,8 +18,8 @@ export default async function PricingPage() {
 
   return (
     <>
-      <PageHero id="pricing" photo="pupils" title="Simple plans in naira."
-        intro="Start free. Upgrade when you want live classes, the learning companion or full exam preparation. Teachers always join free.">
+      <PageHero id="pricing" mascot={{ pose: "stand", prop: "star" }} title="Simple plans in naira."
+        intro="Start free. Upgrade when you want live classes and the learning companion. Teachers always join free.">
         <ButtonLink href="/signup" size="lg" variant="accent">Start free</ButtonLink>
         <ButtonLink href="#schools" size="lg" variant="onDark">Plans for schools</ButtonLink>
       </PageHero>
@@ -30,12 +30,12 @@ export default async function PricingPage() {
 
       <section className="container-page pb-8">
         <div className="grid gap-10 border-t border-line pt-16 lg:grid-cols-[0.8fr_1.2fr]">
-          <SectionHeading title="About payments" intro={<>More answers on the <Link href="/faq" className="font-semibold text-adire-700 underline-offset-4 hover:underline">questions page</Link>, or write to {brand.supportEmail}.</>} />
+          <SectionHeading title="About payments" intro={<>More answers on the <Link href="/faq" className="font-semibold text-grape-700 underline-offset-4 hover:underline">questions page</Link>, or write to {brand.supportEmail}.</>} />
           <dl className="divide-y divide-line border-y border-line">
             {[
               ["How do I pay?", "Plans are paid in naira by card, bank transfer or USSD through Paystack. Your plan becomes active as soon as Paystack confirms the payment to us."],
               ["Can I cancel?", "Yes. Monthly plans simply stop at the end of the month you paid for. You keep your progress, results and certificates."],
-              ["Is anything free?", "Yes. Lessons for your class, classroom codes, CBT practice and progress tracking are free. During the pilot term every feature is free."],
+              ["Is anything free?", "Yes. Class videos, lessons, classroom codes, practice quizzes and progress tracking are free. During the pilot term every feature is free."],
             ].map(([q, a]) => (
               <div key={q} className="py-5">
                 <dt className="text-lg font-semibold">{q}</dt>
@@ -46,8 +46,8 @@ export default async function PricingPage() {
         </div>
       </section>
 
-      <CtaBand title="Bring a whole school." text="Tell us about your school and we will set up your classes, teachers and student accounts with you." photo="school">
-        <ButtonLink href={`mailto:${brand.supportEmail}?subject=School%20plan`} size="lg" variant="accent">Talk to us about your school</ButtonLink>
+      <CtaBand title="Bring your whole school." text="Tell us about your primary school and we will set up your classes, teachers and pupil accounts with you.">
+        <ButtonLink href={`mailto:${brand.supportEmail}?subject=School%20plan`} size="lg">Talk to us about your school</ButtonLink>
       </CtaBand>
     </>
   );

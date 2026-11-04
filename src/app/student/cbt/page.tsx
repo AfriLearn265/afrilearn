@@ -5,7 +5,7 @@ import { formatDate, pct } from "@/lib/format";
 import { PageHeader, Panel, EmptyState, Stat } from "@/components/app/AppShell";
 import { CbtLauncher, type CatalogueRow } from "./CbtLauncher";
 
-export const metadata = { title: "CBT Centre" };
+export const metadata = { title: "Practice quizzes" };
 
 type Session = {
   id: string; status: string; percentage: number | null; started_at: string;
@@ -37,7 +37,7 @@ export default async function CbtCentre({ searchParams }: { searchParams: Promis
 
   return (
     <>
-      <PageHeader title="CBT Examination Centre" intro="Build a fresh paper from our question banks. Practice mode shows the answer after each question; mock mode is timed and marked at the end, like the real hall." />
+      <PageHeader title="Practice quizzes" intro="Pick a subject and get a fresh quiz every time. Practice mode shows the answer after each question; challenge mode is timed and marked at the end." />
       <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
         <Stat label="Sessions completed" value={graded.length} />
         <Stat label="Average score" value={pct(avg)} />

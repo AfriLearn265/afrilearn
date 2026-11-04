@@ -5,24 +5,33 @@ import type { ComponentProps, ReactNode } from "react";
 type Variant = "primary" | "accent" | "outline" | "ghost" | "danger" | "light" | "onDark";
 type Size = "sm" | "md" | "lg";
 
+// A chunky "pressable" look: a solid shadow under the pill that shrinks when it is pressed.
+const press = {
+  grape: "shadow-[0_4px_0_var(--color-grape-900)] hover:shadow-[0_5px_0_var(--color-grape-900)] active:shadow-[0_1px_0_var(--color-grape-900)]",
+  ink: "shadow-[0_4px_0_var(--color-ink)] hover:shadow-[0_5px_0_var(--color-ink)] active:shadow-[0_1px_0_var(--color-ink)]",
+  coral: "shadow-[0_4px_0_var(--color-coral-700)] hover:shadow-[0_5px_0_var(--color-coral-700)] active:shadow-[0_1px_0_var(--color-coral-700)]",
+  soft: "shadow-[0_4px_0_rgb(23_10_58/0.35)] hover:shadow-[0_5px_0_rgb(23_10_58/0.35)] active:shadow-[0_1px_0_rgb(23_10_58/0.35)]",
+};
+const lift = "hover:-translate-y-px active:translate-y-[3px]";
+
 const variants: Record<Variant, string> = {
-  primary: "bg-adire-700 text-white hover:bg-adire-800 active:bg-adire-900 shadow-[0_1px_0_rgb(255_255_255/0.15)_inset]",
-  accent: "bg-sun-400 text-ink hover:bg-sun-300 active:bg-sun-600",
-  outline: "border border-line bg-white text-ink hover:border-adire-300 hover:bg-adire-50",
+  primary: `bg-grape-600 text-white hover:bg-grape-500 ${press.grape} ${lift}`,
+  accent: `border-2 border-ink bg-sun-400 text-ink hover:bg-sun-300 ${press.ink} ${lift}`,
+  outline: "border-2 border-line bg-white text-ink hover:border-grape-300 hover:bg-grape-50",
   ghost: "text-ink-soft hover:bg-wash hover:text-ink",
-  danger: "bg-coral-500 text-white hover:bg-coral-700",
-  light: "bg-white text-adire-800 hover:bg-adire-50",
-  onDark: "border border-white/30 text-white hover:border-white/60 hover:bg-white/10",
+  danger: `bg-coral-500 text-white hover:bg-coral-700 ${press.coral} ${lift}`,
+  light: `bg-white text-grape-800 hover:bg-grape-50 ${press.soft} ${lift}`,
+  onDark: "border-2 border-white/40 text-white hover:border-white hover:bg-white/10",
 };
 const sizes: Record<Size, string> = {
-  sm: "h-9 px-3.5 text-sm gap-1.5",
+  sm: "h-9 px-4 text-sm gap-1.5",
   md: "h-11 px-5 text-[0.95rem] gap-2",
-  lg: "h-13 px-7 text-base gap-2.5",
+  lg: "h-14 px-7 text-[1.05rem] gap-2.5",
 };
 
 export function buttonClass(variant: Variant = "primary", size: Size = "md", extra?: string) {
   return clsx(
-    "inline-flex items-center justify-center rounded-xl font-semibold whitespace-nowrap transition-colors",
+    "inline-flex items-center justify-center rounded-full font-display font-semibold tracking-[0.005em] whitespace-nowrap transition-[transform,box-shadow,background-color,border-color]",
     "disabled:pointer-events-none disabled:opacity-55",
     variants[variant], sizes[size], extra,
   );

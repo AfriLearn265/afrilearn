@@ -4,7 +4,11 @@ import { requireRole, firstName } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getStudentCourses } from "@/lib/learning";
 import { formatDateTime, greeting } from "@/lib/format";
-import { PageHeader, Panel, EmptyState } from "@/components/app/AppShell";
+import { Panel, EmptyState } from "@/components/app/AppShell";
+import { Mascot } from "@/components/brand/Mascot";
+import { VideoCard } from "@/components/app/VideoCard";
+import { ButtonLink } from "@/components/ui/Button";
+import { VIDEO_FIELDS, withMedia, type ClassVideo } from "@/lib/videos";
 import { ActionForm } from "@/components/app/ActionForm";
 import { CopyButton } from "@/components/app/CopyButton";
 import { TopicMastery, type MasteryRow } from "@/components/app/TopicMastery";
@@ -25,7 +29,7 @@ export default async function StudentHome({ searchParams }: { searchParams: Prom
   const supabase = await createClient();
   const now = clock();
   const [{ data: me }, { data: enrollments }, { count: badgeCount }, learning, { data: mastery }, { data: due }, { data: live }, { data: challenge }] = await Promise.all([
-    supabase.from("students").select("points, streak_days, link_code, classes(name, education_levels(name))").eq("profile_id", userId).single(),
+    supabase.from("students").select("points, streak_days, link_code, class_id, classes(name, education_levels(name))").eq("profile_id", userId).single(),
     supabase.from("enrollments").select("classrooms(id, name, subjects(name, color), profiles(full_name))").eq("student_id", userId).eq("status", "active"),
     supabase.from("student_badges").select("badge_id", { count: "exact", head: true }).eq("student_id", userId),
     getStudentCourses(userId),
@@ -35,6 +39,10 @@ export default async function StudentHome({ searchParams }: { searchParams: Prom
     supabase.from("weekly_challenges").select("title, description, target, points, metric, starts_on, ends_on").eq("is_active", true).order("starts_on", { ascending: false }).limit(1).maybeSingle(),
   ]);
   const klass = me?.classes as unknown as { name: string; education_levels: { name: string } | null } | null;
+  const { data: vids } = me?.class_id
+    ? await supabase.from("class_videos").select(VIDEO_FIELDS).eq("class_id", me.class_id).eq("is_published", true).order("created_at", { ascending: false }).limit(3)
+    : { data: [] };
+  const videos = await withMedia((vids ?? []) as unknown as ClassVideo[]);
   const rooms = ((enrollments ?? []) as unknown as Enrollment[]).map((e) => e.classrooms).filter((r): r is NonNullable<Enrollment["classrooms"]> => !!r);
   const { courses, status } = learning;
 
@@ -53,30 +61,60 @@ export default async function StudentHome({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <PageHeader title={`${greeting()}, ${firstName(profile.full_name)}.`}
-        intro={klass ? `${klass.name}${klass.education_levels ? `, ${klass.education_levels.name}` : ""}. Here is where your learning stands today.` : "Choose your class on your profile page to see the right lessons."} />
+      <section className="relative isolate mb-6 overflow-hidden rounded-[2rem] bg-grape-700 p-6 text-white sm:p-8">
+        <div aria-hidden="true" className="sky-dots absolute inset-0 -z-10" />
+        <div className="grid items-center gap-4 sm:grid-cols-[1fr_auto]">
+          <div>
+            <h1 className="text-[2.1rem] font-semibold leading-[1.05] sm:text-5xl">{greeting()}, {firstName(profile.full_name)}!</h1>
+            <p className="mt-2 max-w-lg text-lg text-grape-100">
+              {klass ? `${klass.name}. ${videos[0] ? "There's a new video waiting for you." : "Ready to learn something new today?"}` : "Choose your class on your profile page to see the right lessons."}
+            </p>
+            <div className="mt-5 flex flex-wrap gap-3">
+              {videos[0] ? <ButtonLink href={`/student/videos/${videos[0].id}`} variant="accent">Watch the newest video</ButtonLink>
+                : <ButtonLink href="/student/courses" variant="accent">Start a lesson</ButtonLink>}
+              <ButtonLink href="/student/cbt" variant="onDark">Play a quiz</ButtonLink>
+            </div>
+          </div>
+          <div className="relative hidden w-56 sm:block md:w-64">
+            <span aria-hidden="true" className="absolute inset-[12%] -z-10 rounded-full bg-sun-400" />
+            <Mascot pose="wave" prop="cap" className="w-full" />
+          </div>
+        </div>
+      </section>
 
       {sp.welcome && <div className="mb-6"><Notice tone="success" title="Your account is ready.">Join your teacher&apos;s classroom with their class code, or start a course for your class below.</Notice></div>}
       {sp.notice && <div className="mb-6"><Notice tone="warning">{sp.notice}</Notice></div>}
 
       <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {[{ icon: Star, label: "Learning points", value: me?.points ?? 0 }, { icon: Flame, label: "Day streak", value: me?.streak_days ?? 0 },
-          { icon: Users, label: "Classrooms", value: rooms.length }, { icon: Medal, label: "Badges", value: badgeCount ?? 0 }].map(({ icon: Icon, label, value }) => (
-          <li key={label} className="rounded-[1.25rem] border border-line bg-white p-5">
-            <Icon className="size-5 text-adire-700" aria-hidden="true" />
-            <p className="mt-3 font-display text-3xl font-bold tabular">{value}</p>
-            <p className="text-sm text-muted">{label}</p>
+        {[{ icon: Star, label: "Learning points", value: me?.points ?? 0, tone: "bg-sun-300" }, { icon: Flame, label: "Day streak", value: me?.streak_days ?? 0, tone: "bg-tangerine-300" },
+          { icon: Users, label: "Classrooms", value: rooms.length, tone: "bg-sky-300" }, { icon: Medal, label: "Badges", value: badgeCount ?? 0, tone: "bg-lime-300" }].map(({ icon: Icon, label, value, tone }) => (
+          <li key={label} className={`rounded-[1.5rem] p-5 ${tone}`}>
+            <span className="grid size-10 place-items-center rounded-full border-2 border-ink bg-white"><Icon className="size-5 text-ink" aria-hidden="true" /></span>
+            <p className="mt-3 font-display text-4xl font-semibold tabular">{value}</p>
+            <p className="text-sm font-semibold text-ink-soft">{label}</p>
           </li>
         ))}
       </ul>
 
-      <section aria-labelledby="journey" className="mt-6 rounded-[1.5rem] bg-adire-800 p-5 text-white sm:p-6 md:p-8">
+      {videos.length > 0 && (
+        <section aria-labelledby="new-videos" className="mt-8">
+          <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+            <h2 id="new-videos" className="text-2xl font-semibold sm:text-3xl">New videos for {klass?.name ?? "your class"}</h2>
+            <Link href="/student/videos" className="font-display font-semibold text-grape-700 hover:underline">See all videos</Link>
+          </div>
+          <ul className="grid gap-x-5 gap-y-6 sm:grid-cols-2 xl:grid-cols-3">
+            {videos.map((v) => <VideoCard key={v.id} v={v} href={`/student/videos/${v.id}`} />)}
+          </ul>
+        </section>
+      )}
+
+      <section aria-labelledby="journey" className="mt-8 rounded-[2rem] bg-grape-800 p-5 text-white sm:p-6 md:p-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h2 id="journey" className="text-2xl font-bold md:text-3xl">My learning journey</h2>
+            <h2 id="journey" className="text-2xl font-semibold md:text-3xl">My learning journey</h2>
             <p className="mt-1 text-adire-100">{completed} lessons completed, {inProgress.length} in progress, {mastered} topics mastered, {revise} to revise.</p>
           </div>
-          <p className="font-display text-4xl font-bold tabular sm:text-5xl">{overall}%</p>
+          <p className="font-display text-5xl font-semibold tabular sm:text-6xl">{overall}%</p>
         </div>
         <div className="mt-5 h-3 overflow-hidden rounded-full bg-white/15" role="progressbar" aria-label="Overall progress" aria-valuenow={overall} aria-valuemin={0} aria-valuemax={100}>
           <div className="h-full rounded-full bg-sun-400" style={{ width: `${Math.max(overall, 2)}%` }} />
@@ -126,7 +164,7 @@ export default async function StudentHome({ searchParams }: { searchParams: Prom
               <ul className="divide-y divide-line">
                 {rooms.map((r) => (
                   <li key={r.id}><Link href={`/student/classes/${r.id}`} className="flex items-center gap-4 py-3.5 hover:opacity-80">
-                    <span className="size-3 shrink-0 rounded-full" style={{ background: r.subjects?.color ?? "#2B3A9F" }} aria-hidden="true" />
+                    <span className="size-3 shrink-0 rounded-full" style={{ background: r.subjects?.color ?? "#4A1FB8" }} aria-hidden="true" />
                     <span className="min-w-0"><span className="block truncate font-semibold">{r.name}</span><span className="text-sm text-muted">{[r.subjects?.name, r.profiles?.full_name && `with ${r.profiles.full_name}`].filter(Boolean).join(", ")}</span></span>
                   </Link></li>
                 ))}

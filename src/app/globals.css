@@ -1,55 +1,96 @@
 @import "tailwindcss";
 
 /*
-  AfriLearn design tokens
-  Adire indigo is the base, sun yellow is the single accent,
-  leaf and coral are reserved for meaning (mastered / needs revision).
+  AfriLearn "toy box" design tokens (Primary 1 to 6)
+  Grape is the base, tangerine is the call to action, sunshine is the highlight.
+  Lime, sky and bubblegum colour the six classes and subjects. Leaf and coral are kept for meaning
+  (done / needs attention). Signature: chunky rounded type and sticker shapes with an ink outline
+  and a hard offset shadow, used sparingly.
 */
 @theme {
-  --font-display: "Bricolage Grotesque Variable", "Segoe UI", system-ui, sans-serif;
-  --font-sans: "Figtree Variable", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Fredoka Variable", "Nunito Variable", "Segoe UI", system-ui, sans-serif;
+  --font-sans: "Nunito Variable", "Segoe UI", system-ui, sans-serif;
 
-  --color-ink: #10153f;
-  --color-ink-soft: #2a3063;
-  --color-muted: #5a6189;
-  --color-faint: #8b90b0;
-  --color-line: #e3e6f3;
-  --color-paper: #fbfbfd;
-  --color-wash: #eef1ff;
-  --color-wash-strong: #dfe4ff;
+  --color-ink: #1e1240;
+  --color-ink-soft: #3b2e66;
+  --color-muted: #625884;
+  --color-faint: #958cb2;
+  --color-line: #e6e0f5;
+  --color-paper: #fbf9ff;
+  --color-wash: #f3eeff;
+  --color-wash-strong: #e7deff;
 
-  --color-adire-50: #f1f3ff;
-  --color-adire-100: #e1e5fd;
-  --color-adire-200: #c3cbfa;
-  --color-adire-300: #9ba6f2;
-  --color-adire-400: #6d79e3;
-  --color-adire-500: #4a56cf;
-  --color-adire-600: #3743b5;
-  --color-adire-700: #2b3a9f;
-  --color-adire-800: #222d7a;
-  --color-adire-900: #1a225c;
+  --color-grape-50: #f4f0ff;
+  --color-grape-100: #e9e1ff;
+  --color-grape-200: #d2c2ff;
+  --color-grape-300: #b096ff;
+  --color-grape-400: #8a63f7;
+  --color-grape-500: #6c3eeb;
+  --color-grape-600: #5a2ad9;
+  --color-grape-700: #4a1fb8;
+  --color-grape-800: #391894;
+  --color-grape-900: #26105f;
+  --color-grape-950: #170a3a;
 
-  --color-sun-100: #fff3d6;
-  --color-sun-300: #fbd57f;
-  --color-sun-400: #f6b93b;
-  --color-sun-600: #c98a0c;
+  /* The original name for the base colour, kept so every dashboard screen follows the new palette. */
+  --color-adire-50: var(--color-grape-50);
+  --color-adire-100: var(--color-grape-100);
+  --color-adire-200: var(--color-grape-200);
+  --color-adire-300: var(--color-grape-300);
+  --color-adire-400: var(--color-grape-400);
+  --color-adire-500: var(--color-grape-500);
+  --color-adire-600: var(--color-grape-600);
+  --color-adire-700: var(--color-grape-700);
+  --color-adire-800: var(--color-grape-800);
+  --color-adire-900: var(--color-grape-900);
 
-  --color-leaf-100: #dcf5e8;
-  --color-leaf-500: #1c8c5e;
-  --color-leaf-700: #12613f;
+  --color-tangerine-100: #ffe9d6;
+  --color-tangerine-300: #ffb27a;
+  --color-tangerine-400: #ff9442;
+  --color-tangerine-500: #ff7a1a;
+  --color-tangerine-600: #e8620a;
+  --color-tangerine-700: #b84a05;
 
-  --color-coral-100: #fde4e2;
-  --color-coral-500: #e2554f;
-  --color-coral-700: #a8302b;
+  --color-sun-100: #fff6d1;
+  --color-sun-300: #ffe07a;
+  --color-sun-400: #ffcb2e;
+  --color-sun-600: #c99600;
+
+  --color-lime-100: #eefbd9;
+  --color-lime-300: #c4ef8d;
+  --color-lime-400: #9bdb4a;
+  --color-lime-600: #5a9e17;
+
+  --color-sky-100: #ddf5fe;
+  --color-sky-300: #8fdcf8;
+  --color-sky-400: #33c2f2;
+  --color-sky-600: #0786b5;
+
+  --color-bubble-100: #ffe3f0;
+  --color-bubble-300: #ffa9cd;
+  --color-bubble-400: #ff6baa;
+  --color-bubble-600: #d82c76;
+
+  --color-leaf-100: #dcf7e6;
+  --color-leaf-500: #18a058;
+  --color-leaf-700: #0f6b3b;
+
+  --color-coral-100: #ffe3e0;
+  --color-coral-500: #ef4b43;
+  --color-coral-700: #b02a24;
 
   --radius-pill: 999px;
-  --shadow-lift: 0 1px 2px rgb(16 21 63 / 0.06), 0 8px 24px -12px rgb(16 21 63 / 0.18);
-  --shadow-pop: 0 18px 48px -20px rgb(26 34 92 / 0.45);
+  --shadow-lift: 0 1px 2px rgb(30 18 64 / 0.06), 0 10px 26px -14px rgb(30 18 64 / 0.22);
+  --shadow-pop: 0 22px 50px -24px rgb(38 16 95 / 0.5);
+  --shadow-sticker: 4px 5px 0 var(--color-ink);
+  --shadow-sticker-sm: 2px 3px 0 var(--color-ink);
 
   --animate-rail-draw: rail-draw 1.4s cubic-bezier(0.65, 0, 0.35, 1) both;
   --animate-stop-in: stop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   --animate-fade-in: fade-in 0.35s ease-out both;
   --animate-hero-in: hero-in 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-pop-in: pop-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-bob: bob 4.5s ease-in-out infinite;
 
   @keyframes rail-draw {
     from { transform: scaleX(0); }
@@ -63,9 +104,17 @@
     from { opacity: 0; transform: translateY(14px) scale(0.97); }
     to { opacity: 1; transform: none; }
   }
+  @keyframes pop-in {
+    from { opacity: 0; transform: translateY(18px) scale(0.6) rotate(var(--tilt, 0deg)); }
+    to { opacity: 1; transform: rotate(var(--tilt, 0deg)); }
+  }
   @keyframes fade-in {
     from { opacity: 0; transform: translateY(4px); }
     to { opacity: 1; transform: none; }
+  }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
   }
 }
 
@@ -84,20 +133,21 @@
     color: var(--color-ink);
     font-family: var(--font-sans);
     font-size: 1rem;
-    line-height: 1.55;
+    line-height: 1.6;
     text-rendering: optimizeLegibility;
   }
   h1, h2, h3, h4 {
     font-family: var(--font-display);
-    letter-spacing: -0.02em;
-    line-height: 1.1;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.08;
     text-wrap: balance;
   }
   p { text-wrap: pretty; }
   :focus-visible {
-    outline: 3px solid var(--color-sun-400);
+    outline: 3px solid var(--color-tangerine-500);
     outline-offset: 2px;
-    border-radius: 6px;
+    border-radius: 8px;
   }
   ::selection { background: var(--color-sun-300); color: var(--color-ink); }
 }
@@ -115,12 +165,31 @@
   .tabular { font-variant-numeric: tabular-nums; }
   .scrollbar-none { scrollbar-width: none; }
   .scrollbar-none::-webkit-scrollbar { display: none; }
+
+  /* The signature sticker: an ink outline with a hard offset shadow. */
+  .sticker {
+    border: 2.5px solid var(--color-ink);
+    box-shadow: var(--shadow-sticker);
+  }
+  .sticker-sm {
+    border: 2px solid var(--color-ink);
+    box-shadow: var(--shadow-sticker-sm);
+  }
+  /* Starry night sky used behind the hero and dark bands. */
+  .sky-dots {
+    background-image:
+      radial-gradient(circle at 1px 1px, rgb(255 255 255 / 0.22) 1.2px, transparent 1.6px),
+      radial-gradient(circle at 1px 1px, rgb(255 255 255 / 0.12) 1px, transparent 1.4px);
+    background-size: 46px 46px, 23px 23px;
+    background-position: 0 0, 11px 17px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }

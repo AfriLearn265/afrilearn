@@ -2,7 +2,7 @@ export type MasteryRow = { subject_name: string; topic: string; answered: number
 
 /** Topics sorted weakest first: green is mastered (70%+), coral needs revision. */
 export function TopicMastery({ rows, limit = 10 }: { rows: MasteryRow[]; limit?: number }) {
-  if (rows.length === 0) return <p className="text-sm text-muted">Answer some questions in tests or the CBT Centre to see which topics you have mastered.</p>;
+  if (rows.length === 0) return <p className="text-sm text-muted">Answer some questions in tests or practice quizzes to see which topics you have mastered.</p>;
   const sorted = [...rows].sort((a, b) => Number(a.percent) - Number(b.percent)).slice(0, limit);
   return (
     <ul className="grid gap-3">

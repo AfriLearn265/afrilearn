@@ -14,7 +14,7 @@ type Role = "student" | "teacher" | "parent";
 type ClassOption = { code: string; name: string; level: LevelKey };
 
 const roles: { value: Role; label: string; sub: string; icon: typeof GraduationCap }[] = [
-  { value: "student", label: "Student", sub: "Learn and practise", icon: GraduationCap },
+  { value: "student", label: "Pupil", sub: "Watch, learn and play", icon: GraduationCap },
   { value: "parent", label: "Parent or guardian", sub: "Follow my children", icon: UsersRound },
   { value: "teacher", label: "Teacher", sub: "Apply to teach", icon: Presentation },
 ];
@@ -52,7 +52,7 @@ export function SignupForm({ initialRole, initialClass, levels, classes, subject
           {roles.map(({ value, label, sub, icon: Icon }) => (
             <label key={value} className="cursor-pointer">
               <input type="radio" name="role" value={value} checked={role === value} onChange={() => setRole(value)} className="peer sr-only" />
-              <span className="flex h-full items-start gap-3 rounded-xl border border-line bg-white p-3.5 transition-colors hover:border-adire-300
+              <span className="flex h-full items-start gap-3 rounded-2xl border-2 border-line bg-white p-3.5 transition-colors hover:border-adire-300
                 peer-checked:border-adire-700 peer-checked:bg-adire-50 peer-checked:shadow-[inset_0_0_0_1px_var(--color-adire-700)] peer-focus-visible:ring-4 peer-focus-visible:ring-sun-300">
                 <Icon className="mt-0.5 size-5 shrink-0 text-adire-700" aria-hidden="true" />
                 <span><span className="block font-semibold leading-tight">{label}</span><span className="text-sm text-muted">{sub}</span></span>
@@ -83,9 +83,9 @@ export function SignupForm({ initialRole, initialClass, levels, classes, subject
 
       {role === "student" && (
         <>
-          <Field label="Class or exam" htmlFor="class_code" error={err("class_code")}>
+          <Field label="Class" htmlFor="class_code" error={err("class_code")}>
             <Select id="class_code" name="class_code" value={classCode} onChange={(e) => setClassCode(e.target.value)} required {...aria("class_code")}>
-              <option value="" disabled>Choose your class</option>
+              <option value="" disabled>Choose a class, Primary 1 to 6</option>
               {levels.map((l) => (
                 <optgroup key={l.key} label={l.name}>
                   {classes.filter((c) => c.level === l.key).map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
@@ -97,7 +97,7 @@ export function SignupForm({ initialRole, initialClass, levels, classes, subject
           {needsGuardian && (
             <fieldset className="grid gap-4 rounded-2xl border border-sun-400/60 bg-sun-100/60 p-5">
               <legend className="px-1 text-sm font-semibold">Parent or guardian</legend>
-              <p className="text-sm text-ink-soft">Pupils in Nursery and Primary need a parent or guardian to set up their account. If you are the parent, you can also create a parent account later and link this pupil.</p>
+              <p className="text-sm text-ink-soft">Every pupil needs a parent or guardian to set up their account. If you are the parent, you can also create a parent account later and link this pupil.</p>
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Parent or guardian's name" htmlFor="guardian_name" error={err("guardian_name")}>
                   <Input id="guardian_name" name="guardian_name" autoComplete="off" {...aria("guardian_name")} />
@@ -158,7 +158,7 @@ export function SignupForm({ initialRole, initialClass, levels, classes, subject
             {err("class_codes") && <p className="mt-1.5 text-sm text-coral-700">{err("class_codes")}</p>}
           </fieldset>
           <Field label="About your teaching" htmlFor="bio" hint="Optional">
-            <Textarea id="bio" name="bio" maxLength={2000} placeholder="Where you have taught and what your students achieved." />
+            <Textarea id="bio" name="bio" maxLength={2000} placeholder="Where you have taught and what your pupils achieved." />
           </Field>
           <Notice tone="info">An administrator reviews every teacher application. After you submit, you can upload your certificates from your application page.</Notice>
         </>
@@ -169,7 +169,7 @@ export function SignupForm({ initialRole, initialClass, levels, classes, subject
           <Field label="Phone number" htmlFor="phone" hint="Optional">
             <Input id="phone" name="phone" type="tel" autoComplete="tel" inputMode="tel" />
           </Field>
-          <Notice tone="info">After you sign up, link each child with the code shown on their profile page.</Notice>
+          <Notice tone="info">After you sign up, add each child from your dashboard, or link them with the code shown on their profile page.</Notice>
         </>
       )}
 
@@ -182,7 +182,7 @@ export function SignupForm({ initialRole, initialClass, levels, classes, subject
       </div>
 
       <Button type="submit" size="lg" loading={pending} className={clsx(pending && "cursor-wait")}>
-        {pending ? "Creating your account" : role === "teacher" ? "Submit teacher application" : role === "parent" ? "Create parent account" : "Create student account"}
+        {pending ? "Creating your account" : role === "teacher" ? "Submit teacher application" : role === "parent" ? "Create parent account" : "Create pupil account"}
       </Button>
     </form>
   );

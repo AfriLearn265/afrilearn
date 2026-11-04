@@ -25,7 +25,7 @@ export default async function Privacy() {
       <p>These rules are enforced inside the database itself, not only in the website, so they cannot be bypassed by changing a link.</p>
       <h2 id="children">Children&apos;s safety</h2>
       <ul>
-        <li>Nursery and Primary accounts require a parent or guardian&apos;s name, email and consent.</li>
+        <li>Every pupil account requires a parent or guardian&apos;s name, email and consent.</li>
         <li>There is no private messaging between adults and children. Teachers message parents, and moderators can review conversations.</li>
         <li>Profiles are never public. Class leaderboards are off unless a teacher turns them on, students opt in, and only first names and an initial are shown.</li>
         <li>Teachers are approved by an administrator before they can create classrooms or content.</li>

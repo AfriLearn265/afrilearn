@@ -36,8 +36,8 @@ export default async function StudentExams() {
 
   return (
     <>
-      <PageHeader title="Tests and examinations" intro="Tests set for your classrooms and scheduled mock examinations. For self-paced WAEC, NECO and JAMB practice, use the CBT Centre."
-        actions={<ButtonLink href="/student/cbt" variant="accent">Open CBT Centre</ButtonLink>} />
+      <PageHeader title="Tests" intro="Tests your teachers set for your classrooms. For extra practice at your own pace, try the practice quizzes."
+        actions={<ButtonLink href="/student/cbt" variant="accent">Practice quizzes</ButtonLink>} />
       {list.length === 0 ? (
         <EmptyState title="No tests have been set for your classrooms yet.">When a teacher publishes a test, it appears here and you get a notification.</EmptyState>
       ) : (

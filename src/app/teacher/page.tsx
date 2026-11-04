@@ -47,7 +47,7 @@ export default async function TeacherHome() {
             <ul className="divide-y divide-line">
               {list.map((r) => (
                 <li key={r.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-4">
-                  <span className="size-3 shrink-0 rounded-full" style={{ background: r.subjects?.color ?? "#2B3A9F" }} aria-hidden="true" />
+                  <span className="size-3 shrink-0 rounded-full" style={{ background: r.subjects?.color ?? "#4A1FB8" }} aria-hidden="true" />
                   <div className="min-w-0 flex-1">
                     <Link href={`/teacher/classrooms/${r.id}`} className="block truncate font-semibold hover:underline">{r.name}</Link>
                     <p className="text-sm text-muted">{[r.classes?.name, r.subjects?.name, `${r.enrollments?.[0]?.count ?? 0} students`].filter(Boolean).join(", ")}</p>

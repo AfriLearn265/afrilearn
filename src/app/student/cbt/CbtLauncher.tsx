@@ -8,13 +8,11 @@ import { Field, Select } from "@/components/ui/Field";
 
 export type CatalogueRow = { exam_body: string | null; subject_id: string; subject_name: string; topic: string; question_count: number };
 
-const bodies = ["JAMB", "WAEC", "NECO", "NABTEB", "SCHOLARSHIP"];
 
-export function CbtLauncher({ rows, initialBody }: { rows: CatalogueRow[]; initialBody?: string }) {
-  const [body, setBody] = useState(bodies.includes(initialBody ?? "") ? initialBody! : "");
+export function CbtLauncher({ rows }: { rows: CatalogueRow[]; initialBody?: string }) {
   const [subject, setSubject] = useState("");
   const [mode, setMode] = useState<"practice" | "mock">("practice");
-  const scoped = useMemo(() => rows.filter((r) => !body || r.exam_body === body || r.exam_body === null), [rows, body]);
+  const scoped = rows;
   const subjects = useMemo(() => {
     const m = new Map<string, { id: string; name: string; n: number }>();
     scoped.forEach((r) => {
@@ -28,20 +26,8 @@ export function CbtLauncher({ rows, initialBody }: { rows: CatalogueRow[]; initi
   const available = subjects.find((s) => s.id === subject)?.n ?? 0;
 
   return (
-    <ActionForm action={startPractice} submitLabel={mode === "mock" ? "Start timed mock" : "Start practice"} pendingLabel="Building your paper" resetOnSuccess={false} variant="accent">
-      <fieldset>
-        <legend className="mb-2 text-sm font-semibold text-ink-soft">Examination</legend>
-        <div className="flex flex-wrap gap-2">
-          {["", ...bodies].map((b) => (
-            <label key={b || "any"} className="cursor-pointer">
-              <input type="radio" name="exam_body" value={b} checked={body === b} onChange={() => { setBody(b); setSubject(""); }} className="peer sr-only" />
-              <span className="inline-flex rounded-full border border-line px-3.5 py-1.5 text-sm font-semibold peer-checked:border-adire-700 peer-checked:bg-adire-700 peer-checked:text-white peer-focus-visible:ring-4 peer-focus-visible:ring-sun-300">
-                {b === "" ? "Any" : b === "SCHOLARSHIP" ? "Entrance" : b}
-              </span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
+    <ActionForm action={startPractice} submitLabel={mode === "mock" ? "Start the challenge" : "Start practising"} pendingLabel="Making your quiz" resetOnSuccess={false} variant="accent">
+      <input type="hidden" name="exam_body" value="" />
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Subject" htmlFor="subject_id">
           <Select id="subject_id" name="subject_id" value={subject} onChange={(e) => setSubject(e.target.value)}>
@@ -59,10 +45,10 @@ export function CbtLauncher({ rows, initialBody }: { rows: CatalogueRow[]; initi
       <fieldset>
         <legend className="mb-2 text-sm font-semibold text-ink-soft">Mode</legend>
         <div className="grid gap-2 sm:grid-cols-2">
-          {([["practice", "Practice", "See the answer and explanation after each question."], ["mock", "Timed mock", "Exam conditions. Marked when you submit."]] as const).map(([v, t, d]) => (
+          {([["practice", "Practice", "See the answer and a short explanation after each question."], ["mock", "Timed challenge", "Beat the clock. Marked when you finish."]] as const).map(([v, t, d]) => (
             <label key={v} className="cursor-pointer">
               <input type="radio" name="mode" value={v} checked={mode === v} onChange={() => setMode(v)} className="peer sr-only" />
-              <span className={clsx("block h-full rounded-xl border p-3.5 peer-checked:border-adire-700 peer-checked:bg-adire-50 peer-focus-visible:ring-4 peer-focus-visible:ring-sun-300", "border-line")}>
+              <span className={clsx("block h-full rounded-2xl border-2 p-3.5 peer-checked:border-adire-700 peer-checked:bg-adire-50 peer-focus-visible:ring-4 peer-focus-visible:ring-sun-300", "border-line")}>
                 <span className="block font-semibold">{t}</span><span className="text-sm text-muted">{d}</span>
               </span>
             </label>
@@ -71,13 +57,13 @@ export function CbtLauncher({ rows, initialBody }: { rows: CatalogueRow[]; initi
       </fieldset>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Questions" htmlFor="count" hint={subject ? `${available} available` : undefined}>
-          <Select id="count" name="count" defaultValue="20">
-            {[5, 10, 20, 30, 40, 50, 60].map((n) => <option key={n} value={n}>{n} questions</option>)}
+          <Select id="count" name="count" defaultValue="10">
+            {[5, 10, 15, 20, 30].map((n) => <option key={n} value={n}>{n} questions</option>)}
           </Select>
         </Field>
         <Field label="Time allowed" htmlFor="minutes">
-          <Select id="minutes" name="minutes" defaultValue="20">
-            {[5, 10, 15, 20, 30, 45, 60, 90, 120].map((n) => <option key={n} value={n}>{n} minutes</option>)}
+          <Select id="minutes" name="minutes" defaultValue="10">
+            {[5, 10, 15, 20, 30].map((n) => <option key={n} value={n}>{n} minutes</option>)}
           </Select>
         </Field>
       </div>
