@@ -1,6 +1,8 @@
 # AfriLearn
 
-**Learning Without Limits.** A learning platform for the Nigerian school system: Nursery 1 to SS3 plus WAEC, NECO, JAMB, NABTEB and scholarship preparation, for students, teachers, parents and administrators.
+**Learning Without Limits.** A learning platform for Nigerian primary schools, Primary 1 to Primary 6, for pupils, teachers, parents and administrators: class videos, lessons, quizzes that mark themselves, live classes and progress reports.
+
+> **Primary edition (November 2026).** The first edition covered Nursery 1 to SS 3 and WAEC/NECO/JAMB preparation. That version is kept on the `backup-full-platform` branch. In the database the other classes are switched off, not deleted, and every table changed by the switch was copied to the private `archive` schema first.
 
 > "AfriLearn" is a temporary brand. Change the name, tagline and contact email in `src/config/brand.ts` (and the `brand` row in `platform_settings`).
 
@@ -22,6 +24,9 @@ database/            SQL to create the whole backend, run in this order:
   functions.sql      access helpers, sign-up trigger, secure RPCs (exams, grading, payments)
   policies.sql       privileges, Row Level Security, storage buckets and rules
   seed.sql           levels, classes, subjects, subject-to-class map, plans, badges, settings
+  updates/           run after the four files above, oldest first:
+    2026-11-05-primary-and-videos.sql    Primary-only switch, class videos table, bucket and rules
+    2026-11-05-primary-demo-content.sql  demo classrooms, courses, quizzes, results and videos
 src/
   app/               routes: landing, (auth), student, teacher, parent, admin, pending ...
   components/        landing sections, app shell, UI kit
@@ -49,7 +54,7 @@ npm run dev                     # http://localhost:3000
 ## Connect Supabase (new project)
 
 1. Create a project at supabase.com.
-2. In **SQL Editor**, run `database/schema.sql`, `functions.sql`, `policies.sql`, then `seed.sql`.
+2. In **SQL Editor**, run `database/schema.sql`, `functions.sql`, `policies.sql`, then `seed.sql`, then the files in `database/updates/` (oldest first).
 3. **Authentication → Sign In / Providers → Email:** for a demo without custom email, turn off **Confirm email**. For production, add custom SMTP (for example Resend) and keep it on.
 4. **Authentication → URL Configuration:** set the Site URL to your Vercel address and add `https://YOUR-SITE/auth/callback` to the redirect URLs.
 5. Copy the Project URL and publishable key into `.env.local` and Vercel.
@@ -132,3 +137,13 @@ The hosted pilot database contains demo accounts so every role can be shown with
 | Parent | parent2@demo.afrilearn.ng | Kunle Adeyemi: Tobi's progress |
 
 All lessons and exam questions in the demo are original. The library links to openly licensed OpenStax textbooks.
+
+## Class videos
+
+Teachers and administrators add videos from **Class videos** in their dashboard. Each video belongs to one class (and optionally one subject), and only pupils in that class, their parents, and staff can watch it.
+
+* **Upload a video:** MP4, WebM or MOV straight from the browser to private storage, with a progress bar. The browser grabs a poster frame and the length before uploading. A free Supabase project allows up to **50 MB per file** (raise the global and bucket limits on the Pro plan for longer videos), and video viewing counts towards the monthly egress allowance.
+* **YouTube link:** for longer videos, upload to YouTube (unlisted works) and paste the link. Playback uses YouTube's privacy-enhanced player and costs no storage or egress.
+* **Video file link:** a direct https link to an .mp4 or .webm stored elsewhere.
+
+Pupils in the class get a notification for each new video, and teachers see a view count.
