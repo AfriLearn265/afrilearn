@@ -6,6 +6,9 @@ import { formatNaira } from "@/lib/catalogue";
 import { PageHeader, Panel, Stat } from "@/components/app/AppShell";
 import { DailyBars } from "@/components/app/charts";
 import { TeacherReview, type Application } from "./TeacherReview";
+import { AlertTriangle, Eye } from "lucide-react";
+import { classNumber, lookFor } from "@/config/classLook";
+import { Mascot } from "@/components/brand/Mascot";
 
 export const metadata = { title: "Administration" };
 
@@ -25,6 +28,8 @@ type TeacherRow = {
 type ClassRow = { code: string; name: string; level_name: string | null; sort_order: number; students: number; active_7d: number; teachers: number; classrooms: number; courses: number };
 type Activity = { id: number; action: string; created_at: string; metadata: Record<string, unknown>; actor: { full_name: string; role: string } | null };
 type LiveNow = { id: string; title: string; classrooms: { name: string } | null; profiles: { full_name: string } | null };
+
+const clock = () => Date.now();
 
 const actionLabel: Record<string, string> = {
   "account.created": "created an account", "classroom.joined": "joined a classroom", "exam.started": "started a test",
@@ -47,11 +52,22 @@ export default async function AdminHome() {
     supabase.from("activity_logs").select("id, action, created_at, metadata, actor:profiles(full_name, role)").order("created_at", { ascending: false }).limit(12),
     supabase.from("live_classes").select("id, title, classrooms(name), profiles(full_name)").eq("status", "live").limit(5),
   ]);
+  const [{ data: vids }, { data: watches }] = await Promise.all([
+    supabase.from("class_videos").select("id, title, view_count, class_id, created_at, classes(code, name)").eq("is_published", true).order("view_count", { ascending: false }).limit(400),
+    supabase.from("video_views").select("video_id, student_id, last_viewed_at").limit(5000),
+  ]);
+  type VidRow = { id: string; title: string; view_count: number; class_id: string; created_at: string; classes: { code: string; name: string } | null };
+  const videoRows = (vids ?? []) as unknown as VidRow[];
+  const videosByClass = new Map<string, { videos: number; watches: number }>();
+  const classOfVideo = new Map(videoRows.map((v) => [v.id, v.classes?.code ?? ""]));
+  videoRows.forEach((v) => { const k = v.classes?.code ?? ""; const e = videosByClass.get(k) ?? { videos: 0, watches: 0 }; e.videos += 1; videosByClass.set(k, e); });
+  (watches ?? []).forEach((w) => { const k = classOfVideo.get(w.video_id as string); if (!k) return; const e = videosByClass.get(k) ?? { videos: 0, watches: 0 }; e.watches += 1; videosByClass.set(k, e); });
+  const weekAgo = clock() - 7 * 86400000;
+  const watchedThisWeek = (watches ?? []).filter((w) => new Date(String(w.last_viewed_at)).getTime() > weekAgo).length;
+  const totalViews = videoRows.reduce((n, v) => n + v.view_count, 0);
   const classes = ((breakdown ?? []) as ClassRow[]);
-  const levels = [...new Set(classes.map((c) => c.level_name ?? "Other"))];
   const totals = classes.reduce((t, c) => ({ students: t.students + Number(c.students), active: t.active + Number(c.active_7d), classrooms: t.classrooms + Number(c.classrooms) }), { students: 0, active: 0, classrooms: 0 });
-  const busiest = Math.max(1, ...classes.map((c) => Number(c.students)));
-  const o = (overview ?? {}) as Overview;
+    const o = (overview ?? {}) as Overview;
   const emails = new Map(((users ?? []) as { id: string; email: string }[]).map((u) => [u.id, u.email]));
   const apps: Application[] = ((pending ?? []) as unknown as TeacherRow[]).map((t) => ({
     id: t.profile_id, name: t.profiles?.full_name ?? "Unnamed", email: emails.get(t.profile_id) ?? null,
@@ -65,14 +81,24 @@ export default async function AdminHome() {
 
   return (
     <>
-      <PageHeader title={`${greeting()}, ${firstName(profile.full_name)}.`} intro="Everything happening across the platform, live from the database." />
+      <section className="relative isolate mb-6 overflow-hidden rounded-[2rem] bg-grape-700 p-6 text-white sm:p-8">
+        <div aria-hidden="true" className="sky-dots absolute inset-0 -z-10" />
+        <div className="grid items-center gap-4 sm:grid-cols-[1fr_auto]">
+          <div>
+            <h1 className="text-[2.1rem] font-semibold leading-[1.05] sm:text-5xl">{greeting()}, {firstName(profile.full_name)}!</h1>
+            <p className="mt-2 max-w-xl text-lg text-grape-100">Your Primary 1 to 6 control room: every class, teacher and video, live from the database.</p>
+          </div>
+          <Mascot pose="stand" prop="cap" className="hidden w-48 sm:block" />
+        </div>
+      </section>
+      <PageHeader title="School at a glance" />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Stat label="Students" value={o.students ?? 0} note={`${o.active_learners_7d ?? 0} active this week`} />
+        <Stat label="Pupils" value={o.students ?? 0} note={`${o.active_learners_7d ?? 0} active this week`} />
         <Stat label="Active teachers" value={o.teachers_active ?? 0} note={`${o.teachers_pending ?? 0} waiting for review`} />
         <Stat label="Parents" value={o.parents ?? 0} />
         <Stat label="Classrooms" value={o.classrooms ?? 0} />
-        <Stat label="Courses" value={o.courses ?? 0} note={`${o.courses_published ?? 0} published`} />
-        <Stat label="Examinations" value={o.examinations ?? 0} note={`${o.exam_attempts ?? 0} attempts`} />
+        <Stat label="Tests and quizzes" value={o.examinations ?? 0} note={`${o.exam_attempts ?? 0} taken, ${o.courses_published ?? 0} courses live`} />
+        <Stat label="Class videos" value={videoRows.length} note={`${totalViews} plays, ${watchedThisWeek} pupils watched this week`} />
         <Stat label="Submission rate" value={submissionRate == null ? "–" : `${submissionRate}%`} note={`${o.submissions ?? 0} submissions`} />
         <Stat label="Revenue" value={formatNaira(o.revenue_kobo ?? 0)} note={`${o.active_subscriptions ?? 0} active plans`} />
       </div>
@@ -83,49 +109,62 @@ export default async function AdminHome() {
         </Panel>
       )}
 
-      <Panel title="Every class at a glance" className="mt-6"
-        action={<span className="text-sm text-muted">{totals.students} students, {totals.active} active this week, {totals.classrooms} classrooms</span>}>
-        <div className="-mx-4 overflow-x-auto sm:-mx-5 md:-mx-6">
-          <table className="w-full min-w-[40rem] text-left text-sm">
-            <thead className="border-b border-line text-muted">
-              <tr>
-                <th scope="col" className="px-4 py-2 font-medium sm:px-5 md:px-6">Class</th>
-                <th scope="col" className="px-3 py-2 font-medium">Students</th>
-                <th scope="col" className="px-3 py-2 font-medium">Active this week</th>
-                <th scope="col" className="px-3 py-2 font-medium">Teachers</th>
-                <th scope="col" className="px-3 py-2 font-medium">Classrooms</th>
-                <th scope="col" className="px-3 py-2 pr-4 font-medium sm:pr-5 md:pr-6">Courses</th>
-              </tr>
-            </thead>
-            {levels.map((lv) => (
-              <tbody key={lv} className="border-b border-line last:border-0">
-                <tr><th colSpan={6} scope="colgroup" className="bg-paper px-4 py-2 text-xs font-semibold text-muted sm:px-5 md:px-6">{lv}</th></tr>
-                {classes.filter((c) => (c.level_name ?? "Other") === lv).map((c) => {
-                  const n = Number(c.students);
-                  return (
-                    <tr key={c.code} className={n === 0 && Number(c.teachers) === 0 ? "text-muted" : ""}>
-                      <th scope="row" className="px-4 py-2.5 font-semibold sm:px-5 md:px-6">{c.name}</th>
-                      <td className="px-3 py-2.5">
-                        <span className="flex items-center gap-2">
-                          <span className="tabular w-6">{n}</span>
-                          <span aria-hidden="true" className="h-2 w-24 overflow-hidden rounded-full bg-wash"><span className="block h-full rounded-full bg-adire-600" style={{ width: `${(n / busiest) * 100}%` }} /></span>
-                        </span>
-                      </td>
-                      <td className="tabular px-3 py-2.5">{Number(c.active_7d)}</td>
-                      <td className={`tabular px-3 py-2.5 ${n > 0 && Number(c.teachers) === 0 ? "font-semibold text-coral-700" : ""}`}>{Number(c.teachers)}{n > 0 && Number(c.teachers) === 0 ? " (needs one)" : ""}</td>
-                      <td className="tabular px-3 py-2.5">{Number(c.classrooms)}</td>
-                      <td className="tabular px-3 py-2.5 pr-4 sm:pr-5 md:pr-6">{Number(c.courses)}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            ))}
-          </table>
+      <section aria-labelledby="classes-title" className="mt-8">
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+          <h2 id="classes-title" className="text-2xl font-semibold sm:text-3xl">Primary 1 to 6</h2>
+          <p className="text-sm text-muted">{totals.students} pupils, {totals.active} active this week, {totals.classrooms} classrooms</p>
         </div>
+        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {classes.map((c) => {
+            const look = lookFor(c.code);
+            const n = Number(c.students);
+            const v = videosByClass.get(c.code) ?? { videos: 0, watches: 0 };
+            const possible = v.videos * n;
+            const watchRate = possible ? Math.round((v.watches / possible) * 100) : null;
+            const warnings = [n > 0 && Number(c.teachers) === 0 && "Needs a teacher", v.videos === 0 && "No videos yet", n === 0 && "No pupils yet"].filter(Boolean) as string[];
+            return (
+              <li key={c.code} className="overflow-hidden rounded-[1.6rem] border-2 border-line bg-white">
+                <div className={`flex items-center gap-3 px-5 py-3 ${look.bg}`}>
+                  <span className="font-display text-4xl font-semibold leading-none">{classNumber(c.name)}</span>
+                  <span className="font-display text-lg font-semibold">{c.name}</span>
+                  <Link href={`/admin/videos?class=${c.code}`} className="ml-auto rounded-full bg-white/80 px-3 py-1 text-xs font-bold hover:bg-white">Videos</Link>
+                </div>
+                <dl className="grid grid-cols-3 gap-2 px-5 py-4 text-center">
+                  <div><dt className="text-xs text-muted">Pupils</dt><dd className="font-display text-2xl font-semibold tabular">{n}</dd></div>
+                  <div><dt className="text-xs text-muted">Active</dt><dd className="font-display text-2xl font-semibold tabular">{Number(c.active_7d)}</dd></div>
+                  <div><dt className="text-xs text-muted">Teachers</dt><dd className="font-display text-2xl font-semibold tabular">{Number(c.teachers)}</dd></div>
+                  <div><dt className="text-xs text-muted">Videos</dt><dd className="font-display text-2xl font-semibold tabular">{v.videos}</dd></div>
+                  <div><dt className="text-xs text-muted">Courses</dt><dd className="font-display text-2xl font-semibold tabular">{Number(c.courses)}</dd></div>
+                  <div><dt className="text-xs text-muted">Watched</dt><dd className="font-display text-2xl font-semibold tabular">{watchRate == null ? "–" : `${watchRate}%`}</dd></div>
+                </dl>
+                {warnings.length > 0 && (
+                  <p className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t-2 border-line bg-sun-100 px-5 py-2.5 text-sm font-semibold text-ink-soft">
+                    <AlertTriangle className="size-4 text-tangerine-700" aria-hidden="true" />{warnings.join(", ")}
+                  </p>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
+      <Panel title="Most-watched videos" className="mt-6" action={<Link href="/admin/videos" className="text-sm font-semibold text-grape-700 hover:underline">All class videos</Link>}>
+        {videoRows.length === 0 ? <p className="text-sm text-muted">No class videos yet. Teachers add them from Class videos.</p> : (
+          <ol className="grid gap-2.5 text-sm">
+            {videoRows.slice(0, 6).map((v, i) => (
+              <li key={v.id} className="flex items-center gap-3">
+                <span className={`grid size-8 shrink-0 place-items-center rounded-full font-display font-semibold ${lookFor(v.classes?.code).bg}`}>{i + 1}</span>
+                <Link href={`/admin/videos/${v.id}`} className="min-w-0 flex-1 truncate font-semibold hover:underline">{v.title}</Link>
+                <span className="shrink-0 text-muted">{v.classes?.name}</span>
+                <span className="inline-flex w-16 shrink-0 items-center justify-end gap-1 tabular"><Eye className="size-3.5" aria-hidden="true" />{v.view_count}</span>
+              </li>
+            ))}
+          </ol>
+        )}
       </Panel>
 
       <div className="mt-6 grid gap-6 xl:grid-cols-[1.2fr_1fr]">
-        <Panel title="Happening now" action={<Link href="/admin/activity" className="text-sm font-semibold text-adire-700 hover:underline">All activity</Link>}>
+        <Panel title="Happening now" action={<Link href="/admin/activity" className="text-sm font-semibold text-grape-700 hover:underline">All activity</Link>}>
           {((live ?? []) as unknown as LiveNow[]).length > 0 && (
             <ul className="mb-4 grid gap-2">
               {((live ?? []) as unknown as LiveNow[]).map((l) => (

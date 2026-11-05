@@ -2,7 +2,9 @@ import Link from "next/link";
 import { requireRole, firstName } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { greeting } from "@/lib/format";
-import { PageHeader, Panel, EmptyState, Stat } from "@/components/app/AppShell";
+import { Panel, EmptyState, Stat } from "@/components/app/AppShell";
+import { Mascot } from "@/components/brand/Mascot";
+import { ButtonLink } from "@/components/ui/Button";
 import { ActionForm } from "@/components/app/ActionForm";
 import { CopyButton } from "@/components/app/CopyButton";
 import { Field, Input, Select } from "@/components/ui/Field";
@@ -32,17 +34,31 @@ export default async function TeacherHome() {
 
   return (
     <>
-      <PageHeader title={`${greeting()}, ${firstName(profile.full_name)}.`} intro="Create a classroom, share its code, and your students appear here as they join." />
+      <section className="relative isolate mb-6 overflow-hidden rounded-[2rem] bg-grape-700 p-6 text-white sm:p-8">
+        <div aria-hidden="true" className="sky-dots absolute inset-0 -z-10" />
+        <div className="grid items-center gap-4 sm:grid-cols-[1fr_auto]">
+          <div>
+            <h1 className="text-[2.1rem] font-semibold leading-[1.05] sm:text-5xl">{greeting()}, {firstName(profile.full_name)}!</h1>
+            <p className="mt-2 max-w-xl text-lg text-grape-100">Add a video, set a quiz or go live. Your pupils and their parents see it straight away.</p>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <ButtonLink href="/teacher/videos" variant="accent">Add a class video</ButtonLink>
+              <ButtonLink href="/teacher/exams" variant="onDark">Set a quiz</ButtonLink>
+              <ButtonLink href="/teacher/live" variant="onDark">Go live</ButtonLink>
+            </div>
+          </div>
+          <Mascot pose="cheer" prop="cap" className="hidden w-52 sm:block" />
+        </div>
+      </section>
       <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
         <Stat label="Classrooms" value={list.length} />
-        <Stat label="Students enrolled" value={students} />
+        <Stat label="Pupils enrolled" value={students} />
         <Stat label="Subjects you teach" value={mine.size} />
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <Panel title="Your classrooms">
           {list.length === 0 ? (
-            <EmptyState title="No classrooms yet.">Create your first classroom. You will get a code to share with your students.</EmptyState>
+            <EmptyState title="No classrooms yet.">Create your first classroom. You will get a code to share with your pupils and their parents.</EmptyState>
           ) : (
             <ul className="divide-y divide-line">
               {list.map((r) => (
@@ -50,10 +66,10 @@ export default async function TeacherHome() {
                   <span className="size-3 shrink-0 rounded-full" style={{ background: r.subjects?.color ?? "#4A1FB8" }} aria-hidden="true" />
                   <div className="min-w-0 flex-1">
                     <Link href={`/teacher/classrooms/${r.id}`} className="block truncate font-semibold hover:underline">{r.name}</Link>
-                    <p className="text-sm text-muted">{[r.classes?.name, r.subjects?.name, `${r.enrollments?.[0]?.count ?? 0} students`].filter(Boolean).join(", ")}</p>
+                    <p className="text-sm text-muted">{[r.classes?.name, r.subjects?.name, `${r.enrollments?.[0]?.count ?? 0} pupils`].filter(Boolean).join(", ")}</p>
                   </div>
                   <div className="flex basis-full items-center gap-2 pl-7 sm:basis-auto sm:pl-0">
-                    <p className="rounded-lg bg-wash px-3 py-1.5 font-display font-bold tracking-[0.2em] text-adire-800">{r.join_code}</p>
+                    <p className="rounded-lg bg-wash px-3 py-1.5 font-display font-bold tracking-[0.2em] text-grape-800">{r.join_code}</p>
                     <CopyButton value={r.join_code} label="Copy code" />
                   </div>
                 </li>
@@ -65,7 +81,7 @@ export default async function TeacherHome() {
         <Panel title="Create a classroom">
           <ActionForm action={createClassroom} submitLabel="Create classroom" pendingLabel="Creating">
             <Field label="Classroom name" htmlFor="name">
-              <Input id="name" name="name" placeholder="SS1 Mathematics, First Term" required />
+              <Input id="name" name="name" placeholder="Primary 5 Mathematics, First Term" required />
             </Field>
             <Field label="Class" htmlFor="class_id">
               <Select id="class_id" name="class_id" defaultValue="">
