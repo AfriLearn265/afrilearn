@@ -16,7 +16,7 @@ export default async function TeacherCourses() {
   const [{ data }, { data: subjects }, { data: classes }, { data: rooms }] = await Promise.all([
     supabase.from("courses").select("id, title, is_published, classrooms(name), classes(name), subjects(name, color), lessons(count)").eq("teacher_id", userId).order("created_at", { ascending: false }),
     supabase.from("subjects").select("id, name").eq("is_active", true).order("name"),
-    supabase.from("classes").select("id, name").order("sort_order"),
+    supabase.from("classes").select("id, name").eq("is_active", true).order("sort_order"),
     supabase.from("classrooms").select("id, name").eq("teacher_id", userId).eq("is_archived", false),
   ]);
   const courses = (data ?? []) as unknown as Course[];

@@ -16,7 +16,7 @@ const flags: [string, string, string][] = [
   ["registration_open", "New sign-ups", "Allow new student, parent and teacher accounts."],
   ["paid_features_enabled", "Paid plans", "When off, every feature is free (pilot mode) and checkout is hidden."],
   ["leaderboards_enabled", "Class leaderboards", "Allow teachers to switch on opt-in leaderboards."],
-  ["ai_companion_enabled", "AI learning companion", "Show the companion to students when an AI key is configured."],
+  ["ai_companion_enabled", "Ask Tiko (AI helper)", "Show Ask Tiko to pupils when an AI key is configured."],
   ["live_classes_enabled", "Live classes", "Allow teachers to schedule live classes."],
 ];
 

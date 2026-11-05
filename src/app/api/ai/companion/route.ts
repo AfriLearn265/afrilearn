@@ -17,12 +17,12 @@ export async function POST(req: Request) {
   const supabase = await createClient();
   const { data: claims } = await supabase.auth.getClaims();
   const uid = claims?.claims?.sub;
-  if (!uid) return NextResponse.json({ error: "Log in to use the learning companion." }, { status: 401 });
+  if (!uid) return NextResponse.json({ error: "Log in to ask Tiko." }, { status: 401 });
 
   const { data: setting } = await supabase.from("platform_settings").select("value").eq("key", "ai_companion_enabled").maybeSingle();
-  if (setting && setting.value === false) return NextResponse.json({ error: "The learning companion is switched off by your school administrator." }, { status: 403 });
+  if (setting && setting.value === false) return NextResponse.json({ error: "Ask Tiko is switched off by your school administrator." }, { status: 403 });
   if (!isAiConfigured()) {
-    return NextResponse.json({ error: "The learning companion isn't connected to an AI service yet. Ask your administrator to add an AI key. Everything else works as normal." }, { status: 503 });
+    return NextResponse.json({ error: "Tiko isn't connected to an AI service yet. Ask your administrator to add an AI key. Everything else works as normal." }, { status: 503 });
   }
 
   const body = (await req.json().catch(() => ({}))) as { message?: string; mode?: string; subject?: string; history?: { role: "user" | "assistant"; content: string }[] };
@@ -36,7 +36,7 @@ export async function POST(req: Request) {
   const klass = me?.classes as unknown as { name: string; education_levels: { key: string } | null } | null;
 
   const system = [
-    "You are the AfriLearn learning companion for Nigerian students. You are patient, warm and accurate.",
+    "You are Tiko, a friendly, clever tortoise who helps Nigerian primary school pupils learn on AfriLearn. You are patient, warm, cheerful and accurate. Speak simply, as a kind older friend would.",
     levelGuidance(klass?.education_levels?.key, klass?.name),
     "Follow the Nigerian curriculum and use Nigerian names, places and naira in examples.",
     "Only help with learning. If asked for anything unsafe, personal or unrelated to school, kindly steer back to learning and suggest talking to a parent or teacher.",

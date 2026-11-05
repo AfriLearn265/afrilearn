@@ -11,9 +11,9 @@ import { VideoAdminButtons } from "@/components/app/VideoAdminButtons";
 import { Notice } from "@/components/ui/Field";
 
 /** A class's videos, newest first, with subject filter chips. */
-export async function ClassVideoGrid({ classIds, basePath, subject, showClass, staff, mineOnly, userId, emptyTitle, emptyText }: {
+export async function ClassVideoGrid({ classIds, basePath, subject, showClass, staff, mineOnly, userId, studentId, emptyTitle, emptyText }: {
   classIds: string[] | null; basePath: string; subject?: string; showClass?: boolean; staff?: boolean; mineOnly?: boolean;
-  userId?: string; emptyTitle: string; emptyText: string;
+  userId?: string; studentId?: string; emptyTitle: string; emptyText: string;
 }) {
   const supabase = await createClient();
   let q = supabase.from("class_videos").select(VIDEO_FIELDS).order("created_at", { ascending: false }).limit(120);
@@ -25,6 +25,7 @@ export async function ClassVideoGrid({ classIds, basePath, subject, showClass, s
   const subjects = [...new Map(all.filter((v) => v.subjects && v.subject_id).map((v) => [v.subject_id!, v.subjects!])).entries()];
   const shown = subject ? all.filter((v) => v.subject_id === subject) : all;
   const videos = await withMedia(shown);
+  const watched = studentId ? await watchedBy(studentId, videos.map((v) => v.id)) : new Set<string>();
   const sep = basePath.includes("?") ? "&" : "?";
 
   return (
@@ -45,10 +46,65 @@ export async function ClassVideoGrid({ classIds, basePath, subject, showClass, s
       )}
       {videos.length === 0 ? <EmptyState title={emptyTitle}>{emptyText}</EmptyState> : (
         <ul className="grid gap-x-5 gap-y-8 sm:grid-cols-2 xl:grid-cols-3">
-          {videos.map((v) => <VideoCard key={v.id} v={v} href={`${basePath.split("?")[0]}/${v.id}`} showClass={showClass} staff={staff} />)}
+          {videos.map((v) => <VideoCard key={v.id} v={v} href={`${basePath.split("?")[0]}/${v.id}`} showClass={showClass} staff={staff} watched={watched.has(v.id)} />)}
         </ul>
       )}
     </div>
+  );
+}
+
+/** Which of these videos a pupil has watched. */
+export async function watchedBy(studentId: string, videoIds: string[]) {
+  if (!videoIds.length) return new Set<string>();
+  const supabase = await createClient();
+  const { data } = await supabase.from("video_views").select("video_id").eq("student_id", studentId).in("video_id", videoIds);
+  return new Set((data ?? []).map((r) => r.video_id as string));
+}
+
+type WatchRow = { student_id: string; full_name: string; plays: number; last_viewed_at: string | null };
+
+/** For teachers: who in the class has watched this video, and who still needs to. */
+async function WatchReport({ videoId, className }: { videoId: string; className: string }) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("video_watch_report", { p_video: videoId });
+  if (error) return null;
+  const rows = (data ?? []) as WatchRow[];
+  const seen = rows.filter((r) => r.plays > 0);
+  const notYet = rows.filter((r) => r.plays === 0);
+  const pct = rows.length ? Math.round((seen.length / rows.length) * 100) : 0;
+  return (
+    <section aria-labelledby="who-watched" className="mt-8 rounded-[1.6rem] border-2 border-line bg-white p-5 sm:p-6">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <h2 id="who-watched" className="text-xl font-semibold">Who has watched</h2>
+        <p className="text-sm font-semibold text-ink-soft">{seen.length} of {rows.length} pupils in {className}</p>
+      </div>
+      <div className="mt-3 h-3.5 overflow-hidden rounded-full bg-wash" role="progressbar" aria-label="Pupils who watched" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
+        <div className="h-full rounded-full bg-lime-400" style={{ width: `${Math.max(pct, rows.length ? 2 : 0)}%` }} />
+      </div>
+      {rows.length === 0 ? <p className="mt-4 text-sm text-muted">No pupils are in this class yet.</p> : (
+        <div className="mt-5 grid gap-6 sm:grid-cols-2">
+          <div>
+            <h3 className="text-sm font-bold text-leaf-700">Watched</h3>
+            {seen.length === 0 ? <p className="mt-1.5 text-sm text-muted">Nobody yet.</p> : (
+              <ul className="mt-2 grid gap-1.5 text-sm">
+                {seen.map((r) => (
+                  <li key={r.student_id} className="flex justify-between gap-3">
+                    <span className="font-semibold">{r.full_name}</span>
+                    <span className="text-muted">{r.plays > 1 ? `${r.plays} times, last ` : ""}{r.last_viewed_at ? formatDate(r.last_viewed_at) : ""}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-coral-700">Not watched yet</h3>
+            {notYet.length === 0 ? <p className="mt-1.5 text-sm text-muted">Everyone has watched it.</p> : (
+              <ul className="mt-2 grid gap-1.5 text-sm">{notYet.map((r) => <li key={r.student_id}>{r.full_name}</li>)}</ul>
+            )}
+          </div>
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -58,8 +114,8 @@ function chip(active: boolean) {
 }
 
 /** The watch page: the player, what to look out for, and more videos from the same class. */
-export async function WatchVideo({ id, backHref, backLabel, staff, userId, isAdmin }: {
-  id: string; backHref: string; backLabel: string; staff?: boolean; userId?: string; isAdmin?: boolean;
+export async function WatchVideo({ id, backHref, backLabel, staff, userId, isAdmin, studentId }: {
+  id: string; backHref: string; backLabel: string; staff?: boolean; userId?: string; isAdmin?: boolean; studentId?: string;
 }) {
   const supabase = await createClient();
   const { data } = await supabase.from("class_videos").select(VIDEO_FIELDS).eq("id", id).maybeSingle();
@@ -75,6 +131,7 @@ export async function WatchVideo({ id, backHref, backLabel, staff, userId, isAdm
   const { data: more } = await supabase.from("class_videos").select(VIDEO_FIELDS).eq("class_id", v.class_id).eq("is_published", true)
     .neq("id", v.id).order("created_at", { ascending: false }).limit(6);
   const others = await withMedia((more ?? []) as unknown as ClassVideo[]);
+  const watched = studentId ? await watchedBy(studentId, others.map((o) => o.id)) : new Set<string>();
   const duration = formatDuration(v.duration_seconds);
   const canManage = staff && (isAdmin || v.uploaded_by === userId);
 
@@ -103,12 +160,13 @@ export async function WatchVideo({ id, backHref, backLabel, staff, userId, isAdm
             {canManage && <VideoAdminButtons id={v.id} published={v.is_published} afterDelete={backHref} />}
           </div>
           {v.description && <p className="mt-5 max-w-2xl whitespace-pre-line rounded-[1.4rem] bg-sun-100 p-5 text-lg leading-relaxed">{v.description}</p>}
+          {staff && <WatchReport videoId={v.id} className={v.classes?.name ?? "this class"} />}
         </div>
         <aside aria-label="More videos for this class">
           <h2 className="text-xl font-semibold">More for {v.classes?.name ?? "this class"}</h2>
           {others.length === 0 ? <p className="mt-3 text-sm text-muted">No other videos yet.</p> : (
             <ul className="mt-4 grid gap-6 sm:grid-cols-2 xl:grid-cols-1">
-              {others.map((o) => <VideoCard key={o.id} v={o} href={`${backHref.split("?")[0]}/${o.id}`} staff={staff} />)}
+              {others.map((o) => <VideoCard key={o.id} v={o} href={`${backHref.split("?")[0]}/${o.id}`} staff={staff} watched={watched.has(o.id)} />)}
             </ul>
           )}
         </aside>

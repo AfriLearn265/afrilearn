@@ -6,13 +6,13 @@ import { ButtonLink } from "@/components/ui/Button";
 
 export const metadata = { title: "Class videos" };
 
-type Row = { students: { class_id: string | null; profiles: { full_name: string } | null; classes: { name: string } | null } | null };
+type Row = { students: { profile_id: string; class_id: string | null; profiles: { full_name: string } | null; classes: { name: string } | null } | null };
 
 export default async function ParentVideos({ searchParams }: { searchParams: Promise<{ subject?: string }> }) {
   const { userId } = await requireRole("parent");
   const { subject } = await searchParams;
   const supabase = await createClient();
-  const { data } = await supabase.from("parent_children").select("students(class_id, profiles(full_name), classes(name))").eq("parent_id", userId);
+  const { data } = await supabase.from("parent_children").select("students(profile_id, class_id, profiles(full_name), classes(name))").eq("parent_id", userId);
   const kids = ((data ?? []) as unknown as Row[]).map((r) => r.students).filter((s): s is NonNullable<Row["students"]> => !!s?.class_id);
   const classIds = [...new Set(kids.map((k) => k.class_id!))];
   const who = kids.map((k) => `${k.profiles?.full_name?.split(" ")[0]} (${k.classes?.name})`).join(", ");
@@ -26,6 +26,7 @@ export default async function ParentVideos({ searchParams }: { searchParams: Pro
         </EmptyState>
       ) : (
         <ClassVideoGrid classIds={classIds} basePath="/parent/videos" subject={subject} showClass={classIds.length > 1}
+          studentId={kids.length === 1 ? kids[0].profile_id : undefined}
           emptyTitle="No videos for these classes yet." emptyText="Teachers are adding them now. Check back soon." />
       )}
     </>

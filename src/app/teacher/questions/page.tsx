@@ -25,7 +25,7 @@ export default async function QuestionBanks({ searchParams }: { searchParams: Pr
   const [{ data: banksData }, { data: subjects }, { data: classes }] = await Promise.all([
     supabase.from("question_banks").select("id, name, owner_id, is_shared, exam_body, subject_id, class_id, subjects(name), classes(name), questions(count)").order("created_at", { ascending: false }),
     supabase.from("subjects").select("id, name").eq("is_active", true).order("name"),
-    supabase.from("classes").select("id, name").order("sort_order"),
+    supabase.from("classes").select("id, name").eq("is_active", true).order("sort_order"),
   ]);
   const banks = (banksData ?? []) as unknown as Bank[];
   const current = banks.find((b) => b.id === bankId) ?? null;

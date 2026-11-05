@@ -9,6 +9,6 @@ export const faqs: [string, string][] = [
   ["Are the quiz questions from past papers?", "Our questions are written by our teachers or come from sources we are licensed to use. We do not copy copyrighted past papers, including Common Entrance papers."],
   ["Does it work on a phone and with slow internet?", "Yes. Every page is built for small screens first, loads quickly and saves quiz answers as you go, so a dropped connection does not lose your work."],
   ["What do I need for live classes?", "A phone or computer with a microphone, a camera if you want to be seen, and a steady connection. Live classes open from your dashboard in the browser, so there is nothing to install."],
-  ["What is the learning companion?", "A friendly AI helper that explains topics step by step at your child's class level. Each pupil has a daily limit, and conversations stay in the pupil's own account."],
+  ["Who is Tiko?", "Tiko the tortoise is AfriLearn's friendly AI helper. Pupils can ask Tiko about their lessons, and Tiko explains topics step by step at your child's class level. Each pupil has a daily limit, and conversations stay in the pupil's own account."],
   ["How do payments work?", "Plans are paid in naira through Paystack. A plan only becomes active after Paystack confirms the payment to our server."],
 ];

@@ -44,7 +44,7 @@ export default async function Profile() {
   const supabase = await createClient();
   const [{ data: meRow }, { data: classes }, { data: parents }, { data: badges }, { data: mine }, { data: certs }, { count: lessons }, { data: results }, { count: rooms }] = await Promise.all([
     supabase.from("students").select("class_id, interests, leaderboard_opt_in, link_code, guardian_name, points, streak_days, created_at, classes(name)").eq("profile_id", userId).single(),
-    supabase.from("classes").select("id, name").order("sort_order"),
+    supabase.from("classes").select("id, name").eq("is_active", true).order("sort_order"),
     supabase.from("parent_children").select("parent_id, relationship").eq("student_id", userId),
     supabase.from("badges").select("id, key, name, description, icon").order("points").order("name"),
     supabase.from("student_badges").select("badge_id, awarded_at").eq("student_id", userId),

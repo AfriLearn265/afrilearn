@@ -39,6 +39,14 @@ export async function toggleSubject(fd: FormData) {
   revalidatePath("/admin/academics");
 }
 
+/** Offer a class again, or switch it off. Switched-off classes keep all their records. */
+export async function toggleClass(fd: FormData) {
+  const s = await db();
+  await s.from("classes").update({ is_active: fd.get("on") === "1" }).eq("id", String(fd.get("id")));
+  revalidatePath("/admin/academics");
+  revalidatePath("/", "layout");
+}
+
 export async function saveClassSubjects(fd: FormData): Promise<ActionResult> {
   const s = await db();
   const classId = String(fd.get("class_id"));

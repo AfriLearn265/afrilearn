@@ -5,22 +5,24 @@ import { createClient } from "@/lib/supabase/server";
 import { PageHeader, Panel } from "@/components/app/AppShell";
 import { ActionForm } from "@/components/app/ActionForm";
 import { Field, Input } from "@/components/ui/Field";
-import { addSubject, saveClassSubjects, toggleSubject } from "../manage-actions";
+import { addSubject, saveClassSubjects, toggleClass, toggleSubject } from "../manage-actions";
 
 export const metadata = { title: "Academic structure" };
 
-type Klass = { id: string; code: string; name: string; education_levels: { name: string; sort_order: number } | null };
+type Klass = { id: string; code: string; name: string; is_active: boolean; education_levels: { name: string; sort_order: number } | null };
 
 export default async function Academics({ searchParams }: { searchParams: Promise<{ class?: string }> }) {
   await requireRole("admin");
   const sp = await searchParams;
   const supabase = await createClient();
   const [{ data: classesData }, { data: subjects }] = await Promise.all([
-    supabase.from("classes").select("id, code, name, education_levels(name, sort_order)").order("sort_order"),
+    supabase.from("classes").select("id, code, name, is_active, education_levels(name, sort_order)").order("sort_order"),
     supabase.from("subjects").select("id, name, color, is_active, class_subjects(count)").order("name"),
   ]);
-  const classes = (classesData ?? []) as unknown as Klass[];
-  const current = classes.find((c) => c.code === sp.class) ?? classes[0];
+  const all = (classesData ?? []) as unknown as Klass[];
+  const classes = all.filter((c) => c.is_active);
+  const off = all.filter((c) => !c.is_active);
+  const current = all.find((c) => c.code === sp.class) ?? classes[0];
   const { data: mapped } = current ? await supabase.from("class_subjects").select("subject_id, is_compulsory").eq("class_id", current.id) : { data: [] };
   const on = new Map((mapped ?? []).map((m) => [m.subject_id, m.is_compulsory]));
   const levels = [...new Set(classes.map((c) => c.education_levels?.name ?? ""))];
@@ -36,14 +38,33 @@ export default async function Academics({ searchParams }: { searchParams: Promis
                 <p className="mb-1 text-xs font-semibold text-muted">{lv}</p>
                 <ul className="grid gap-0.5">
                   {classes.filter((c) => (c.education_levels?.name ?? "") === lv).map((c) => (
-                    <li key={c.id}><Link href={`/admin/academics?class=${c.code}`} className={clsx("block rounded-lg px-2.5 py-1.5 text-sm", c.id === current?.id ? "bg-adire-700 font-semibold text-white" : "hover:bg-wash")}>{c.name}</Link></li>
+                    <li key={c.id}><Link href={`/admin/academics?class=${c.code}`} className={clsx("block rounded-lg px-2.5 py-1.5 text-sm", c.id === current?.id ? "bg-grape-600 font-semibold text-white" : "hover:bg-wash")}>{c.name}</Link></li>
                   ))}
                 </ul>
               </div>
             ))}
           </nav>
+          {off.length > 0 && (
+            <details className="mt-5 border-t-2 border-line pt-4">
+              <summary className="cursor-pointer text-sm font-semibold text-muted">Switched off ({off.length})</summary>
+              <p className="mt-2 text-xs text-muted">These classes are hidden from the site, sign-up and dashboards. Their records are kept.</p>
+              <ul className="mt-2 grid gap-1">
+                {off.map((c) => (
+                  <li key={c.id} className="flex items-center justify-between gap-2 text-sm">
+                    <span className="text-muted">{c.name}</span>
+                    <form action={toggleClass}><input type="hidden" name="id" value={c.id} /><input type="hidden" name="on" value="1" />
+                      <button type="submit" className="text-xs font-semibold text-grape-700 hover:underline">Switch on</button></form>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
         </Panel>
-        <Panel title={current ? `Subjects for ${current.name}` : "Subjects"}>
+        <Panel title={current ? `Subjects for ${current.name}` : "Subjects"}
+          action={current?.is_active ? (
+            <form action={toggleClass}><input type="hidden" name="id" value={current.id} /><input type="hidden" name="on" value="0" />
+              <button type="submit" className="text-sm font-semibold text-coral-700 hover:underline">Switch this class off</button></form>
+          ) : undefined}>
           {current && (
             <ActionForm action={saveClassSubjects} submitLabel="Save subjects" resetOnSuccess={false}>
               <input type="hidden" name="class_id" value={current.id} />

@@ -4,7 +4,7 @@ import { WatchVideo } from "@/components/app/ClassVideos";
 export const metadata = { title: "Watch" };
 
 export default async function StudentWatch({ params }: { params: Promise<{ id: string }> }) {
-  await requireRole("student");
+  const { userId } = await requireRole("student");
   const { id } = await params;
-  return <WatchVideo id={id} backHref="/student/videos" backLabel="All my class videos" />;
+  return <WatchVideo id={id} backHref="/student/videos" backLabel="All my class videos" studentId={userId} />;
 }

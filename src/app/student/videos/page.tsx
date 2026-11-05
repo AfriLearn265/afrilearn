@@ -31,7 +31,7 @@ export default async function StudentVideos({ searchParams }: { searchParams: Pr
   return (
     <>
       <PageHeader title={`${klass?.name ?? "Class"} videos`} intro={`Hi ${firstName(profile.full_name)}! Your teachers made these videos for your class. Watch them as many times as you like.`} />
-      <ClassVideoGrid classIds={[me.class_id]} basePath="/student/videos" subject={subject}
+      <ClassVideoGrid classIds={[me.class_id]} basePath="/student/videos" subject={subject} studentId={userId}
         emptyTitle="No videos for your class yet." emptyText="Your teachers are making them now. You will get a message when the first one is ready." />
     </>
   );

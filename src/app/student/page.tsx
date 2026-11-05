@@ -9,6 +9,7 @@ import { Mascot } from "@/components/brand/Mascot";
 import { VideoCard } from "@/components/app/VideoCard";
 import { ButtonLink } from "@/components/ui/Button";
 import { VIDEO_FIELDS, withMedia, type ClassVideo } from "@/lib/videos";
+import { watchedBy } from "@/components/app/ClassVideos";
 import { ActionForm } from "@/components/app/ActionForm";
 import { CopyButton } from "@/components/app/CopyButton";
 import { TopicMastery, type MasteryRow } from "@/components/app/TopicMastery";
@@ -43,6 +44,8 @@ export default async function StudentHome({ searchParams }: { searchParams: Prom
     ? await supabase.from("class_videos").select(VIDEO_FIELDS).eq("class_id", me.class_id).eq("is_published", true).order("created_at", { ascending: false }).limit(3)
     : { data: [] };
   const videos = await withMedia((vids ?? []) as unknown as ClassVideo[]);
+  const watched = await watchedBy(userId, videos.map((v) => v.id));
+  const nextVideo = videos.find((v) => !watched.has(v.id));
   const rooms = ((enrollments ?? []) as unknown as Enrollment[]).map((e) => e.classrooms).filter((r): r is NonNullable<Enrollment["classrooms"]> => !!r);
   const { courses, status } = learning;
 
@@ -67,10 +70,10 @@ export default async function StudentHome({ searchParams }: { searchParams: Prom
           <div>
             <h1 className="text-[2.1rem] font-semibold leading-[1.05] sm:text-5xl">{greeting()}, {firstName(profile.full_name)}!</h1>
             <p className="mt-2 max-w-lg text-lg text-grape-100">
-              {klass ? `${klass.name}. ${videos[0] ? "There's a new video waiting for you." : "Ready to learn something new today?"}` : "Choose your class on your profile page to see the right lessons."}
+              {klass ? `${klass.name}. ${nextVideo ? "There's a video waiting for you." : "Ready to learn something new today?"}` : "Choose your class on your profile page to see the right lessons."}
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
-              {videos[0] ? <ButtonLink href={`/student/videos/${videos[0].id}`} variant="accent">Watch the newest video</ButtonLink>
+              {nextVideo ? <ButtonLink href={`/student/videos/${nextVideo.id}`} variant="accent">Watch the next video</ButtonLink>
                 : <ButtonLink href="/student/courses" variant="accent">Start a lesson</ButtonLink>}
               <ButtonLink href="/student/cbt" variant="onDark">Play a quiz</ButtonLink>
             </div>
@@ -103,7 +106,7 @@ export default async function StudentHome({ searchParams }: { searchParams: Prom
             <Link href="/student/videos" className="font-display font-semibold text-grape-700 hover:underline">See all videos</Link>
           </div>
           <ul className="grid gap-x-5 gap-y-6 sm:grid-cols-2 xl:grid-cols-3">
-            {videos.map((v) => <VideoCard key={v.id} v={v} href={`/student/videos/${v.id}`} />)}
+            {videos.map((v) => <VideoCard key={v.id} v={v} href={`/student/videos/${v.id}`} watched={watched.has(v.id)} />)}
           </ul>
         </section>
       )}

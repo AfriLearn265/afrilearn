@@ -1,13 +1,13 @@
 import Link from "next/link";
 import clsx from "clsx";
-import { Eye, Play } from "lucide-react";
+import { Check, Eye, Play } from "lucide-react";
 import { formatDuration, isNew, type VideoWithMedia } from "@/lib/videos";
 import { formatDate } from "@/lib/format";
 
 const fallbackTones = ["bg-tangerine-400", "bg-sky-400", "bg-lime-400", "bg-bubble-400", "bg-sun-400", "bg-grape-400"];
 
 /** A video in a grid: poster frame (or a colourful tile), title, subject and class. */
-export function VideoCard({ v, href, showClass, staff }: { v: VideoWithMedia; href: string; showClass?: boolean; staff?: boolean }) {
+export function VideoCard({ v, href, showClass, staff, watched }: { v: VideoWithMedia; href: string; showClass?: boolean; staff?: boolean; watched?: boolean }) {
   const duration = formatDuration(v.duration_seconds);
   const tone = fallbackTones[v.title.length % fallbackTones.length];
   return (
@@ -28,7 +28,12 @@ export function VideoCard({ v, href, showClass, staff }: { v: VideoWithMedia; hr
             <Play className="ml-0.5 size-6 fill-ink text-ink" aria-hidden="true" />
           </span>
           {duration && <span className="absolute bottom-2 right-2 rounded-full bg-ink/85 px-2 py-0.5 text-xs font-bold text-white tabular">{duration}</span>}
-          {isNew(v.created_at) && <span className="absolute left-2 top-2 rounded-full border-2 border-ink bg-sun-400 px-2.5 py-0.5 font-display text-xs font-semibold text-ink">New</span>}
+          {watched && (
+            <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-full border-2 border-ink bg-lime-400 px-2.5 py-0.5 font-display text-xs font-semibold text-ink">
+              <Check className="size-3.5" strokeWidth={3} aria-hidden="true" />Watched
+            </span>
+          )}
+          {isNew(v.created_at) && !watched && <span className="absolute left-2 top-2 rounded-full border-2 border-ink bg-sun-400 px-2.5 py-0.5 font-display text-xs font-semibold text-ink">New</span>}
           {staff && !v.is_published && <span className="absolute right-2 top-2 rounded-full bg-white px-2.5 py-0.5 text-xs font-bold text-ink">Hidden</span>}
         </div>
         <div className="mt-3 px-1">

@@ -21,7 +21,7 @@ export default async function TeacherHome() {
   const [{ data: rooms }, { data: classes }, { data: subjects }, { data: mySubjects }] = await Promise.all([
     supabase.from("classrooms").select("id, name, join_code, classes(name), subjects(name, color), enrollments(count)")
       .eq("teacher_id", userId).eq("is_archived", false).order("created_at", { ascending: false }),
-    supabase.from("classes").select("id, name, education_levels(name, sort_order)").order("sort_order"),
+    supabase.from("classes").select("id, name, education_levels(name, sort_order)").eq("is_active", true).order("sort_order"),
     supabase.from("subjects").select("id, name").eq("is_active", true).order("name"),
     supabase.from("teacher_subjects").select("subject_id").eq("teacher_id", userId),
   ]);

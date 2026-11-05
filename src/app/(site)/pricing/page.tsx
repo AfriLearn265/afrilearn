@@ -19,7 +19,7 @@ export default async function PricingPage() {
   return (
     <>
       <PageHero id="pricing" mascot={{ pose: "stand", prop: "star" }} title="Simple plans in naira."
-        intro="Start free. Upgrade when you want live classes and the learning companion. Teachers always join free.">
+        intro="Start free. Upgrade when you want live classes and Ask Tiko, the learning helper. Teachers always join free.">
         <ButtonLink href="/signup" size="lg" variant="accent">Start free</ButtonLink>
         <ButtonLink href="#schools" size="lg" variant="onDark">Plans for schools</ButtonLink>
       </PageHero>

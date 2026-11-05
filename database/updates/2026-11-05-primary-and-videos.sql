@@ -173,3 +173,89 @@ language sql stable security definer set search_path = '' as $$
 $$;
 revoke execute on function public.cbt_catalogue() from public, anon;
 grant execute on function public.cbt_catalogue() to authenticated;
+
+-- ---------------------------------------------------------------------
+-- 4. Plans rewritten for the Primary edition (keys unchanged so payments keep working).
+-- ---------------------------------------------------------------------
+update public.subscription_plans p set name = v.name, description = v.description, features = v.features
+from (values
+  ('free', 'Free for every pupil', 'Start learning at no cost.',
+   array['Class videos for your class', 'Short lessons and courses', 'Practice quizzes with explanations', 'Progress, points and badges']),
+  ('standard', 'Standard pupil', 'Everything a pupil needs for the school term.',
+   array['Everything in Free', 'Assignments with teacher feedback', 'Printable worksheets and notes', 'Timed quiz challenges']),
+  ('premium', 'Premium pupil', 'Live teaching and Tiko, the learning helper.',
+   array['Everything in Standard', 'Live classes with teachers', 'Ask Tiko, the learning helper', 'Certificates for finished courses']),
+  ('exam-prep', 'Common Entrance (Primary 6)', 'Focused preparation for the Common Entrance examination.',
+   array['Common Entrance style practice papers', 'Timed practice in English, Maths and reasoning', 'Reports on strong and weak topics', 'A review of every wrong answer']),
+  ('teacher', 'Teacher account', 'Free for approved teachers.',
+   array['Unlimited classrooms', 'Upload class videos', 'Quizzes that mark themselves', 'Gradebook, attendance and live classes']),
+  ('school', 'Primary school', 'For schools enrolling whole classes, Primary 1 to 6.',
+   array['Every feature for all pupils and teachers', 'A dashboard for the head teacher', 'Help setting up every class and teacher', 'Priority support'])
+) as v(key, name, description, features)
+where p.key = v.key;
+
+-- ---------------------------------------------------------------------
+-- 5. Who watched which video (one row per pupil per video).
+-- ---------------------------------------------------------------------
+create table public.video_views (
+  video_id uuid not null references public.class_videos (id) on delete cascade,
+  student_id uuid not null references public.students (profile_id) on delete cascade,
+  plays int not null default 1 check (plays > 0),
+  first_viewed_at timestamptz not null default now(),
+  last_viewed_at timestamptz not null default now(),
+  primary key (video_id, student_id)
+);
+create index video_views_student_idx on public.video_views (student_id, last_viewed_at desc);
+alter table public.video_views enable row level security;
+grant select on public.video_views to authenticated;
+create policy "video_views: read" on public.video_views for select to authenticated using (
+  student_id = (select auth.uid())
+  or public.is_parent_of(student_id)
+  or (select public.is_admin())
+  or exists (select 1 from public.class_videos v
+             where v.id = video_id
+               and (v.uploaded_by = (select auth.uid())
+                    or exists (select 1 from public.teacher_classes tc where tc.teacher_id = (select auth.uid()) and tc.class_id = v.class_id))));
+
+-- Pupils' plays are recorded against their name (2 points the first time); parents' plays only add to the total.
+create or replace function public.record_video_view(p_video uuid)
+returns void language plpgsql security definer set search_path = '' as $$
+declare v_role text := public.current_user_role(); v_title text; v_new boolean;
+begin
+  if v_role not in ('student', 'parent') or not public.can_view_class_video(p_video) then return; end if;
+  update public.class_videos set view_count = view_count + 1 where id = p_video returning title into v_title;
+  if v_role = 'student' then
+    insert into public.video_views (video_id, student_id) values (p_video, auth.uid())
+    on conflict (video_id, student_id) do update set plays = public.video_views.plays + 1, last_viewed_at = now()
+    returning (xmax = 0) into v_new;
+    if v_new then
+      perform private.award_points(auth.uid(), 2, 'Watched: ' || v_title, 'class_video', p_video);
+    end if;
+    perform private.touch_streak(auth.uid());
+  end if;
+end $$;
+revoke all on function public.record_video_view(uuid) from public, anon;
+grant execute on function public.record_video_view(uuid) to authenticated;
+
+-- For the class's teachers and administrators: every pupil in the class and whether they have watched.
+create or replace function public.video_watch_report(p_video uuid)
+returns table (student_id uuid, full_name text, plays int, last_viewed_at timestamptz)
+language plpgsql stable security definer set search_path = '' as $$
+declare v public.class_videos;
+begin
+  select * into v from public.class_videos where id = p_video;
+  if not found then return; end if;
+  if not (public.is_admin() or v.uploaded_by = auth.uid()
+          or exists (select 1 from public.teacher_classes tc where tc.teacher_id = auth.uid() and tc.class_id = v.class_id)) then
+    raise exception 'Only the class''s teachers and administrators can see who watched.';
+  end if;
+  return query
+  select s.profile_id, p.full_name, coalesce(w.plays, 0), w.last_viewed_at
+  from public.students s
+  join public.profiles p on p.id = s.profile_id and p.status = 'active'
+  left join public.video_views w on w.video_id = v.id and w.student_id = s.profile_id
+  where s.class_id = v.class_id
+  order by w.last_viewed_at desc nulls last, p.full_name;
+end $$;
+revoke all on function public.video_watch_report(uuid) from public, anon;
+grant execute on function public.video_watch_report(uuid) to authenticated;

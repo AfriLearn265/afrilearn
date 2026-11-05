@@ -49,7 +49,7 @@ export function Companion({ initial, configured, subjects }: { initial: Msg[]; c
 
   return (
     <div className="grid gap-4">
-      {!configured && <Notice tone="warning" title="Not connected yet.">The learning companion needs an AI service key on the server. Your administrator can add one; until then questions can&apos;t be answered here.</Notice>}
+      {!configured && <Notice tone="warning" title="Not connected yet.">Tiko needs an AI service key on the server. Your administrator can add one; until then questions can&apos;t be answered here.</Notice>}
       <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="What do you need?">
         {modes.map(([v, label]) => (
           <button key={v} type="button" role="radio" aria-checked={mode === v} onClick={() => setMode(v)}

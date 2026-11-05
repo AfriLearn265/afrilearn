@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatDateTime, pct } from "@/lib/format";
 import { PageHeader, Panel, EmptyState, Stat } from "@/components/app/AppShell";
 import { TopicMastery, type MasteryRow } from "@/components/app/TopicMastery";
+import { Check, Play } from "lucide-react";
 
 export const metadata = { title: "Child progress" };
 
@@ -17,7 +18,7 @@ export default async function ChildPage({ params }: { params: Promise<{ id: stri
   await requireRole("parent");
   const { id } = await params;
   const supabase = await createClient();
-  const { data: child } = await supabase.from("students").select("profile_id, points, streak_days, profiles(full_name), classes(name)").eq("profile_id", id).maybeSingle();
+  const { data: child } = await supabase.from("students").select("profile_id, class_id, points, streak_days, profiles(full_name), classes(name)").eq("profile_id", id).maybeSingle();
   if (!child) notFound();
   const now = clock();
   const [{ data: attempts }, { data: subs }, { data: att }, { data: rooms }, { data: mastery }, { count: lessons }, { data: badges }, { data: due }, { data: certs }] = await Promise.all([
@@ -31,6 +32,16 @@ export default async function ChildPage({ params }: { params: Promise<{ id: stri
     supabase.from("assignments").select("id, title, due_at, assignment_submissions(student_id)").gte("due_at", new Date(now).toISOString()).order("due_at").limit(6),
     supabase.from("certificates").select("title, issued_at").eq("student_id", id),
   ]);
+  const [{ data: classVids }, { data: views }] = await Promise.all([
+    child.class_id
+      ? supabase.from("class_videos").select("id, title, created_at, subjects(name, color)").eq("class_id", child.class_id).eq("is_published", true).order("created_at", { ascending: false }).limit(40)
+      : Promise.resolve({ data: [] as never[] }),
+    supabase.from("video_views").select("video_id, plays, last_viewed_at").eq("student_id", id),
+  ]);
+  const seen = new Map((views ?? []).map((v) => [v.video_id as string, v]));
+  const vids = (classVids ?? []) as unknown as { id: string; title: string; created_at: string; subjects: { name: string; color: string } | null }[];
+  const watchedVids = vids.filter((v) => seen.has(v.id)).sort((a, b) => String(seen.get(b.id)?.last_viewed_at).localeCompare(String(seen.get(a.id)?.last_viewed_at)));
+  const toWatch = vids.filter((v) => !seen.has(v.id));
   const name = (child.profiles as unknown as { full_name: string } | null)?.full_name ?? "Your child";
   const attendance = att ?? [];
   const present = attendance.filter((a) => a.status === "present" || a.status === "late").length;
@@ -42,7 +53,8 @@ export default async function ChildPage({ params }: { params: Promise<{ id: stri
   return (
     <>
       <PageHeader title={name} intro={`${(child.classes as unknown as { name: string } | null)?.name ?? "Class not set"}. Everything below is updated as ${name.split(" ")[0]} learns.`} />
-      <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-5 max-lg:[&>:last-child]:col-span-2">
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3 xl:grid-cols-6">
+        <Stat label="Videos watched" value={`${watchedVids.length}/${vids.length}`} note="class videos" />
         <Stat label="Average test score" value={pct(avg)} note={`${graded.length} completed`} />
         <Stat label="Attendance" value={attendance.length ? `${Math.round((present / attendance.length) * 100)}%` : "–"} note={`${attendance.length} records`} />
         <Stat label="Lessons completed" value={lessons ?? 0} />
@@ -51,7 +63,44 @@ export default async function ChildPage({ params }: { params: Promise<{ id: stri
       </div>
       <div className="mt-6 grid gap-6 xl:grid-cols-[1.3fr_1fr]">
         <div className="grid content-start gap-6">
-          <Panel title="Test and examination results">
+          <Panel title="Class videos" action={<Link href="/parent/videos" className="text-sm font-semibold text-grape-700">All class videos</Link>}>
+            {vids.length === 0 ? <EmptyState title="No videos for this class yet." /> : (
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <h3 className="text-sm font-bold text-leaf-700">Watched ({watchedVids.length})</h3>
+                  {watchedVids.length === 0 ? <p className="mt-1.5 text-sm text-muted">None yet. Watching together is a great start.</p> : (
+                    <ul className="mt-2 grid gap-2 text-sm">
+                      {watchedVids.slice(0, 8).map((v) => {
+                        const w = seen.get(v.id)!;
+                        return (
+                          <li key={v.id} className="flex gap-2.5">
+                            <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-lime-400"><Check className="size-3" strokeWidth={3} aria-hidden="true" /></span>
+                            <span><Link href={`/parent/videos/${v.id}`} className="font-semibold hover:underline">{v.title}</Link>
+                              <span className="block text-muted">{v.subjects?.name ? `${v.subjects.name}, ` : ""}{w.plays > 1 ? `${w.plays} times, last ` : ""}{formatDate(String(w.last_viewed_at))}</span></span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-tangerine-700">Still to watch ({toWatch.length})</h3>
+                  {toWatch.length === 0 ? <p className="mt-1.5 text-sm text-muted">All caught up!</p> : (
+                    <ul className="mt-2 grid gap-2 text-sm">
+                      {toWatch.slice(0, 8).map((v) => (
+                        <li key={v.id} className="flex gap-2.5">
+                          <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-tangerine-100"><Play className="size-3 fill-tangerine-700 text-tangerine-700" aria-hidden="true" /></span>
+                          <span><Link href={`/parent/videos/${v.id}`} className="font-semibold hover:underline">{v.title}</Link>
+                            <span className="block text-muted">{v.subjects?.name ? `${v.subjects.name}, ` : ""}added {formatDate(v.created_at)}</span></span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+            )}
+          </Panel>
+          <Panel title="Test and quiz results">
             {graded.length === 0 && (attempts ?? []).length === 0 ? <EmptyState title="No results yet." /> : (
               <ul className="divide-y divide-line text-sm">
                 {((attempts ?? []) as unknown as Attempt[]).map((a) => (
@@ -84,7 +133,7 @@ export default async function ChildPage({ params }: { params: Promise<{ id: stri
             {((rooms ?? []) as unknown as Room[]).length === 0 ? <p className="text-sm text-muted">Not in any classroom yet.</p> : (
               <ul className="grid gap-2 text-sm">
                 {((rooms ?? []) as unknown as Room[]).map((r) => r.classrooms && (
-                  <li key={r.classrooms.id} className="flex items-center justify-between gap-3"><span><strong>{r.classrooms.name}</strong><span className="text-muted">, {r.classrooms.profiles?.full_name}</span></span><Link href="/parent/messages" className="font-semibold text-adire-700 hover:underline">Message</Link></li>
+                  <li key={r.classrooms.id} className="flex items-center justify-between gap-3"><span><strong>{r.classrooms.name}</strong><span className="text-muted">, {r.classrooms.profiles?.full_name}</span></span><Link href="/parent/messages" className="font-semibold text-grape-700 hover:underline">Message</Link></li>
                 ))}
               </ul>
             )}

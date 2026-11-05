@@ -71,6 +71,6 @@ export function levelGuidance(level: string | null | undefined, className: strin
     case "exam_prep":
       return `The learner is preparing for ${className ?? "WAEC, NECO or JAMB"}. Be exam-focused: give the method, common traps, quick checks, and how marks are usually awarded.`;
     default:
-      return "Adapt to a secondary school learner in Nigeria.";
+      return "The learner is a Nigerian primary school pupil (about 6 to 11 years old). Use simple words and one idea at a time.";
   }
 }
