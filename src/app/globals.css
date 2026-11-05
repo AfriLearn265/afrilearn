@@ -185,6 +185,13 @@
   }
 }
 
+/* Printing pupil login cards prints only the cards. */
+@media print {
+  body.print-cards * { visibility: hidden; }
+  body.print-cards .login-cards, body.print-cards .login-cards * { visibility: visible; }
+  body.print-cards .login-cards { position: absolute; inset: 0 auto auto 0; width: 100%; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

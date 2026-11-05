@@ -6,6 +6,8 @@ import { PageHeader, Panel, EmptyState } from "@/components/app/AppShell";
 import { ActionForm } from "@/components/app/ActionForm";
 import { Field, Input, Select } from "@/components/ui/Field";
 import { linkChild } from "./actions";
+import { AddChildForm } from "./AddChildForm";
+import { siteUrl } from "@/lib/env";
 import { Flame, MonitorPlay, Star, Trophy } from "lucide-react";
 import { classNumber, lookFor } from "@/config/classLook";
 import { pct } from "@/lib/format";
@@ -24,6 +26,8 @@ export default async function ParentHome() {
     .select("relationship, students(profile_id, class_id, points, streak_days, profiles(full_name), classes(name, code))")
     .eq("parent_id", userId).order("linked_at");
   const children = ((data ?? []) as unknown as Child[]).map((c) => ({ ...c.students!, relationship: c.relationship })).filter((c) => c.profile_id);
+  const { data: offered } = await supabase.from("classes").select("code, name").eq("is_active", true).order("sort_order");
+  const site = siteUrl().replace(/^https?:\/\//, "");
   const ids = children.map((c) => c.profile_id);
   const classIds = [...new Set(children.map((c) => c.class_id).filter((x): x is string => !!x))];
   const [{ data: views }, { data: vids }, { data: attempts }] = ids.length ? await Promise.all([
@@ -42,7 +46,7 @@ export default async function ParentHome() {
       <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <Panel title="Your children">
           {children.length === 0 ? (
-            <EmptyState title="No children linked yet.">Ask your child to open their dashboard or profile page and read out their link code, then enter it under Link a child.</EmptyState>
+            <EmptyState title="No children added yet.">Create your child&apos;s account under Add a child. If they already have one, enter the link code from their profile page.</EmptyState>
           ) : (
             <ul className="grid gap-4">
               {children.map((c) => {
@@ -75,7 +79,12 @@ export default async function ParentHome() {
             </ul>
           )}
         </Panel>
-        <Panel title="Link a child">
+        <div className="grid content-start gap-6">
+        <Panel title="Add a child">
+          <p className="mb-4 text-sm text-muted">No email needed. We make a simple login ID and password your child can type on any phone or computer.</p>
+          <AddChildForm classes={offered ?? []} site={site} />
+        </Panel>
+        <Panel title="Already has an account? Link it">
           <ActionForm action={linkChild} submitLabel="Link child" pendingLabel="Linking">
             <Field label="Link code" htmlFor="code" hint="From your child's dashboard">
               <Input id="code" name="code" maxLength={12} autoComplete="off" className="uppercase tracking-[0.25em]" placeholder="8 characters" />
@@ -91,6 +100,7 @@ export default async function ParentHome() {
             </Field>
           </ActionForm>
         </Panel>
+        </div>
       </div>
     </>
   );

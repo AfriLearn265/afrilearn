@@ -16,10 +16,10 @@ export function LoginForm({ next, notice }: { next?: string; notice?: string }) 
       {notice && !state.error && <Notice tone="success">{notice}</Notice>}
       {state.error && <Notice tone="error">{state.error}</Notice>}
       <input type="hidden" name="next" value={next ?? ""} />
-      <Field label="Email address" htmlFor="email">
-        <Input id="email" name="email" type="email" autoComplete="email" inputMode="email" required autoFocus />
+      <Field label="Email address or pupil login ID" htmlFor="email" hint="Pupils: use the login ID on your card">
+        <Input id="email" name="email" type="text" autoComplete="username" inputMode="email" autoCapitalize="none" spellCheck={false} required autoFocus />
       </Field>
-      <Field label="Password" htmlFor="password" hint={<Link href="/forgot-password" className="font-semibold text-adire-700 hover:underline">Forgot password?</Link>}>
+      <Field label="Password" htmlFor="password" hint={<Link href="/forgot-password" className="font-semibold text-grape-700 hover:underline">Forgot password?</Link>}>
         <div className="relative">
           <Input id="password" name="password" type={show ? "text" : "password"} autoComplete="current-password" required className="pr-12" />
           <button type="button" onClick={() => setShow((s) => !s)} className="absolute inset-y-0 right-0 grid w-11 place-items-center text-muted hover:text-ink"

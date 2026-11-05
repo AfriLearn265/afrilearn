@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient, createPublicClient } from "@/lib/supabase/server";
 import { siteUrl } from "@/lib/env";
 import { guardianRequiredLevels, type LevelKey } from "@/config/curriculum";
+import { PUPIL_EMAIL_DOMAIN } from "@/lib/pupils";
 
 export type FormState = { error?: string; fieldErrors?: Record<string, string>; message?: string };
 
@@ -44,9 +45,12 @@ function authMessage(code: string | undefined, fallback: string) {
 }
 
 export async function login(fd: FormData): Promise<FormState> {
-  const email = str(fd, "email").toLowerCase();
+  const typed = str(fd, "email").toLowerCase();
+  // Pupils made by a parent or the school sign in with a login ID such as "amina.y482".
+  const isPupilId = /^[a-z][a-z0-9._-]{2,40}$/.test(typed) && !typed.includes("@");
+  const email = isPupilId ? `${typed}@${PUPIL_EMAIL_DOMAIN}` : typed;
   const password = String(fd.get("password") ?? "");
-  if (!EMAIL.test(email) || !password) return { error: "Enter your email address and password." };
+  if (!EMAIL.test(email) || !password) return { error: "Enter your email address (or pupil login ID) and password." };
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -55,7 +59,9 @@ export async function login(fd: FormData): Promise<FormState> {
       return { error: `Confirm your email address first. Open the link we sent to ${email}.` };
     }
     if (error.code === "invalid_credentials") {
-      return { error: "That email and password don't match an account. Check both and try again." };
+      return { error: isPupilId
+        ? "That login ID and password don't match. Check the login card your parent or school gave you."
+        : "That email and password don't match an account. Check both and try again." };
     }
     return { error: authMessage(error.code, "We couldn't log you in. Try again in a moment.") };
   }

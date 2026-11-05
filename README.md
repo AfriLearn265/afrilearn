@@ -147,3 +147,14 @@ Teachers and administrators add videos from **Class videos** in their dashboard.
 * **Video file link:** a direct https link to an .mp4 or .webm stored elsewhere.
 
 Pupils in the class get a notification for each new video, and teachers see a view count.
+
+## Pupil accounts without email
+
+Young pupils often have no email address, so parents and the school can create accounts for them:
+
+* **Parents:** *Add a child* on the parent dashboard creates the pupil, links them to the parent, and shows a printable login card.
+* **School administrators:** *Add pupils* creates a whole class at once from names pasted out of a spreadsheet (optionally with each parent's name and email), puts them in a classroom if you choose one, and prints a login card for each pupil.
+
+Each pupil gets a login ID such as `amina.y482` and an easy password such as `mango-rocket-47`. They sign in on the normal login page by typing the login ID instead of an email. Behind the scenes the ID maps to an internal address on `pupils.afrilearn.ng`; no email is ever sent there. This needs `SUPABASE_SECRET_KEY` on the server.
+
+Pupils can also pick a cartoon animal as their picture instead of uploading a photo.

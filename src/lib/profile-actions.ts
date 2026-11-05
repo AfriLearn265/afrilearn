@@ -15,10 +15,11 @@ async function ownImageUrl(url: string, userId: string) {
 export async function saveAvatar(url: string | null): Promise<ActionResult> {
   const session = await getSession();
   if (!session) return { error: "Log in again to change your photo." };
-  if (url !== null && !(await ownImageUrl(url, session.userId))) return { error: "That photo couldn't be saved." };
+  const critter = url !== null && /^avatar:(tortoise|lion|elephant|owl|frog|giraffe)$/.test(url);
+  if (url !== null && !critter && !(await ownImageUrl(url, session.userId))) return { error: "That photo couldn't be saved." };
   const supabase = await createClient();
   const { error } = await supabase.from("profiles").update({ avatar_url: url }).eq("id", session.userId);
   if (error) return { error: error.message };
   revalidatePath("/", "layout");
-  return { message: url ? "Photo updated." : "Photo removed." };
+  return { message: critter ? "Character chosen." : url ? "Photo updated." : "Photo removed." };
 }
