@@ -126,7 +126,7 @@ function PopularLessons({ topics, stats }: { topics: TopicHighlight[]; stats: { 
     <section aria-labelledby="popular-title" className="bg-white py-14 sm:py-20">
       <div className="container-page">
         <div className="flex flex-wrap items-end justify-between gap-6">
-          <SectionHeading title="Lessons pupils are watching" intro="Each one has a video, notes and a quiz." />
+          <SectionHeading title="Lessons pupils are watching" intro="Watch the video, read the notes, then play the quiz." />
           {stats && (
             <dl className="flex flex-wrap gap-x-8 gap-y-3">
               <Stat label="topics to learn" value={nf.format(stats.topics)} />

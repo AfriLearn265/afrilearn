@@ -31,7 +31,9 @@ alter table public.curriculum_topics enable row level security;
 grant select (id, code, class_id, subject_id, term, theme, sub_theme, title, summary, sort_order, is_published) on public.curriculum_topics to anon;
 grant select, insert, update, delete on public.curriculum_topics to authenticated;
 
-create policy "topics: read" on public.curriculum_topics for select to anon, authenticated
+-- Visitors can't run the staff-check functions, so they get their own simpler rule.
+create policy "topics: public read" on public.curriculum_topics for select to anon using (is_published);
+create policy "topics: read" on public.curriculum_topics for select to authenticated
   using (is_published or (select public.is_admin()) or (select public.is_active_teacher()));
 create policy "topics: admin add" on public.curriculum_topics for insert to authenticated
   with check ((select public.is_admin()));

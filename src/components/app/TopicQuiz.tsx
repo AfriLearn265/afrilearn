@@ -54,7 +54,7 @@ export function TopicQuiz({ topicId, questions }: { topicId: string; questions: 
                         chosen ? "border-grape-600 bg-grape-50" : "border-line hover:border-grape-300")}>
                       <span className={clsx("grid size-7 shrink-0 place-items-center rounded-full border-2 font-display text-sm",
                         chosen ? "border-grape-600 bg-grape-600 text-white" : "border-line text-ink-soft")}>{String.fromCharCode(65 + i)}</span>
-                      <span className="flex-1">{opt}</span>
+                      <span className="flex-1 text-lg">{opt}</span>
                       {right && <CircleCheck className="size-5 text-leaf-700" aria-label="Correct answer" />}
                       {wrong && <CircleX className="size-5 text-coral-700" aria-label="Your answer" />}
                     </button>
