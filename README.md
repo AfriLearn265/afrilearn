@@ -27,6 +27,9 @@ database/            SQL to create the whole backend, run in this order:
   updates/           run after the four files above, oldest first:
     2026-11-05-primary-and-videos.sql    Primary-only switch, class videos table, bucket and rules
     2026-11-05-primary-demo-content.sql  demo classrooms, courses, quizzes, results and videos
+    2026-11-06-curriculum-topics.sql     topics by term (English, Maths, P1-6), quizzes, progress, DRM video columns
+    2026-11-06-demo-topic-content.sql    demo notes and quizzes for a few first-term topics
+    2026-11-07-ratings-and-highlights.sql lesson star ratings and the homepage's real numbers
 src/
   app/               routes: landing, (auth), student, teacher, parent, admin, pending ...
   components/        landing sections, app shell, UI kit
@@ -92,6 +95,7 @@ git push -u origin main
 | AI learning companion | `ANTHROPIC_API_KEY` | Companion shows a "not configured" message |
 | Payments | `PAYSTACK_SECRET_KEY` (test key for the pilot) | Pricing stays informational; pilot mode keeps every feature free |
 | Live classes | `JAAS_APP_ID`, `JAAS_API_KEY_ID`, `JAAS_PRIVATE_KEY` | Falls back to public Jitsi, which limits embedded calls to 5 minutes |
+| Protected (DRM) videos | `VDOCIPHER_API_SECRET`, optional `VDOCIPHER_FOLDER_ID` | Uploads go to private Supabase storage and play through a 20-minute link |
 
 ## Development phases
 
@@ -140,13 +144,17 @@ All lessons and exam questions in the demo are original. The library links to op
 
 ## Class videos
 
-Teachers and administrators add videos from **Class videos** in their dashboard. Each video belongs to one class (and optionally one subject), and only pupils in that class, their parents, and staff can watch it.
+Teachers and administrators add videos from **Class videos** in their dashboard. Each video belongs to one class, and usually to one topic, so pupils find it on that topic's page. Only pupils in that class, their parents, and staff can watch it.
 
-* **Upload a video:** MP4, WebM or MOV straight from the browser to private storage, with a progress bar. The browser grabs a poster frame and the length before uploading. A free Supabase project allows up to **50 MB per file** (raise the global and bucket limits on the Pro plan for longer videos), and video viewing counts towards the monthly egress allowance.
-* **YouTube link:** for longer videos, upload to YouTube (unlisted works) and paste the link. Playback uses YouTube's privacy-enhanced player and costs no storage or egress.
-* **Video file link:** a direct https link to an .mp4 or .webm stored elsewhere.
+* **Protected hosting (VdoCipher):** with `VDOCIPHER_API_SECRET` set, the teacher's browser sends the file straight to VdoCipher, which encrypts it (Widevine and FairPlay DRM). Each play gets a five-minute one-time pass from the server and shows the pupil's name drifting across the picture. The video can't be downloaded, and a link copied from the browser's developer tools plays nowhere else. VdoCipher's Android and iOS SDKs add screen-recording blocking and encrypted offline downloads for the future app.
+* **Until then:** uploads go to private Supabase storage (up to 50 MB a file on the free plan) and play through a link that expires after 20 minutes, with no download button, no picture-in-picture, no right-click menu and the same moving name watermark. A determined person can still capture this, which is why DRM hosting is recommended.
+* YouTube links are no longer accepted for new videos, because YouTube videos can be downloaded. The early sample videos still play through YouTube's privacy-enhanced player until real lessons replace them.
 
-Pupils in the class get a notification for each new video, and teachers see a view count.
+Pupils in the class get a notification for each new video, and teachers see a view count and who has watched.
+
+## Topics by term
+
+Each class has its English, Mathematics and Basic Science topics split into first, second and third term (**Topics by term** for administrators, **Topics and notes** for teachers). Each topic page has three parts: **Watch** (its video), **Notes** (simple formatting: `##` headings, `-` lists, `**bold**`, `| a | b |` tables) and **Quiz** (checked on the server, so answers never reach the pupil's browser; 50% or more marks the topic done and earns stars). Topic links use a short random code, so the address never spells out the class or topic.
 
 ## Pupil accounts without email
 
