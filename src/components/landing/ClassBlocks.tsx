@@ -9,17 +9,19 @@ const tilts = ["-rotate-2", "rotate-1", "-rotate-1", "rotate-2", "-rotate-1", "r
 export function ClassBlocks({ classes, hrefFor, simple }: { classes: CatalogueClass[]; hrefFor?: (c: CatalogueClass) => string; simple?: boolean }) {
   const primary = classes.filter((c) => c.level === "primary");
   return (
-    <ul className="grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 lg:grid-cols-6">
+    <ul className={clsx("grid sm:gap-5 md:grid-cols-3 lg:grid-cols-6", simple ? "grid-cols-3 gap-3" : "grid-cols-2 gap-4")}>
       {primary.map((c, i) => {
         const look = lookFor(c.code);
         return (
           <li key={c.code}>
             <Link href={hrefFor ? hrefFor(c) : `/classes#${c.code.toLowerCase()}`}
-              className={clsx("sticker group flex h-full flex-col rounded-[1.6rem] p-4 text-ink transition-transform duration-200 hover:-translate-y-1 hover:rotate-0 focus-visible:rotate-0 sm:p-5",
-                look.bg, tilts[i % tilts.length])}>
-              <span className="font-display text-[4.2rem] font-semibold leading-[0.85] sm:text-[5rem]">{classNumber(c.name)}</span>
-              <span className="mt-3 font-display text-lg font-semibold leading-tight sm:text-xl">{c.name}</span>
-              <span className="text-sm font-semibold text-ink/70">{look.age}</span>
+              className={clsx("sticker group flex h-full flex-col rounded-[1.6rem] text-ink transition-transform duration-200 hover:-translate-y-1 hover:rotate-0 focus-visible:rotate-0 sm:p-5",
+                simple ? "p-3" : "p-4", look.bg, tilts[i % tilts.length])}>
+              <span className={clsx("font-display font-semibold leading-[0.85] sm:text-[5rem]", simple ? "text-[3.2rem]" : "text-[4.2rem]")}>{classNumber(c.name)}</span>
+              <span className={clsx("mt-3 font-display font-semibold leading-tight sm:text-xl", simple ? "text-[0.95rem]" : "text-lg")}>{c.name}</span>
+              {simple ? (
+                <span className="text-xs font-semibold text-ink/70 sm:text-sm"><span className="sm:hidden">{look.age.replace("About age", "Age")}</span><span className="hidden sm:inline">{look.age}</span></span>
+              ) : <span className="text-sm font-semibold text-ink/70">{look.age}</span>}
               {!simple && (
                 <>
                   <span className="mt-2 text-sm leading-snug text-ink/85">{look.about}</span>

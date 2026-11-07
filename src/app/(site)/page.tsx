@@ -26,22 +26,23 @@ export default async function Home() {
 
       <section aria-labelledby="subjects-title" className="container-page pb-6 pt-8 md:pt-10">
         <SectionHeading title="Start with a subject" intro="English and Maths, the subjects that matter most. Basic Science is on its way." />
-        <ul className="mt-8 grid gap-4 sm:grid-cols-3">
+        <ul className="mt-7 grid gap-3 sm:mt-8 sm:grid-cols-3 sm:gap-4">
           {CORE_SUBJECTS.map((code) => {
             const look = lookForSubject(code);
             const count = topicCounts[code] ?? 0;
             return (
               <li key={code}>
                 <Link href={count ? `/classes?subject=${code}` : "/signup"}
-                  className="group flex h-full flex-col overflow-hidden rounded-[1.75rem] border-2 border-ink bg-white shadow-[4px_5px_0_var(--color-ink)] transition hover:-translate-y-1">
-                  <span className={clsx("relative grid h-40 place-items-center", look.bg)}>
-                    <SubjectArt code={code} className="h-28 w-auto transition-transform group-hover:scale-105" />
-                    <span className="absolute left-4 top-4 rounded-full bg-white px-3 py-1 text-xs font-bold text-ink">{count ? `${count} topics` : "Coming soon"}</span>
+                  className="group flex h-full items-center overflow-hidden rounded-[1.5rem] border-2 border-ink bg-white shadow-[4px_5px_0_var(--color-ink)] transition hover:-translate-y-1 sm:flex-col sm:items-stretch sm:rounded-[1.75rem]">
+                  <span className={clsx("relative grid h-28 w-28 shrink-0 place-items-center border-r-2 border-ink sm:h-40 sm:w-auto sm:border-b-2 sm:border-r-0", look.bg)}>
+                    <SubjectArt code={code} className="h-16 w-auto transition-transform group-hover:scale-105 sm:h-28" />
+                    <span className="absolute left-4 top-4 hidden rounded-full bg-white px-3 py-1 text-xs font-bold text-ink sm:inline">{count ? `${count} topics` : "Coming soon"}</span>
                   </span>
-                  <span className="flex flex-1 items-center justify-between gap-3 p-5">
-                    <span>
-                      <span className="block font-display text-2xl font-semibold">{look.short}</span>
-                      <span className="block text-sm text-muted">{look.tagline}</span>
+                  <span className="flex min-w-0 flex-1 items-center justify-between gap-3 p-4 sm:p-5">
+                    <span className="min-w-0">
+                      <span className="block font-display text-xl font-semibold sm:text-2xl">{look.short}</span>
+                      <span className="block text-sm text-muted sm:hidden">{count ? `${count} topics, Primary 1 to 6` : "Coming soon"}</span>
+                      <span className="hidden text-sm text-muted sm:block">{look.tagline}</span>
                     </span>
                     <ArrowRight className="size-5 shrink-0 text-grape-600 transition-transform group-hover:translate-x-1" aria-hidden="true" />
                   </span>

@@ -34,22 +34,22 @@ export function PlayArcade() {
   const [round, setRound] = useState(0);
   return (
     <div className="grid gap-5 lg:grid-cols-[19rem_minmax(0,1fr)] lg:gap-7">
-      <div role="tablist" aria-label="Choose a game" className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1 scrollbar-none lg:mx-0 lg:grid lg:overflow-visible lg:px-0">
+      <div role="tablist" aria-label="Choose a game" className="grid grid-cols-3 gap-2 sm:gap-3 lg:grid-cols-1">
         {games.map((g) => (
           <button key={g.key} type="button" role="tab" aria-selected={game === g.key} onClick={() => { setGame(g.key); setRound((r) => r + 1); }}
-            className={clsx("flex w-60 shrink-0 items-center gap-3 rounded-[1.4rem] border-2 p-2.5 pr-4 text-left transition lg:w-auto",
-              game === g.key ? "border-ink bg-white shadow-[4px_5px_0_var(--color-ink)]" : "border-line bg-white/70 hover:border-grape-300")}>
-            <span className={clsx("grid size-16 shrink-0 place-items-center rounded-2xl border-2 border-ink", g.tone)}>
-              {g.art === "sprint" ? <Timer className="size-8 text-ink" aria-hidden="true" /> : <SubjectArt code={g.art} className="h-11 w-auto" />}
+            className={clsx("flex flex-col items-center gap-2 rounded-[1.4rem] border-2 p-2.5 text-center transition sm:flex-row sm:text-left lg:pr-4",
+              game === g.key ? "border-ink bg-white shadow-[3px_4px_0_var(--color-ink)]" : "border-line bg-white/70 hover:border-grape-300")}>
+            <span className={clsx("grid size-14 shrink-0 place-items-center rounded-2xl border-2 border-ink sm:size-16", g.tone)}>
+              {g.art === "sprint" ? <Timer className="size-7 text-ink sm:size-8" aria-hidden="true" /> : <SubjectArt code={g.art} className="h-10 w-auto sm:h-11" />}
             </span>
-            <span>
-              <span className="block font-display text-lg font-semibold leading-tight">{g.title}</span>
-              <span className="block text-sm text-muted">{g.blurb}</span>
+            <span className="min-w-0">
+              <span className="block font-display text-[0.95rem] font-semibold leading-tight sm:text-lg">{g.title}</span>
+              <span className="hidden text-sm text-muted sm:block">{g.blurb}</span>
             </span>
           </button>
         ))}
       </div>
-      <div className="sticker relative min-h-[25rem] overflow-hidden rounded-[2rem] bg-white">
+      <div className="sticker relative min-h-[23rem] overflow-hidden rounded-[1.75rem] bg-white sm:min-h-[25rem] sm:rounded-[2rem]">
         {game === "sprint" ? <Sprint key={`s${round}`} /> : <Quiz key={`${game}${round}`} bank={game === "english" ? englishQuestions : mathsQuestions} label={game === "english" ? "English" : "Maths"} />}
       </div>
     </div>
@@ -88,7 +88,7 @@ function Quiz({ bank, label }: { bank: FreeQuestion[]; label: string }) {
           ))}
         </ol>
       </div>
-      <p className="mt-6 font-display text-3xl font-semibold leading-tight sm:text-4xl">{q.q}</p>
+      <p className="mt-5 font-display text-[1.7rem] font-semibold leading-tight sm:mt-6 sm:text-4xl">{q.q}</p>
       <div className="mt-7 grid gap-3 sm:grid-cols-3">
         {q.options.map((opt, i) => {
           const isRight = picked !== null && i === q.answer;
@@ -146,7 +146,7 @@ function Sprint() {
   return (
     <div className="flex h-full flex-col items-center justify-center p-5 text-center sm:p-8">
       <p className="inline-flex items-center gap-2 rounded-full bg-lime-100 px-4 py-1.5 font-display font-semibold text-lime-600"><Timer className="size-4" aria-hidden="true" />{left}s · {score} right</p>
-      <p className={clsx("mt-6 font-display text-7xl font-semibold tabular transition-colors", flash === "right" ? "text-leaf-500" : flash === "wrong" ? "text-coral-500" : "text-ink")}>{q?.text} = ?</p>
+      <p className={clsx("mt-6 font-display text-6xl font-semibold tabular transition-colors sm:text-7xl", flash === "right" ? "text-leaf-500" : flash === "wrong" ? "text-coral-500" : "text-ink")}>{q?.text} = ?</p>
       <div className="mt-8 grid w-full max-w-md grid-cols-3 gap-3">
         {q?.options.map((n) => (
           <button key={n} type="button" onClick={() => {

@@ -38,24 +38,25 @@ export function HomeHero() {
           </ul>
         </div>
 
-        <div className="relative mx-auto w-full max-w-[29rem] lg:mr-0">
-          <span aria-hidden="true" className="absolute -right-4 top-6 size-[78%] rounded-full bg-sun-400" />
-          <div className="relative ml-auto aspect-[4/5] w-[82%] overflow-hidden rounded-[2.5rem] border-[5px] border-white shadow-[0_40px_80px_-30px_rgb(0_0_0/0.6)]">
-            <Image src={photos.heroBoy.src} alt={photos.heroBoy.alt} fill priority sizes="(min-width: 1024px) 380px, 80vw" className="object-cover object-[50%_20%]" />
+        {/* The cards and Tiko sit on the edges and the lower half of the photo, never over the child's face. */}
+        <div className="relative mx-auto w-full max-w-[22rem] pb-6 sm:max-w-[29rem] lg:mr-0">
+          <span aria-hidden="true" className="absolute -right-3 top-8 size-[74%] rounded-full bg-sun-400" />
+          <div className="relative mx-auto aspect-[4/5] w-[84%] overflow-hidden rounded-[2.25rem] border-[5px] border-white shadow-[0_40px_80px_-30px_rgb(0_0_0/0.6)] sm:w-[82%] lg:mr-0 sm:rounded-[2.5rem]">
+            <Image src={photos.heroBoy.src} alt={photos.heroBoy.alt} fill priority sizes="(min-width: 1024px) 380px, 84vw" className="object-cover object-top" />
           </div>
-          <div aria-hidden="true" className="absolute -bottom-8 -left-4 w-[46%] animate-pop-in [animation-delay:200ms] sm:-left-8">
-            <Mascot pose="wave" prop="cap" className="w-full drop-shadow-[0_18px_24px_rgb(0_0_0/0.35)]" />
-          </div>
-          <div aria-hidden="true" className="absolute -left-2 top-8 w-52 rotate-[-4deg] animate-pop-in rounded-2xl border-2 border-ink bg-white p-3 text-ink shadow-[4px_5px_0_var(--color-ink)] [animation-delay:450ms] sm:-left-10">
-            <p className="text-xs font-bold uppercase tracking-[0.1em] text-tangerine-600">Primary 5 · Maths</p>
-            <p className="font-display text-lg font-semibold leading-tight">Fractions quiz</p>
-            <p className="mt-1.5 flex items-center gap-1.5 text-sm font-semibold text-leaf-700"><CircleCheck className="size-4" />4 out of 4</p>
-          </div>
-          <div aria-hidden="true" className="absolute -right-2 bottom-20 rotate-[5deg] animate-pop-in rounded-full border-2 border-ink bg-sun-400 px-4 py-2 font-display font-semibold text-ink shadow-[3px_4px_0_var(--color-ink)] [animation-delay:650ms]">
+          <div aria-hidden="true" className="absolute right-0 top-[8%] rotate-[5deg] animate-pop-in rounded-full border-2 border-ink bg-sun-400 px-3 py-1.5 font-display text-sm font-semibold text-ink shadow-[3px_4px_0_var(--color-ink)] [animation-delay:650ms] sm:-right-3 sm:px-4 sm:py-2 sm:text-base">
             <Star className="mr-1 inline size-4 fill-ink" />+20 stars
           </div>
-          <Sparkle className="absolute -top-4 right-10 size-9 animate-bob" color="#FF6BAA" />
-          <Sparkle className="absolute bottom-2 right-[38%] size-7 animate-bob [animation-delay:-2s]" color="#9BDB4A" />
+          <div aria-hidden="true" className="absolute -left-1 bottom-[20%] w-44 -rotate-[4deg] animate-pop-in rounded-2xl border-2 border-ink bg-white p-3 text-ink shadow-[4px_5px_0_var(--color-ink)] [animation-delay:450ms] sm:-left-6 sm:w-52">
+            <p className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-tangerine-600 sm:text-xs">Primary 5 · Maths</p>
+            <p className="font-display text-base font-semibold leading-tight sm:text-lg">Fractions quiz</p>
+            <p className="mt-1 flex items-center gap-1.5 text-sm font-semibold text-leaf-700"><CircleCheck className="size-4" />4 out of 4</p>
+          </div>
+          <div aria-hidden="true" className="absolute -bottom-2 -right-2 w-[36%] animate-pop-in [animation-delay:200ms] sm:-right-6 sm:w-[38%]">
+            <Mascot pose="wave" prop="cap" className="w-full drop-shadow-[0_18px_24px_rgb(0_0_0/0.35)]" />
+          </div>
+          <Sparkle className="absolute -top-3 left-[6%] size-8 animate-bob sm:size-9" color="#FF6BAA" />
+          <Sparkle className="absolute left-[2%] top-[38%] size-6 animate-bob [animation-delay:-2s]" color="#9BDB4A" />
         </div>
       </div>
       <WaveEdge className="absolute inset-x-0 -bottom-px" />

@@ -69,7 +69,10 @@ export function PageHero({ title, intro, theme = "grape", art = { kind: "tiko" }
           <p className={clsx("mt-5 text-lg leading-relaxed md:text-xl", t.intro, hasArt ? "max-w-xl" : "mx-auto max-w-2xl")}>{intro}</p>
           {children && <div className={clsx("mt-8 grid gap-3 sm:flex sm:flex-wrap", !hasArt && "sm:justify-center")}>{children}</div>}
         </div>
-        {hasArt && <div className="relative mx-auto w-full max-w-[19rem] sm:max-w-[22rem] lg:mr-0"><HeroPicture art={art} /></div>}
+        {hasArt && (
+          // The class-number blocks repeat the class cards just below, so phones skip them.
+          <div className={clsx("relative mx-auto w-full max-w-[19rem] sm:max-w-[22rem] lg:mr-0", art.kind === "numbers" && "hidden sm:block")}><HeroPicture art={art} /></div>
+        )}
       </div>
       <WaveEdge className="absolute inset-x-0 -bottom-px" />
     </section>
