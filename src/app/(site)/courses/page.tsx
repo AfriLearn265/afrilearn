@@ -16,10 +16,10 @@ export default async function CoursesPage() {
 
   return (
     <>
-      <PageHero id="courses" mascot={{ pose: "stand", prop: "book" }} title="Courses that make learning click."
+      <PageHero theme="lime" art={{ kind: "subjects" }} title="Courses that make learning click."
         intro="Short lessons with videos, pictures and practice, matched to each class from Primary 1 to 6. Finish every lesson to earn a certificate.">
-        <ButtonLink href="/signup" size="lg" variant="accent">Create a free account</ButtonLink>
-        <ButtonLink href="/login" size="lg" variant="onDark">Log in to continue</ButtonLink>
+        <ButtonLink href="/signup" size="lg">Create a free account</ButtonLink>
+        <ButtonLink href="/login" size="lg" variant="light">Log in to continue</ButtonLink>
       </PageHero>
 
       <section className="container-page py-16 md:py-20">

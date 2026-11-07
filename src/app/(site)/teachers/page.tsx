@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { photos } from "@/config/photos";
 import { ChartNoAxesColumnIncreasing, ClipboardList, Clapperboard, FileQuestion, MessagesSquare, UploadCloud, Users, Video } from "lucide-react";
 import { CtaBand, PageHero, SectionHeading, Steps } from "@/components/landing/Marketing";
 import { ButtonLink } from "@/components/ui/Button";
@@ -22,10 +23,10 @@ const tools = [
 export default function TeachersPage() {
   return (
     <>
-      <PageHero id="teachers" mascot={{ pose: "cheer", prop: "cap" }} title="Teach the little ones who need you most."
+      <PageHero theme="sky" art={{ kind: "photo", src: photos.schoolFriends.src, alt: photos.schoolFriends.alt }} title="Teach the little ones who need you most."
         intro="We are recruiting qualified primary school teachers for every class from Primary 1 to Primary 6. Teacher accounts are free.">
-        <ButtonLink href="/signup?role=teacher" size="lg" variant="accent">Apply to teach</ButtonLink>
-        <ButtonLink href="/login?as=teacher" size="lg" variant="onDark">Teacher login</ButtonLink>
+        <ButtonLink href="/signup?role=teacher" size="lg">Apply to teach</ButtonLink>
+        <ButtonLink href="/login?as=teacher" size="lg" variant="light">Teacher login</ButtonLink>
       </PageHero>
 
       <section className="container-page py-14 sm:py-20 md:py-28">

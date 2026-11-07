@@ -12,6 +12,7 @@ import { TopicQuiz, type QuizQuestion } from "@/components/app/TopicQuiz";
 import { VideoPlayer } from "@/components/app/VideoPlayer";
 import { Markdown } from "@/components/app/Markdown";
 import { Mascot } from "@/components/brand/Mascot";
+import { StarRating } from "@/components/app/StarRating";
 import { markTopicDone } from "../../topic-actions";
 
 export const metadata = { title: "Lesson" };
@@ -30,12 +31,13 @@ export default async function TopicPage({ params }: { params: Promise<{ code: st
   const subjectCode = topic.subjects?.code ?? "";
   const look = lookForSubject(subjectCode);
 
-  const [{ data: vids }, { data: qs }, { data: progress }, { data: siblings }] = await Promise.all([
+  const [{ data: vids }, { data: qs }, { data: progress }, { data: siblings }, { data: myRating }] = await Promise.all([
     supabase.from("class_videos").select(VIDEO_FIELDS).eq("topic_id", topic.id).eq("is_published", true).order("created_at"),
     supabase.from("topic_questions").select("id, prompt, options, sort_order").eq("topic_id", topic.id).order("sort_order"),
     supabase.from("topic_progress").select("completed_at, best_percent").eq("student_id", userId).eq("topic_id", topic.id).maybeSingle(),
     supabase.from("curriculum_topics").select("code, title, term, sort_order").eq("class_id", topic.class_id).eq("subject_id", topic.subject_id)
       .eq("is_published", true).order("term").order("sort_order"),
+    supabase.from("topic_ratings").select("stars").eq("user_id", userId).eq("topic_id", topic.id).maybeSingle(),
   ]);
   const videos = await withMedia((vids ?? []) as unknown as ClassVideo[], { video: true });
   const main = videos[0];
@@ -90,6 +92,8 @@ export default async function TopicPage({ params }: { params: Promise<{ code: st
       </header>
 
       <TopicTabs video={videoPanel} notes={notesPanel} quiz={<TopicQuiz topicId={topic.id} questions={questions} />} initial={main ? "video" : "notes"} />
+
+      <StarRating topicId={topic.id} initial={myRating?.stars ?? null} />
 
       {!done && questions.length === 0 && (
         <form action={markTopicDone.bind(null, topic.id)}>

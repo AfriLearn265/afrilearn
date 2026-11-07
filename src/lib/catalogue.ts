@@ -112,3 +112,26 @@ export async function getPublicResources(): Promise<PublicResource[]> {
   const { data, error } = await createPublicClient().rpc("public_resources");
   return error || !data ? [] : (data as PublicResource[]);
 }
+
+export type TopicHighlight = {
+  code: string; title: string; class_name: string; class_code: string; subject_code: string;
+  stars: number | null; ratings: number; views: number; plays: number;
+};
+export type PlatformStats = { topics: number; video_views: number; quiz_plays: number; rating: number | null; ratings: number };
+
+/** Real numbers for the homepage: popular lessons with their actual ratings and views, and platform totals. */
+export async function getHomeHighlights(): Promise<{ topics: TopicHighlight[]; stats: PlatformStats | null; topicCounts: Record<string, number> }> {
+  if (!isSupabaseConfigured) return { topics: [], stats: null, topicCounts: {} };
+  const db = createPublicClient();
+  const [h, s, c] = await Promise.all([
+    db.rpc("public_topic_highlights", { p_limit: 6 }),
+    db.rpc("public_platform_stats"),
+    db.from("curriculum_topics").select("subjects(code)").eq("is_published", true),
+  ]);
+  const topicCounts: Record<string, number> = {};
+  for (const r of (c.data ?? []) as unknown as { subjects: { code: string } | null }[]) {
+    const code = r.subjects?.code;
+    if (code) topicCounts[code] = (topicCounts[code] ?? 0) + 1;
+  }
+  return { topics: (h.data ?? []) as TopicHighlight[], stats: (s.data ?? null) as PlatformStats | null, topicCounts };
+}

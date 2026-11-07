@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { photos } from "@/config/photos";
 import { BellRing, Check, MessageSquareLock, Play, ShieldCheck, Trophy, UserRoundCheck, Video } from "lucide-react";
 import { CtaBand, PageHero, SectionHeading, Steps } from "@/components/landing/Marketing";
 import { ButtonLink } from "@/components/ui/Button";
@@ -27,10 +28,10 @@ const sees = [
 export default function ParentsPage() {
   return (
     <>
-      <PageHero id="parents" mascot={{ pose: "wave", prop: "book" }} title="See exactly how your child is doing."
+      <PageHero theme="bubble" art={{ kind: "photo", src: photos.graduate.src, alt: photos.graduate.alt, tiko: true }} title="See exactly how your child is doing."
         intro="Set up your child's account, or link it with a secure code. You see their videos, quizzes, results and teacher feedback, and nothing that belongs to anyone else.">
-        <ButtonLink href="/signup?role=parent" size="lg" variant="accent">Create a parent account</ButtonLink>
-        <ButtonLink href="/login" size="lg" variant="onDark">Log in</ButtonLink>
+        <ButtonLink href="/signup?role=parent" size="lg">Create a parent account</ButtonLink>
+        <ButtonLink href="/login" size="lg" variant="outline">Log in</ButtonLink>
       </PageHero>
 
       <section className="container-page py-14 sm:py-20 md:py-28">

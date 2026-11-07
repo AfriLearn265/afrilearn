@@ -15,8 +15,8 @@ export default async function AppPage() {
   const brand = await getBrand();
   return (
     <>
-      <PageHero id="app" mascot={{ pose: "wave", prop: "star" }} title={`${brand.name} on your Android phone.`}
-        intro="Class videos, quizzes, live classes and results, one tap from your home screen. Your login and progress are the same as on the website.">
+      <PageHero theme="ink" art={{ kind: "phone" }} title={`${brand.name} on your Android phone.`}
+        intro="Class videos, quizzes and results, one tap from your home screen. Your login and progress are the same as on the website.">
         <a href={APK} download className={buttonClass("accent", "lg")}>
           <Download className="size-5" aria-hidden="true" />Download for Android
         </a>

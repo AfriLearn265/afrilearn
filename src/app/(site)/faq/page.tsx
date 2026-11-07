@@ -10,7 +10,7 @@ export default async function FaqPage() {
   const brand = await getBrand();
   return (
     <>
-      <PageHero id="faq" title="Questions people ask" intro={`Short answers about classes, videos, child safety, teachers and payments. Something else on your mind? Write to ${brand.supportEmail}.`} />
+      <PageHero theme="grape" art={{ kind: "none" }} title="Questions people ask" intro={`Short answers about classes, videos, child safety, teachers and payments. Something else on your mind? Write to ${brand.supportEmail}.`} />
       <section className="container-page max-w-4xl py-16 md:py-20">
         <div className="grid gap-3">
           {faqs.map(([q, a]) => [q.replaceAll("AfriLearn", brand.name), a.replaceAll("AfriLearn", brand.name)]).map(([q, a], i) => (

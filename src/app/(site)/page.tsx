@@ -1,194 +1,176 @@
-import { Check, Download, ShieldCheck } from "lucide-react";
-import { HeroScene } from "@/components/landing/HeroScene";
+import Image from "next/image";
+import Link from "next/link";
+import clsx from "clsx";
+import { ArrowRight, Eye, Puzzle, Quote, Star } from "lucide-react";
+import { HomeHero } from "@/components/landing/HomeHero";
 import { ClassBlocks } from "@/components/landing/ClassBlocks";
-import { FeatureShowcase } from "@/components/landing/FeatureShowcase";
-import { CourseTile } from "@/components/landing/CourseTile";
-import { AdirePattern, CtaBand, SectionHeading, Steps } from "@/components/landing/Marketing";
-import { Sparkle, Squiggle, WaveEdge } from "@/components/brand/Mascot";
+import { PlayArcade } from "@/components/landing/PlayArcade";
+import { CtaBand, SectionHeading } from "@/components/landing/Marketing";
+import { SubjectArt } from "@/components/brand/SubjectArt";
+import { Sparkle } from "@/components/brand/Mascot";
 import { ButtonLink } from "@/components/ui/Button";
-import { getCatalogue, getPublicResources, type Catalogue, type PublicResource } from "@/lib/catalogue";
-import { getBrand } from "@/lib/brand";
+import { getCatalogue, getHomeHighlights, type TopicHighlight } from "@/lib/catalogue";
+import { CORE_SUBJECTS, lookForSubject } from "@/config/subjects";
+import { photos } from "@/config/photos";
 
 export const revalidate = 300;
 
+const nf = new Intl.NumberFormat("en-NG");
+
 export default async function Home() {
-  const brand = await getBrand();
-  const [catalogue, resources] = await Promise.all([getCatalogue(), getPublicResources()]);
+  const [catalogue, { topics, stats, topicCounts }] = await Promise.all([getCatalogue(), getHomeHighlights()]);
 
   return (
     <>
-      <section className="relative isolate overflow-hidden bg-grape-700 text-white">
-        <div aria-hidden="true" className="sky-dots absolute inset-0 -z-10" />
-        <AdirePattern id="home-pattern" className="-z-10 text-grape-500/40 [mask-image:radial-gradient(60%_80%_at_80%_40%,black,transparent)]" />
-        <div className="container-page grid items-center gap-6 pb-24 pt-10 sm:pb-28 md:pt-14 lg:grid-cols-[1.02fr_0.98fr] lg:gap-10 lg:pb-32">
-          <div className="animate-hero-in">
-            <h1 className="max-w-[12ch] text-[3.1rem] font-semibold leading-[0.95] tracking-[-0.02em] sm:text-[4.4rem] lg:text-[5.4rem]">
-              Big learning for little champions.
-            </h1>
-            <Squiggle className="mt-4 w-32 sm:w-40" color="#FFCB2E" />
-            <p className="mt-5 max-w-[33rem] text-lg leading-relaxed text-grape-100 md:text-xl">
-              Video lessons for every class from Primary 1 to Primary 6, live classes with real teachers,
-              and quizzes that feel like games. Parents see every result.
-            </p>
-            <div className="mt-8 grid gap-3 sm:flex sm:flex-wrap">
-              <ButtonLink href="/signup" size="lg" variant="accent">Start learning free</ButtonLink>
-              <ButtonLink href="#classes" size="lg" variant="onDark">Pick a class</ButtonLink>
-            </div>
-            <p className="mt-5 text-sm text-grape-200">Free for every pupil during the pilot term.</p>
-          </div>
-          <HeroScene />
-        </div>
-        <WaveEdge className="absolute inset-x-0 -bottom-px" />
+      <HomeHero />
+
+      <section aria-labelledby="subjects-title" className="container-page pb-6 pt-8 md:pt-10">
+        <SectionHeading title="Start with a subject" intro="English and Maths first, the way parents asked. Basic Science is on its way." />
+        <ul className="mt-8 grid gap-4 sm:grid-cols-3">
+          {CORE_SUBJECTS.map((code) => {
+            const look = lookForSubject(code);
+            const count = topicCounts[code] ?? 0;
+            return (
+              <li key={code}>
+                <Link href={count ? `/classes?subject=${code}` : "/signup"}
+                  className="group flex h-full flex-col overflow-hidden rounded-[1.75rem] border-2 border-ink bg-white shadow-[4px_5px_0_var(--color-ink)] transition hover:-translate-y-1">
+                  <span className={clsx("relative grid h-40 place-items-center", look.bg)}>
+                    <SubjectArt code={code} className="h-28 w-auto transition-transform group-hover:scale-105" />
+                    <span className="absolute left-4 top-4 rounded-full bg-white px-3 py-1 text-xs font-bold text-ink">{count ? `${count} topics` : "Coming soon"}</span>
+                  </span>
+                  <span className="flex flex-1 items-center justify-between gap-3 p-5">
+                    <span>
+                      <span className="block font-display text-2xl font-semibold">{look.short}</span>
+                      <span className="block text-sm text-muted">{look.tagline}</span>
+                    </span>
+                    <ArrowRight className="size-5 shrink-0 text-grape-600 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       </section>
 
-      <section id="classes" aria-labelledby="classes-title" className="container-page scroll-mt-20 pb-14 pt-8 sm:pb-20 md:pt-12">
-        <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
-          <SectionHeading title="Pick your class" intro="Six classes, one happy journey. Every class has its own videos, lessons, quizzes and teachers." />
-        </div>
-        <div className="mt-9"><ClassBlocks classes={catalogue.classes} /></div>
-      </section>
-
-      <section aria-labelledby="inside-title" className="container-page py-14 sm:py-20">
-        <SectionHeading title="Everything a primary pupil needs" intro={`${brand.name} brings the classroom home, in short, colourful pieces that young learners can manage on their own.`} />
-        <div className="mt-10"><FeatureShowcase /></div>
-      </section>
-
-      <section className="relative bg-white py-16 sm:py-20 md:py-24">
+      <section id="play" aria-labelledby="play-title" className="scroll-mt-20 py-14 sm:py-20">
         <div className="container-page">
-          <SectionHeading title="How it works" intro="Three steps from sign-up to your child's first gold star." />
-          <Steps className="mt-12" steps={[
-            ["Choose your class", "A parent or guardian creates the account and picks the class, from Primary 1 to Primary 6."],
-            ["Watch, learn and play", "Pupils watch class videos, read short lessons and try quizzes that mark themselves."],
-            ["Celebrate progress", "Results, badges and teacher feedback show up on the pupil's and the parent's dashboard."],
-          ]} />
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <SectionHeading title="Play and learn, free" intro="No sign-up needed. Pick a game and see how you do." />
+            <p className="inline-flex items-center gap-2 rounded-full bg-sun-100 px-4 py-2 font-display font-semibold"><Sparkle className="size-5" />3 games to try</p>
+          </div>
+          <div className="mt-9"><PlayArcade /></div>
         </div>
       </section>
 
-      <FeaturedCourses courses={catalogue.courses.slice(0, 6)} />
+      <section id="classes" aria-labelledby="classes-title" className="container-page scroll-mt-20 py-10 sm:py-14">
+        <SectionHeading title="Pick your class" />
+        <div className="mt-8"><ClassBlocks classes={catalogue.classes} simple /></div>
+      </section>
 
-      <ParentsSection name={brand.name} />
+      {topics.length > 0 && <PopularLessons topics={topics} stats={stats} />}
 
-      <FreeDownloads items={resources.filter((r) => r.material_type === "pdf").slice(0, 4)} />
+      {catalogue.testimonials.length > 0 && (
+        <section aria-labelledby="reviews-title" className="container-page py-14 sm:py-20">
+          <SectionHeading title="What families say" />
+          <ul className="mt-9 grid gap-5 md:grid-cols-3">
+            {catalogue.testimonials.slice(0, 3).map((t, i) => (
+              <li key={t.id} className={clsx("relative rounded-[1.75rem] border-2 border-line bg-white p-6", ["md:-rotate-1", "md:translate-y-3", "md:rotate-1"][i])}>
+                <Quote className="size-8 text-grape-200" aria-hidden="true" />
+                <p className="mt-3 text-lg leading-relaxed">{t.quote}</p>
+                <p className="mt-4 font-display font-semibold">{t.author_name}</p>
+                <p className="text-sm text-muted">{t.author_role}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
-      <CtaBand title="Ready for the first gold star?" text="Create a free account, pick a class and watch the first video in minutes.">
+      <section className="relative isolate overflow-hidden bg-grape-950 text-white">
+        <span aria-hidden="true" className="absolute -right-40 top-0 -z-10 size-[30rem] rounded-full bg-grape-500/30 blur-3xl" />
+        <div className="container-page grid items-center gap-10 py-16 sm:py-20 lg:grid-cols-2">
+          <div className="relative grid grid-cols-[1.15fr_0.85fr] gap-4">
+            <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem]">
+              <Image src={photos.graduate.src} alt={photos.graduate.alt} fill sizes="(min-width: 1024px) 320px, 55vw" className="object-cover" />
+            </div>
+            <div className="grid gap-4">
+              <div className="relative aspect-square overflow-hidden rounded-[2rem]">
+                <Image src={photos.uniformGirl.src} alt={photos.uniformGirl.alt} fill sizes="(min-width: 1024px) 240px, 40vw" className="object-cover" />
+              </div>
+              <div className="relative aspect-square overflow-hidden rounded-[2rem]">
+                <Image src={photos.laptopGirl.src} alt={photos.laptopGirl.alt} fill sizes="(min-width: 1024px) 240px, 40vw" className="object-cover" />
+              </div>
+            </div>
+          </div>
+          <div>
+            <h2 className="text-4xl font-semibold leading-tight md:text-5xl">Made for Nigerian classrooms, and for home.</h2>
+            <p className="mt-5 max-w-lg text-lg leading-relaxed text-grape-100">Every topic follows the school term, so your child learns at home what the class is learning at school. You see every video watched and every quiz score.</p>
+            <div className="mt-8 grid gap-3 sm:flex sm:flex-wrap">
+              <ButtonLink href="/signup?role=parent" size="lg" variant="accent">Create a pupil account</ButtonLink>
+              <ButtonLink href="/parents" size="lg" variant="onDark">What parents get</ButtonLink>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <CtaBand title="Ready for the first gold star?" text="Create a free account, pick a class and start the first topic in minutes.">
         <ButtonLink href="/signup" size="lg">Create a free account</ButtonLink>
-        <ButtonLink href="/faq" size="lg" variant="light">Read common questions</ButtonLink>
+        <ButtonLink href="#play" size="lg" variant="light">Play a free quiz</ButtonLink>
       </CtaBand>
     </>
   );
 }
 
-function FeaturedCourses({ courses }: { courses: Catalogue["courses"] }) {
+/** The most-used lessons, with their real ratings, views and quiz plays. Nothing here is made up. */
+function PopularLessons({ topics, stats }: { topics: TopicHighlight[]; stats: { topics: number; video_views: number; quiz_plays: number; rating: number | null; ratings: number } | null }) {
   return (
-    <section className="container-page py-14 sm:py-20 md:py-24">
-      <div className="flex flex-wrap items-end justify-between gap-6">
-        <SectionHeading title="Courses pupils love" intro="Short, step-by-step courses written by approved teachers for each class." />
-        <ButtonLink href="/courses" variant="outline">See all courses</ButtonLink>
-      </div>
-      {courses.length === 0 ? (
-        <div className="mt-10 rounded-[1.75rem] border-2 border-dashed border-grape-200 bg-grape-50 px-6 py-12 text-center">
-          <p className="font-display text-2xl font-semibold">The first courses are being written now.</p>
-          <p className="mx-auto mt-2 max-w-md text-muted">Approved teachers publish courses from their dashboard. They appear here the moment they go live.</p>
-          <ButtonLink href="/teachers" className="mt-6">Apply to teach a course</ButtonLink>
+    <section aria-labelledby="popular-title" className="bg-white py-14 sm:py-20">
+      <div className="container-page">
+        <div className="flex flex-wrap items-end justify-between gap-6">
+          <SectionHeading title="Lessons pupils are watching" intro="Each one has a video, notes and a quiz." />
+          {stats && (
+            <dl className="flex flex-wrap gap-x-8 gap-y-3">
+              <Stat label="topics to learn" value={nf.format(stats.topics)} />
+              {stats.video_views > 0 && <Stat label="lessons watched" value={nf.format(stats.video_views)} />}
+              {stats.ratings > 0 && stats.rating != null && <Stat label={`from ${nf.format(stats.ratings)} ratings`} value={`${stats.rating}★`} />}
+            </dl>
+          )}
         </div>
-      ) : (
-        <ul className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {courses.map((c) => <CourseTile key={c.id} course={c} />)}
-        </ul>
-      )}
-    </section>
-  );
-}
-
-const report = [
-  { subject: "Mathematics", score: 80, tone: "bg-tangerine-400" },
-  { subject: "Basic Science", score: 83, tone: "bg-lime-400" },
-  { subject: "English", score: 72, tone: "bg-grape-400" },
-];
-
-function ParentsSection({ name }: { name: string }) {
-  return (
-    <section className="relative isolate overflow-hidden bg-lime-100">
-      <WaveEdge flip fill="var(--color-paper)" className="absolute inset-x-0 -top-px" />
-      <div className="container-page grid items-center gap-12 py-24 sm:py-28 lg:grid-cols-[1fr_0.9fr]">
-        <div>
-          <SectionHeading title="Parents see everything. Children stay safe."
-            intro={`${name} was built for young children first, so the safety rules are part of the platform, not an afterthought.`} />
-          <ul className="mt-8 grid gap-4">
-            {[
-              "A parent or guardian sets up and consents to every pupil account",
-              "No private messages between adults and children",
-              "Leaderboards are switched off unless a parent agrees, and show first names only",
-              "Every teacher is checked and approved before they can teach",
-            ].map((t) => (
-              <li key={t} className="flex gap-3 text-lg">
-                <span className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-full border-2 border-ink bg-sun-400"><Check className="size-4" strokeWidth={3} /></span>
-                {t}
+        <ul className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {topics.map((t) => {
+            const look = lookForSubject(t.subject_code);
+            return (
+              <li key={t.code}>
+                <Link href="/signup" className="group flex h-full gap-4 rounded-[1.6rem] border-2 border-line bg-paper p-3 pr-4 transition hover:border-ink hover:shadow-[4px_5px_0_var(--color-ink)]">
+                  <span className={clsx("grid w-24 shrink-0 place-items-center rounded-[1.2rem] border-2 border-ink", look.bg)}>
+                    <SubjectArt code={t.subject_code} className="h-14 w-auto" />
+                  </span>
+                  <span className="flex min-w-0 flex-1 flex-col py-1">
+                    <span className="text-xs font-bold uppercase tracking-[0.1em] text-faint">{t.class_name} · {look.short}</span>
+                    <span className="mt-0.5 font-display text-xl font-semibold leading-tight">{t.title}</span>
+                    <span className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 pt-3 text-sm font-semibold text-ink-soft">
+                      {t.ratings > 0 && t.stars != null ? (
+                        <span className="inline-flex items-center gap-1"><Star className="size-4 fill-sun-400 text-sun-600" aria-hidden="true" />{t.stars} <span className="font-normal text-muted">({t.ratings})</span></span>
+                      ) : <span className="rounded-full bg-lime-100 px-2 py-0.5 text-xs text-lime-600">New</span>}
+                      {t.views > 0 && <span className="inline-flex items-center gap-1"><Eye className="size-4" aria-hidden="true" />{nf.format(t.views)} views</span>}
+                      <span className="inline-flex items-center gap-1"><Puzzle className="size-4" aria-hidden="true" />Quiz</span>
+                    </span>
+                  </span>
+                </Link>
               </li>
-            ))}
-          </ul>
-          <div className="mt-9 grid gap-3 sm:flex sm:flex-wrap">
-            <ButtonLink href="/parents" size="lg">See what parents get</ButtonLink>
-            <ButtonLink href="/privacy" size="lg" variant="outline">Child safety policy</ButtonLink>
-          </div>
-        </div>
-
-        <div className="relative mx-auto w-full max-w-md" aria-hidden="true">
-          <Sparkle className="absolute -right-3 -top-6 z-10 size-12" color="#FF6BAA" />
-          <div className="sticker rotate-2 rounded-[1.75rem] bg-white p-6">
-            <div className="flex items-center gap-3">
-              <span className="grid size-12 place-items-center rounded-full border-2 border-ink bg-bubble-400 font-display text-lg font-semibold">AY</span>
-              <div className="leading-tight">
-                <p className="font-display text-xl font-semibold">Amina&apos;s week</p>
-                <p className="text-sm text-muted">Primary 5, sent to her mum every Friday</p>
-              </div>
-            </div>
-            <ul className="mt-6 grid gap-4">
-              {report.map((r) => (
-                <li key={r.subject}>
-                  <div className="flex justify-between text-sm font-semibold"><span>{r.subject}</span><span className="tabular">{r.score}%</span></div>
-                  <div className="mt-1.5 h-3.5 overflow-hidden rounded-full bg-wash">
-                    <div className={`h-full rounded-full ${r.tone}`} style={{ width: `${r.score}%` }} />
-                  </div>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-6 flex items-center gap-3 rounded-2xl bg-sun-100 p-3.5">
-              <ShieldCheck className="size-6 shrink-0 text-grape-700" />
-              <p className="text-sm"><span className="font-semibold">5 videos watched, 2 quizzes passed.</span> Mr Bakare says: &ldquo;Great work on fractions!&rdquo;</p>
-            </div>
-          </div>
-        </div>
+            );
+          })}
+        </ul>
       </div>
-      <WaveEdge fill="var(--color-paper)" className="absolute inset-x-0 -bottom-px" />
     </section>
   );
 }
 
-function FreeDownloads({ items }: { items: PublicResource[] }) {
-  if (items.length === 0) return null;
+function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <section className="container-page py-14 sm:py-20">
-      <div className="grid items-start gap-10 lg:grid-cols-[0.8fr_1.2fr]">
-        <div>
-          <SectionHeading title="Free worksheets" intro="Printable worksheets and practice papers with answers. Use them in class or at the kitchen table." />
-          <ButtonLink href="/resources" variant="outline" size="lg" className="mt-8">See all free downloads</ButtonLink>
-        </div>
-        <ul className="grid gap-3">
-          {items.map((r, i) => (
-            <li key={r.id} className="flex items-center gap-4 rounded-[1.25rem] border-2 border-line bg-white p-3.5 pr-4">
-              <span aria-hidden="true" className={`grid h-14 w-12 shrink-0 place-items-center rounded-xl border-2 border-ink font-display text-xs font-semibold ${["bg-tangerine-400", "bg-sky-400", "bg-lime-400", "bg-bubble-400"][i % 4]}`}>PDF</span>
-              <div className="min-w-0 flex-1">
-                <p className="font-semibold leading-snug">{r.title}</p>
-                <p className="text-sm text-muted">{[r.subject_name, r.class_name].filter(Boolean).join(", ")}</p>
-              </div>
-              <a href={`/api/resources/${r.id}`} download className="grid size-11 shrink-0 place-items-center rounded-full border-2 border-line text-grape-700 hover:border-grape-300 hover:bg-grape-50">
-                <Download className="size-5" aria-hidden="true" /><span className="sr-only">Download {r.title}</span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
+    <div>
+      <dt className="sr-only">{label}</dt>
+      <dd className="font-display text-3xl font-semibold text-grape-700">{value}</dd>
+      <dd className="text-sm text-muted">{label}</dd>
+    </div>
   );
 }

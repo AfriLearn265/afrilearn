@@ -1,6 +1,8 @@
+import Image from "next/image";
 import clsx from "clsx";
 import type { ReactNode } from "react";
 import { Mascot, Sparkle, WaveEdge } from "@/components/brand/Mascot";
+import { SubjectArt } from "@/components/brand/SubjectArt";
 
 type MascotPose = { pose?: "wave" | "stand" | "cheer"; prop?: "none" | "book" | "cap" | "star" };
 
@@ -29,32 +31,128 @@ export function AdirePattern({ id, className }: { id: string; className?: string
   );
 }
 
-/** Grape header shared by every public page: the title on the left and Tiko on the right. */
-export function PageHero({ id, title, intro, mascot = { pose: "wave", prop: "book" }, children }: {
-  id: string; title: string; intro: string; mascot?: MascotPose | false; children?: ReactNode;
+export type HeroTheme = "grape" | "sun" | "bubble" | "sky" | "tangerine" | "lime" | "lavender" | "ink";
+export type HeroArt =
+  | { kind: "tiko"; pose?: MascotPose["pose"]; prop?: MascotPose["prop"] }
+  | { kind: "photo"; src: string; alt: string; tiko?: boolean }
+  | { kind: "numbers" } | { kind: "questions" } | { kind: "sheets" } | { kind: "phone" } | { kind: "subjects" } | { kind: "none" };
+
+const heroThemes: Record<HeroTheme, { bg: string; text: string; intro: string; blob: string; dark: boolean }> = {
+  grape: { bg: "bg-[linear-gradient(160deg,var(--color-grape-950),var(--color-grape-700))]", text: "text-white", intro: "text-grape-100", blob: "bg-bubble-400/25", dark: true },
+  ink: { bg: "bg-ink", text: "text-white", intro: "text-grape-100", blob: "bg-sky-400/20", dark: true },
+  sun: { bg: "bg-sun-400", text: "text-ink", intro: "text-ink/75", blob: "bg-tangerine-400/40", dark: false },
+  bubble: { bg: "bg-bubble-100", text: "text-ink", intro: "text-ink-soft", blob: "bg-bubble-300/50", dark: false },
+  sky: { bg: "bg-sky-300", text: "text-ink", intro: "text-ink/75", blob: "bg-sky-100/70", dark: false },
+  tangerine: { bg: "bg-tangerine-400", text: "text-ink", intro: "text-ink/75", blob: "bg-sun-300/60", dark: false },
+  lime: { bg: "bg-lime-300", text: "text-ink", intro: "text-ink/75", blob: "bg-lime-100/70", dark: false },
+  lavender: { bg: "bg-grape-100", text: "text-ink", intro: "text-ink-soft", blob: "bg-grape-200/70", dark: false },
+};
+
+/** Whether a page header's colour is dark, so its buttons can pick the right style. */
+export const heroIsDark = (theme: HeroTheme) => heroThemes[theme].dark;
+
+/**
+ * The header at the top of each public page. Every page has its own colour and its own picture,
+ * so moving from one page to the next is obvious at a glance.
+ */
+export function PageHero({ title, intro, theme = "grape", art = { kind: "tiko" }, children }: {
+  id?: string; title: string; intro: string; theme?: HeroTheme; art?: HeroArt; children?: ReactNode;
 }) {
+  const t = heroThemes[theme];
+  const hasArt = art.kind !== "none";
   return (
-    <section className="relative isolate overflow-hidden bg-grape-700 text-white">
-      <div aria-hidden="true" className="sky-dots absolute inset-0 -z-10 opacity-70" />
-      <AdirePattern id={`${id}-pattern`} className="-z-10 text-grape-500/45 [mask-image:radial-gradient(70%_90%_at_85%_40%,black,transparent)]" />
-      <div className={clsx("container-page grid items-center gap-8 pb-16 pt-12 md:gap-12 md:pb-24 md:pt-16", mascot && "lg:grid-cols-[1.2fr_0.8fr]")}>
-        <div>
-          <h1 className="max-w-[17ch] text-[2.6rem] font-semibold leading-[1.02] sm:text-5xl lg:text-[4rem]">{title}</h1>
-          <p className="mt-5 max-w-xl text-lg leading-relaxed text-grape-100 md:text-xl">{intro}</p>
-          {children && <div className="mt-8 grid gap-3 sm:flex sm:flex-wrap">{children}</div>}
+    <section className={clsx("relative isolate overflow-hidden", t.bg, t.text)}>
+      <span aria-hidden="true" className={clsx("absolute -right-24 -top-32 -z-10 size-[28rem] rounded-full blur-3xl", t.blob)} />
+      <div className={clsx("container-page grid items-center gap-8 pb-16 pt-12 md:gap-12 md:pb-24 md:pt-16", hasArt ? "lg:grid-cols-[1.2fr_0.8fr]" : "text-center")}>
+        <div className={clsx(!hasArt && "mx-auto max-w-3xl")}>
+          <h1 className={clsx("text-[2.6rem] font-semibold leading-[1.02] sm:text-5xl lg:text-[4rem]", hasArt ? "max-w-[17ch]" : "mx-auto max-w-[20ch]")}>{title}</h1>
+          <p className={clsx("mt-5 text-lg leading-relaxed md:text-xl", t.intro, hasArt ? "max-w-xl" : "mx-auto max-w-2xl")}>{intro}</p>
+          {children && <div className={clsx("mt-8 grid gap-3 sm:flex sm:flex-wrap", !hasArt && "sm:justify-center")}>{children}</div>}
         </div>
-        {mascot && (
-          <div className="relative mx-auto w-full max-w-[19rem] sm:max-w-[22rem] lg:mr-0">
-            <span aria-hidden="true" className="absolute inset-[8%] -z-10 rounded-full bg-sun-400/90" />
-            <Sparkle className="absolute -left-2 top-2 size-9 animate-bob" color="#FF6BAA" />
-            <Sparkle className="absolute -right-1 bottom-10 size-7 animate-bob [animation-delay:-2s]" color="#33C2F2" />
-            <Mascot pose={mascot.pose} prop={mascot.prop} className="w-full drop-shadow-[0_18px_24px_rgb(23_10_58/0.35)]" />
-          </div>
-        )}
+        {hasArt && <div className="relative mx-auto w-full max-w-[19rem] sm:max-w-[22rem] lg:mr-0"><HeroPicture art={art} /></div>}
       </div>
       <WaveEdge className="absolute inset-x-0 -bottom-px" />
     </section>
   );
+}
+
+const blockTones = ["bg-tangerine-400", "bg-sun-300", "bg-lime-400", "bg-sky-400", "bg-bubble-400", "bg-grape-400"];
+
+function HeroPicture({ art }: { art: HeroArt }) {
+  switch (art.kind) {
+    case "photo":
+      return (
+        <div className="relative">
+          <span aria-hidden="true" className="absolute -right-3 -top-3 size-full rounded-[2.5rem] border-[3px] border-ink" />
+          <div className="relative aspect-[4/5] overflow-hidden rounded-[2.5rem] border-[3px] border-ink bg-white">
+            <Image src={art.src} alt={art.alt} fill sizes="(min-width: 1024px) 352px, 80vw" className="object-cover" />
+          </div>
+          {art.tiko && <Mascot pose="wave" prop="book" className="absolute -bottom-8 -left-10 w-[45%] drop-shadow-[0_12px_16px_rgb(0_0_0/0.25)]" />}
+          <Sparkle className="absolute -left-4 top-6 size-9 animate-bob" color="#FFCB2E" />
+        </div>
+      );
+    case "numbers":
+      return (
+        <div aria-hidden="true" className="grid grid-cols-3 gap-3 p-2">
+          {[1, 2, 3, 4, 5, 6].map((n, i) => (
+            <span key={n} className={clsx("sticker grid aspect-square place-items-center rounded-[1.4rem] font-display text-5xl font-semibold text-ink sm:text-6xl", blockTones[i], i % 2 ? "rotate-3" : "-rotate-3", i === 4 && "translate-y-3")}>{n}</span>
+          ))}
+        </div>
+      );
+    case "questions":
+      return (
+        <div aria-hidden="true" className="relative aspect-square">
+          {[["left-0 top-6 bg-white", "?"], ["right-2 top-0 bg-sun-400", "?"], ["bottom-6 left-10 bg-bubble-400", "!"]].map(([pos, ch], i) => (
+            <span key={i} className={clsx("sticker absolute grid size-[44%] place-items-center rounded-[2rem] font-display text-7xl font-semibold text-ink", pos, i === 1 ? "rotate-6" : "-rotate-6")}>{ch}</span>
+          ))}
+          <Mascot pose="stand" prop="none" className="absolute -bottom-2 right-0 w-[50%]" />
+        </div>
+      );
+    case "sheets":
+      return (
+        <div aria-hidden="true" className="relative aspect-square">
+          {["left-2 top-8 -rotate-12 bg-sky-100", "left-1/4 top-2 rotate-3 bg-white", "right-2 top-10 rotate-12 bg-tangerine-100"].map((pos, i) => (
+            <span key={i} className={clsx("sticker absolute flex h-[72%] w-[50%] flex-col gap-2 rounded-2xl p-4", pos)}>
+              <span className="h-3 w-2/3 rounded-full bg-ink/80" />
+              {[0, 1, 2, 3, 4].map((l) => <span key={l} className="h-2 rounded-full bg-ink/15" />)}
+              <span className="mt-auto inline-flex self-start rounded-full bg-lime-400 px-2 py-0.5 text-xs font-bold text-ink">PDF</span>
+            </span>
+          ))}
+        </div>
+      );
+    case "phone":
+      return (
+        <div aria-hidden="true" className="relative mx-auto w-[70%]">
+          <div className="sticker relative aspect-[9/17] overflow-hidden rounded-[2.4rem] bg-grape-600 p-3">
+            <div className="grid h-full place-items-center rounded-[1.8rem] bg-sun-400">
+              <Mascot pose="cheer" prop="star" className="w-[85%]" />
+            </div>
+          </div>
+          <Sparkle className="absolute -right-6 top-10 size-9 animate-bob" color="#9BDB4A" />
+        </div>
+      );
+    case "subjects":
+      return (
+        <div aria-hidden="true" className="grid gap-3">
+          {(["english", "mathematics", "basic-science"] as const).map((code, i) => (
+            <span key={code} className={clsx("sticker grid h-24 place-items-center rounded-[1.4rem]", ["bg-sky-400", "bg-tangerine-400", "bg-lime-400"][i], i === 1 ? "translate-x-6 rotate-2" : "-rotate-2")}>
+              <SubjectArt code={code} className="h-20 w-auto" />
+            </span>
+          ))}
+        </div>
+      );
+    case "tiko":
+      return (
+        <>
+          <span aria-hidden="true" className="absolute inset-[8%] -z-10 rounded-full bg-sun-400/90" />
+          <Sparkle className="absolute -left-2 top-2 size-9 animate-bob" color="#FF6BAA" />
+          <Sparkle className="absolute -right-1 bottom-10 size-7 animate-bob [animation-delay:-2s]" color="#33C2F2" />
+          <Mascot pose={art.pose ?? "wave"} prop={art.prop ?? "book"} className="w-full drop-shadow-[0_18px_24px_rgb(23_10_58/0.35)]" />
+        </>
+      );
+    default:
+      return null;
+  }
 }
 
 export function SectionHeading({ title, intro, light, center, className }: {

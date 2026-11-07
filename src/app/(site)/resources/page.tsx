@@ -32,10 +32,10 @@ export default async function ResourcesPage() {
 
   return (
     <>
-      <PageHero id="resources" mascot={{ pose: "stand", prop: "book" }} title="Free worksheets to print and share."
+      <PageHero theme="lavender" art={{ kind: "sheets" }} title="Free worksheets to print and share."
         intro="Worksheets, lesson notes and Common Entrance practice for Primary 1 to 6. Print them for class or use them at the kitchen table.">
-        <ButtonLink href="#practice" size="lg" variant="accent">Worksheets</ButtonLink>
-        <ButtonLink href="/signup" size="lg" variant="onDark">Get the full library free</ButtonLink>
+        <ButtonLink href="#practice" size="lg">Worksheets</ButtonLink>
+        <ButtonLink href="/signup" size="lg" variant="outline">Get the full library free</ButtonLink>
       </PageHero>
 
       <div className="container-page py-14 sm:py-20">

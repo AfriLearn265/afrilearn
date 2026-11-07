@@ -19,3 +19,12 @@ export async function markTopicDone(topicId: string) {
   await supabase.rpc("mark_topic_done", { p_topic: topicId });
   revalidatePath("/student", "layout");
 }
+
+/** Saves the pupil's star rating for a lesson (one per pupil per topic; rating again replaces it). */
+export async function rateTopic(topicId: string, stars: number) {
+  if (!(stars >= 1 && stars <= 5)) return;
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+  await supabase.from("topic_ratings").upsert({ user_id: user.id, topic_id: topicId, stars: Math.round(stars) });
+}

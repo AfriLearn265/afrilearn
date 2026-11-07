@@ -18,10 +18,10 @@ export default async function PricingPage() {
 
   return (
     <>
-      <PageHero id="pricing" mascot={{ pose: "stand", prop: "star" }} title="Simple plans in naira."
-        intro="Start free. Upgrade when you want live classes and Ask Tiko, the learning helper. Teachers always join free.">
-        <ButtonLink href="/signup" size="lg" variant="accent">Start free</ButtonLink>
-        <ButtonLink href="#schools" size="lg" variant="onDark">Plans for schools</ButtonLink>
+      <PageHero theme="tangerine" art={{ kind: "tiko", pose: "cheer", prop: "star" }} title="Simple plans in naira."
+        intro="Start free. Upgrade for every video, note and quiz in your class, plus Ask Tiko, the learning helper. Teachers always join free.">
+        <ButtonLink href="/signup" size="lg">Start free</ButtonLink>
+        <ButtonLink href="#schools" size="lg" variant="light">Plans for schools</ButtonLink>
       </PageHero>
 
       <section className="container-page py-16 md:py-20">
