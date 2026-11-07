@@ -6,7 +6,7 @@ export const brand = {
   name: "AfriLearn",
   tagline: "Learning Without Limits.",
   description:
-    "Nursery to SS3, WAEC, NECO and JAMB preparation in one place, with real teachers, live classes, CBT practice and progress parents can follow.",
+    "English and Maths for Primary 1 to 6, term by term: short video lessons, simple notes, fun quizzes and progress parents can follow.",
   supportEmail: "support@afrilearn.ng",
   country: "Nigeria",
 } as const;
