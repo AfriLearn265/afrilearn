@@ -25,7 +25,7 @@ export default async function Home() {
       <HomeHero />
 
       <section aria-labelledby="subjects-title" className="container-page pb-6 pt-8 md:pt-10">
-        <SectionHeading title="Start with a subject" intro="English and Maths first, the way parents asked. Basic Science is on its way." />
+        <SectionHeading title="Start with a subject" intro="English and Maths, the subjects that matter most. Basic Science is on its way." />
         <ul className="mt-8 grid gap-4 sm:grid-cols-3">
           {CORE_SUBJECTS.map((code) => {
             const look = lookForSubject(code);
