@@ -7,7 +7,18 @@ import type { ActionResult } from "@/components/app/ActionForm";
 
 const s = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
 
+/** Reads the "from week" and "to week" boxes; both are optional. */
+function weeks(fd: FormData): { week_start: number | null; week_end: number | null } | { error: string } {
+  const a = s(fd, "week_start") ? Number(s(fd, "week_start")) : null;
+  const b = s(fd, "week_end") ? Number(s(fd, "week_end")) : a;
+  if (a !== null && !(a >= 1 && a <= 14)) return { error: "Weeks run from 1 to 14." };
+  if (b !== null && !(b >= 1 && b <= 14)) return { error: "Weeks run from 1 to 14." };
+  if (a !== null && b !== null && b < a) return { error: "The last week can't come before the first week." };
+  return { week_start: a, week_end: a === null ? null : b };
+}
+
 function refresh() {
+  revalidatePath("/scheme-of-work");
   revalidatePath("/admin/curriculum");
   revalidatePath("/teacher/curriculum");
   revalidatePath("/student", "layout");
@@ -19,13 +30,15 @@ export async function addTopic(fd: FormData): Promise<ActionResult> {
   const term = Number(s(fd, "term"));
   if (title.length < 2) return { error: "Type the topic title." };
   if (![1, 2, 3].includes(term)) return { error: "Choose a term." };
+  const w = weeks(fd);
+  if ("error" in w) return w;
   const supabase = await createClient();
   const classId = s(fd, "class_id");
   const subjectId = s(fd, "subject_id");
   const { data: last } = await supabase.from("curriculum_topics").select("sort_order").eq("class_id", classId).eq("subject_id", subjectId)
     .order("sort_order", { ascending: false }).limit(1).maybeSingle();
   const { error } = await supabase.from("curriculum_topics").insert({
-    class_id: classId, subject_id: subjectId, term, title, theme: s(fd, "theme") || null, sort_order: (last?.sort_order ?? 0) + 1,
+    class_id: classId, subject_id: subjectId, term, title, theme: s(fd, "theme") || null, sort_order: (last?.sort_order ?? 0) + 1, ...w,
   });
   if (error) return { error: error.message };
   refresh();
@@ -38,10 +51,12 @@ export async function updateTopic(fd: FormData): Promise<ActionResult> {
   const term = Number(s(fd, "term"));
   if (title.length < 2) return { error: "The title can't be empty." };
   if (![1, 2, 3].includes(term)) return { error: "Choose a term." };
+  const w = weeks(fd);
+  if ("error" in w) return w;
   const supabase = await createClient();
   const { error } = await supabase.from("curriculum_topics").update({
     title, term, theme: s(fd, "theme") || null, summary: s(fd, "summary") || null, notes: s(fd, "notes") || null,
-    is_published: fd.get("is_published") === "on",
+    is_published: fd.get("is_published") === "on", ...w,
   }).eq("id", s(fd, "id"));
   if (error) return { error: error.message };
   refresh();

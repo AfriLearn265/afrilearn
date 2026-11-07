@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight, CircleCheck, MonitorPlay } from "lucide-reac
 import { requireRole } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { TOPIC_FIELDS, doneTopics, topicsWithVideos, type TopicRow } from "@/lib/curriculum";
-import { TERM_NAMES, currentTerm, lookForSubject } from "@/config/subjects";
+import { TERM_NAMES, currentTerm, lookForSubject, weekLabel } from "@/config/subjects";
 import { SubjectArt } from "@/components/brand/SubjectArt";
 
 export const metadata = { title: "Topics" };
@@ -19,7 +19,7 @@ export default async function SubjectPage({ params, searchParams }: {
   const supabase = await createClient();
   const [{ data: subject }, { data: me }] = await Promise.all([
     supabase.from("subjects").select("id, code, name").eq("code", code).maybeSingle(),
-    supabase.from("students").select("class_id, classes(name)").eq("profile_id", userId).single(),
+    supabase.from("students").select("class_id, classes(name, code)").eq("profile_id", userId).single(),
   ]);
   if (!subject || !me?.class_id) notFound();
   const { data } = await supabase.from("curriculum_topics").select(TOPIC_FIELDS)
@@ -28,7 +28,7 @@ export default async function SubjectPage({ params, searchParams }: {
   const termNow = currentTerm();
   const asked = Number(sp.term);
   const term = asked >= 1 && asked <= 3 ? asked : termNow;
-  const shown = topics.filter((t) => t.term === term);
+  const shown = topics.filter((t) => t.term === term).sort((a, b) => (a.week_start ?? 99) - (b.week_start ?? 99) || a.sort_order - b.sort_order);
   const [done, withVideo] = await Promise.all([doneTopics(userId, topics.map((t) => t.id)), topicsWithVideos(shown.map((t) => t.id))]);
   const look = lookForSubject(subject.code);
   const className = (me.classes as unknown as { name: string } | null)?.name;
@@ -59,6 +59,9 @@ export default async function SubjectPage({ params, searchParams }: {
         ))}
       </nav>
 
+      <Link href={`/scheme-of-work?class=${(me.classes as unknown as { code?: string } | null)?.code ?? ""}&subject=${subject.code}&term=${term}`}
+        className="-mt-2 justify-self-end text-sm font-semibold text-grape-700 hover:underline">See the week-by-week scheme of work</Link>
+
       {shown.length === 0 ? (
         <p className="rounded-[1.4rem] bg-wash p-6 text-center text-ink-soft">Topics for this term are on their way.</p>
       ) : (
@@ -74,7 +77,7 @@ export default async function SubjectPage({ params, searchParams }: {
                     {isDone ? <CircleCheck className="size-6" aria-label="Done" /> : i + 1}
                   </span>
                   <span className="min-w-0 flex-1">
-                    {t.theme && <span className="block text-xs font-bold uppercase tracking-[0.1em] text-faint">{t.theme}</span>}
+                    <span className="block text-xs font-bold uppercase tracking-[0.1em] text-faint">{[weekLabel(t.week_start, t.week_end), t.theme].filter(Boolean).join(" · ")}</span>
                     <span className="block font-display text-lg font-semibold leading-snug">{t.title}</span>
                   </span>
                   {withVideo.has(t.id) && <MonitorPlay className="size-5 shrink-0 text-grape-500" aria-label="Has a video" />}

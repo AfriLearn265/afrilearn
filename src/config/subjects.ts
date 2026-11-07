@@ -28,3 +28,16 @@ export function currentTerm(date = new Date()): 1 | 2 | 3 {
   const month = Number(new Intl.DateTimeFormat("en-NG", { timeZone: "Africa/Lagos", month: "numeric" }).format(date));
   return month >= 9 ? 1 : month <= 4 ? 2 : 3;
 }
+
+/** "Week 3" or "Weeks 3–4". */
+export function weekLabel(start: number | null | undefined, end: number | null | undefined) {
+  if (!start) return null;
+  return end && end > start ? `Weeks ${start}–${end}` : `Week ${start}`;
+}
+
+/** The weeks of a term that are not topics: they appear in every scheme of work. */
+export const FIXED_WEEKS: { week: number; label: string; at: "start" | "end" }[] = [
+  { week: 1, label: "Resumption, and revision of last term's work", at: "start" },
+  { week: 11, label: "Revision of the term's work", at: "end" },
+  { week: 12, label: "Examination", at: "end" },
+];

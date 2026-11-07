@@ -4,7 +4,7 @@ import { WaveEdge } from "@/components/brand/Mascot";
 import { getBrand } from "@/lib/brand";
 
 const columns = [
-  { title: "Learn", links: [["Primary 1 to 6", "/classes"], ["Courses", "/courses"], ["Free worksheets", "/resources"], ["Pricing", "/pricing"]] },
+  { title: "Learn", links: [["Primary 1 to 6", "/classes"], ["Scheme of work", "/scheme-of-work"], ["Courses", "/courses"], ["Free worksheets", "/resources"], ["Pricing", "/pricing"]] },
   { title: "Join", links: [["Create a pupil account", "/signup?role=parent"], ["For parents", "/parents"], ["For teachers", "/teachers"], ["Log in", "/login"]] },
   { title: "Help", links: [["Questions people ask", "/faq"], ["Verify a certificate", "/verify"], ["Privacy and child safety", "/privacy"], ["Terms of use", "/terms"], ["Credits", "/credits"]] },
 ];
@@ -12,7 +12,7 @@ const columns = [
 export async function SiteFooter() {
   const brand = await getBrand();
   return (
-    <footer className="relative mt-auto bg-grape-900 text-grape-100">
+    <footer className="relative mt-auto bg-grape-900 text-grape-100 print:hidden">
       <WaveEdge flip fill="var(--color-paper)" className="absolute inset-x-0 -top-px" />
       <div className="container-page grid grid-cols-2 gap-x-6 gap-y-10 pb-12 pt-20 md:grid-cols-[1.3fr_repeat(3,1fr)] md:pb-14 md:pt-24">
         <div className="col-span-2 md:col-span-1">

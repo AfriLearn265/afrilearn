@@ -31,7 +31,7 @@ export function AdirePattern({ id, className }: { id: string; className?: string
   );
 }
 
-export type HeroTheme = "grape" | "sun" | "bubble" | "sky" | "tangerine" | "lime" | "lavender" | "ink";
+export type HeroTheme = "grape" | "sun" | "bubble" | "sky" | "tangerine" | "lime" | "lavender" | "ink" | "coral";
 export type HeroArt =
   | { kind: "tiko"; pose?: MascotPose["pose"]; prop?: MascotPose["prop"] }
   | { kind: "photo"; src: string; alt: string; tiko?: boolean }
@@ -46,6 +46,7 @@ const heroThemes: Record<HeroTheme, { bg: string; text: string; intro: string; b
   tangerine: { bg: "bg-tangerine-400", text: "text-ink", intro: "text-ink/75", blob: "bg-sun-300/60", dark: false },
   lime: { bg: "bg-lime-300", text: "text-ink", intro: "text-ink/75", blob: "bg-lime-100/70", dark: false },
   lavender: { bg: "bg-grape-100", text: "text-ink", intro: "text-ink-soft", blob: "bg-grape-200/70", dark: false },
+  coral: { bg: "bg-coral-100", text: "text-ink", intro: "text-ink-soft", blob: "bg-tangerine-300/50", dark: false },
 };
 
 /** Whether a page header's colour is dark, so its buttons can pick the right style. */
@@ -61,7 +62,7 @@ export function PageHero({ title, intro, theme = "grape", art = { kind: "tiko" }
   const t = heroThemes[theme];
   const hasArt = art.kind !== "none";
   return (
-    <section className={clsx("relative isolate overflow-hidden", t.bg, t.text)}>
+    <section className={clsx("relative isolate overflow-hidden print:hidden", t.bg, t.text)}>
       <span aria-hidden="true" className={clsx("absolute -right-24 -top-32 -z-10 size-[28rem] rounded-full blur-3xl", t.blob)} />
       <div className={clsx("container-page grid items-center gap-8 pb-16 pt-12 md:gap-12 md:pb-24 md:pt-16", hasArt ? "lg:grid-cols-[1.2fr_0.8fr]" : "text-center")}>
         <div className={clsx(!hasArt && "mx-auto max-w-3xl")}>
@@ -70,8 +71,8 @@ export function PageHero({ title, intro, theme = "grape", art = { kind: "tiko" }
           {children && <div className={clsx("mt-8 grid gap-3 sm:flex sm:flex-wrap", !hasArt && "sm:justify-center")}>{children}</div>}
         </div>
         {hasArt && (
-          // The class-number blocks repeat the class cards just below, so phones skip them.
-          <div className={clsx("relative mx-auto w-full max-w-[19rem] sm:max-w-[22rem] lg:mr-0", art.kind === "numbers" && "hidden sm:block")}><HeroPicture art={art} /></div>
+          // Phones keep only real photos here, so headers stay short and the page starts quickly.
+          <div className={clsx("relative mx-auto w-full max-w-[19rem] sm:max-w-[22rem] lg:mr-0", art.kind !== "photo" && "hidden sm:block")}><HeroPicture art={art} /></div>
         )}
       </div>
       <WaveEdge className="absolute inset-x-0 -bottom-px" />

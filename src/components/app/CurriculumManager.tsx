@@ -5,10 +5,14 @@ import { createClient } from "@/lib/supabase/server";
 import { PageHeader, Panel } from "@/components/app/AppShell";
 import { ActionForm } from "@/components/app/ActionForm";
 import { Field, Input, Select, Textarea } from "@/components/ui/Field";
-import { CORE_SUBJECTS, TERM_NAMES } from "@/config/subjects";
+import { CORE_SUBJECTS, TERM_NAMES, currentTerm, weekLabel } from "@/config/subjects";
+import { ButtonLink } from "@/components/ui/Button";
 import { addQuestion, addTopic, deleteQuestion, deleteTopic, updateTopic } from "@/app/curriculum-actions";
 
-type Topic = { id: string; code: string; term: number; theme: string | null; title: string; summary: string | null; notes: string | null; is_published: boolean; sort_order: number };
+type Topic = {
+  id: string; code: string; term: number; theme: string | null; title: string; summary: string | null; notes: string | null;
+  is_published: boolean; sort_order: number; week_start: number | null; week_end: number | null;
+};
 type StaffQuestion = { id: string; prompt: string; options: string[]; answer: number; explanation: string | null };
 
 /**
@@ -31,8 +35,8 @@ export async function CurriculumManager({ basePath, isAdmin, cls, subject, open 
   };
   if (!klass || !subj) return <PageHeader title="Topics by term" intro="Add a class and a subject first." />;
 
-  const { data } = await supabase.from("curriculum_topics").select("id, code, term, theme, title, summary, notes, is_published, sort_order")
-    .eq("class_id", klass.id).eq("subject_id", subj.id).order("term").order("sort_order");
+  const { data } = await supabase.from("curriculum_topics").select("id, code, term, theme, title, summary, notes, is_published, sort_order, week_start, week_end")
+    .eq("class_id", klass.id).eq("subject_id", subj.id).order("term").order("week_start").order("sort_order");
   const topics = (data ?? []) as Topic[];
   const ids = topics.map((t) => t.id);
   const [{ data: qRows }, { data: vRows }] = ids.length
@@ -50,7 +54,8 @@ export async function CurriculumManager({ basePath, isAdmin, cls, subject, open 
 
   return (
     <>
-      <PageHeader title="Topics by term" intro="What each class learns in English, Mathematics and Basic Science, term by term. Pupils see these topics in this order, each with its video, notes and quiz." />
+      <PageHeader title="Topics by term" intro="What each class learns in English, Mathematics and Basic Science, week by week. Pupils see these topics in this order, each with its video, notes and quiz."
+        actions={<ButtonLink href={`/scheme-of-work?class=${klass.code}&subject=${subj.code}&term=${currentTerm()}`} variant="outline">Print the scheme of work</ButtonLink>} />
 
       <nav aria-label="Class" className="-mx-4 mb-3 overflow-x-auto px-4 scrollbar-none">
         <ul className="flex min-w-max gap-2">
@@ -73,6 +78,7 @@ export async function CurriculumManager({ basePath, isAdmin, cls, subject, open 
                       <li key={t.id}>
                         <Link href={t.code === open ? href({ open: undefined }) : href({ open: t.code })}
                           className={clsx("flex items-center gap-3 py-3 hover:text-grape-700", !t.is_published && "opacity-60")}>
+                          <span className="w-20 shrink-0 font-display text-sm font-semibold text-grape-700">{weekLabel(t.week_start, t.week_end) ?? "No week"}</span>
                           <span className="min-w-0 flex-1">
                             {t.theme && <span className="block text-xs font-bold uppercase tracking-[0.1em] text-faint">{t.theme}</span>}
                             <span className="font-semibold">{t.title}</span>{!t.is_published && <span className="ml-2 text-xs font-semibold text-muted">(hidden)</span>}
@@ -96,6 +102,10 @@ export async function CurriculumManager({ basePath, isAdmin, cls, subject, open 
                                   </Select>
                                 </Field>
                                 <Field label="Theme" htmlFor={`theme-${t.id}`} hint="e.g. Reading, or Number and Numeration"><Input id={`theme-${t.id}`} name="theme" defaultValue={t.theme ?? ""} maxLength={80} /></Field>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <Field label="From week" htmlFor={`ws-${t.id}`}><Input id={`ws-${t.id}`} name="week_start" type="number" min={1} max={14} defaultValue={t.week_start ?? ""} /></Field>
+                                  <Field label="To week" htmlFor={`we-${t.id}`}><Input id={`we-${t.id}`} name="week_end" type="number" min={1} max={14} defaultValue={t.week_end ?? ""} /></Field>
+                                </div>
                                 <label className="flex items-center gap-2 self-end pb-3 text-sm font-semibold"><input type="checkbox" name="is_published" defaultChecked={t.is_published} className="size-4 accent-grape-600" />Pupils can see it</label>
                               </div>
                               <Field label="One-line summary" htmlFor={`sum-${t.id}`} hint="Optional"><Input id={`sum-${t.id}`} name="summary" defaultValue={t.summary ?? ""} maxLength={400} /></Field>
@@ -163,6 +173,10 @@ export async function CurriculumManager({ basePath, isAdmin, cls, subject, open 
                 <Select id="new-term" name="term" defaultValue="1">{[1, 2, 3].map((n) => <option key={n} value={n}>{TERM_NAMES[n]}</option>)}</Select>
               </Field>
               <Field label="Theme" htmlFor="new-theme" hint="Optional"><Input id="new-theme" name="theme" maxLength={80} placeholder="e.g. Number and Numeration" /></Field>
+              <div className="grid grid-cols-2 gap-2">
+                <Field label="From week" htmlFor="new-ws"><Input id="new-ws" name="week_start" type="number" min={1} max={14} /></Field>
+                <Field label="To week" htmlFor="new-we" hint="Optional"><Input id="new-we" name="week_end" type="number" min={1} max={14} /></Field>
+              </div>
             </ActionForm>
           </Panel>
         )}

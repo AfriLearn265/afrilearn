@@ -96,7 +96,10 @@ export default async function ClassesPage({ searchParams }: { searchParams: Prom
                       })}
                     </div>
                   )}
-                  <div className="mt-6"><ButtonLink href={`/signup?class=${c.code}`} variant="outline">Start {c.name}</ButtonLink></div>
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    <ButtonLink href={`/signup?class=${c.code}`} variant="outline">Start {c.name}</ButtonLink>
+                    <ButtonLink href={`/scheme-of-work?class=${c.code}&subject=${subject}`} variant="ghost">Week-by-week scheme of work</ButtonLink>
+                  </div>
                 </div>
               </article>
             );

@@ -4,11 +4,11 @@ import { CORE_SUBJECTS } from "@/config/subjects";
 
 export type TopicRow = {
   id: string; code: string; class_id: string; subject_id: string; term: number; theme: string | null; sub_theme: string | null;
-  title: string; summary: string | null; sort_order: number;
+  title: string; summary: string | null; sort_order: number; week_start: number | null; week_end: number | null;
 };
 export type SubjectRow = { id: string; code: string; name: string; color: string };
 
-export const TOPIC_FIELDS = "id, code, class_id, subject_id, term, theme, sub_theme, title, summary, sort_order";
+export const TOPIC_FIELDS = "id, code, class_id, subject_id, term, theme, sub_theme, title, summary, sort_order, week_start, week_end";
 
 /** The core subjects with each one's topics for a class, and which of them the pupil has finished. */
 export async function subjectsForClass(classId: string, studentId?: string) {

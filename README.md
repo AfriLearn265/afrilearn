@@ -30,6 +30,7 @@ database/            SQL to create the whole backend, run in this order:
     2026-11-06-curriculum-topics.sql     topics by term (English, Maths, P1-6), quizzes, progress, DRM video columns
     2026-11-06-demo-topic-content.sql    demo notes and quizzes for a few first-term topics
     2026-11-07-ratings-and-highlights.sql lesson star ratings and the homepage's real numbers
+    2026-11-07-scheme-and-insights.sql   weeks for every topic, learning activity log, admin dashboard numbers
 src/
   app/               routes: landing, (auth), student, teacher, parent, admin, pending ...
   components/        landing sections, app shell, UI kit
@@ -155,6 +156,12 @@ Pupils in the class get a notification for each new video, and teachers see a vi
 ## Topics by term
 
 Each class has its English, Mathematics and Basic Science topics split into first, second and third term (**Topics by term** for administrators, **Topics and notes** for teachers). Each topic page has three parts: **Watch** (its video), **Notes** (simple formatting: `##` headings, `-` lists, `**bold**`, `| a | b |` tables) and **Quiz** (checked on the server, so answers never reach the pupil's browser; 50% or more marks the topic done and earns stars). Topic links use a short random code, so the address never spells out the class or topic.
+
+Every topic also has a week (or a run of weeks) in the term, which makes the **scheme of work** at `/scheme-of-work`: week 1 is resumption and revision, topics run through weeks 2 to 10 in curriculum order, and weeks 11 and 12 are revision and examinations. Parents can follow it, teachers can print it or save it as a PDF, and administrators can move any topic to another week from Topics by term.
+
+## Administrator dashboard
+
+The control room shows the last 7, 30 or 90 days against the period before: new accounts, active pupils, videos watched, quizzes taken, revenue and the average lesson rating, with daily charts. Below that: a to-do list (teacher applications, reports, this term's topics missing a video or notes, videos not linked to a topic), content readiness for every class and subject, each class's progress through this term's topics, the most popular lessons, the lessons pupils find hard (average quiz score under 70%), the most active pupils and what each teacher has added. **Download report** saves the same numbers as a spreadsheet (CSV) for Excel or Google Sheets. Activity is counted from the moment this update was run, plus what earlier video and quiz records show.
 
 ## Pupil accounts without email
 
