@@ -26,6 +26,7 @@ export const navByRole: Record<Role, NavItem[]> = {
   teacher: [
     { href: "/teacher", label: "Overview", icon: "home" },
     { href: "/teacher/videos", label: "Class videos", icon: "play" },
+    { href: "/teacher/curriculum", label: "Topics and notes", icon: "book" },
     { href: "/teacher/courses", label: "Courses", icon: "book" },
     { href: "/teacher/assignments", label: "Assignments", icon: "assignment" },
     { href: "/teacher/questions", label: "Question banks", icon: "bank" },
@@ -46,6 +47,7 @@ export const navByRole: Record<Role, NavItem[]> = {
     { href: "/admin", label: "Overview", icon: "home" },
     { href: "/admin/users", label: "Users", icon: "users" },
     { href: "/admin/pupils", label: "Add pupils", icon: "child" },
+    { href: "/admin/curriculum", label: "Topics by term", icon: "book" },
     { href: "/admin/academics", label: "Classes and subjects", icon: "subjects" },
     { href: "/admin/videos", label: "Class videos", icon: "play" },
     { href: "/admin/content", label: "Content", icon: "shield" },

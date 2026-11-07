@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
+import { photos } from "@/config/photos";
 
 export const metadata: Metadata = { title: "Credits" };
 
 const credits = [
   ["Illustrations", "Tiko the tortoise and every drawing on this site are original artwork made for AfriLearn."],
+  ["Photographs", `From Unsplash, under the Unsplash License, by ${[...new Set(Object.values(photos).map((p) => p.by))].join(", ")}.`],
   ["Typefaces", "Fredoka and Nunito, both released under the SIL Open Font License and served from this site."],
   ["Icons", "Lucide icons, released under the ISC License."],
-  ["Class videos", "Videos that teachers share from YouTube stay the property of their creators and play through YouTube's own player."],
+  ["Curriculum", "Topic lists follow the Nigerian national curriculum for English Studies and Mathematics, Primary 1 to 6."],
+  ["Sample videos", "A few early sample videos come from YouTube, stay the property of their creators and play through YouTube's own player. New lessons are hosted privately."],
   ["Free textbooks", "Open textbooks in the library come from OpenStax and are shared under their Creative Commons licences."],
 ];
 

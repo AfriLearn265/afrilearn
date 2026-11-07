@@ -192,6 +192,15 @@
   body.print-cards .login-cards { position: absolute; inset: 0 auto auto 0; width: 100%; }
 }
 
+/* A watermark that wanders over a playing video, so a screen recording always shows whose account it came from. */
+@keyframes drift {
+  0% { left: 4%; top: 8%; }
+  25% { left: 58%; top: 72%; }
+  50% { left: 8%; top: 80%; }
+  75% { left: 62%; top: 12%; }
+  100% { left: 4%; top: 8%; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

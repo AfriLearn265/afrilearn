@@ -2,7 +2,8 @@ import Link from "next/link";
 import clsx from "clsx";
 import { ChevronLeft, Clock, Eye, User } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { VIDEO_FIELDS, formatDuration, withMedia, type ClassVideo } from "@/lib/videos";
+import { VIDEO_FIELDS, formatDuration, playbackFor, withMedia, type ClassVideo } from "@/lib/videos";
+import { getSession } from "@/lib/auth";
 import { formatDate } from "@/lib/format";
 import { EmptyState } from "@/components/app/AppShell";
 import { VideoCard } from "@/components/app/VideoCard";
@@ -128,6 +129,8 @@ export async function WatchVideo({ id, backHref, backLabel, staff, userId, isAdm
     );
   }
   const [v] = await withMedia([data as unknown as ClassVideo], { video: true });
+  const viewer = (await getSession())?.profile.full_name ?? "AfriLearn";
+  const playback = await playbackFor(v, viewer);
   const { data: more } = await supabase.from("class_videos").select(VIDEO_FIELDS).eq("class_id", v.class_id).eq("is_published", true)
     .neq("id", v.id).order("created_at", { ascending: false }).limit(6);
   const others = await withMedia((more ?? []) as unknown as ClassVideo[]);
@@ -142,7 +145,7 @@ export async function WatchVideo({ id, backHref, backLabel, staff, userId, isAdm
       </Link>
       <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="min-w-0">
-          <VideoPlayer id={v.id} title={v.title} youtubeId={v.youtube_id} src={v.playUrl} poster={v.posterUrl} />
+          <VideoPlayer id={v.id} title={v.title} playback={playback} poster={v.posterUrl} watermark={viewer} />
           <div className="mt-6 flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0">
               <p className="flex flex-wrap items-center gap-2 text-sm font-semibold">

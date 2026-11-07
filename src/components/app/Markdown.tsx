@@ -3,7 +3,7 @@ import { Fragment, type ReactNode } from "react";
 /**
  * Small, safe Markdown renderer for lesson notes (no raw HTML is ever injected).
  * Supports headings, paragraphs, bullet/numbered lists, bold, italic, inline code,
- * links, block quotes and fenced code.
+ * links, block quotes, fenced code and simple pipe tables.
  */
 function inline(text: string, key: string): ReactNode[] {
   const out: ReactNode[] = [];
@@ -43,6 +43,27 @@ export function Markdown({ source }: { source: string }) {
       blocks.push(<pre key={key} className="overflow-x-auto rounded-xl bg-ink p-4 text-sm text-white"><code>{code.join("\n")}</code></pre>);
       continue;
     }
+    if (line.trim().startsWith("|")) {
+      const rows: string[][] = [];
+      while (i < lines.length && lines[i].trim().startsWith("|")) {
+        const cells = lines[i++].trim().replace(/^\||\|$/g, "").split("|").map((c) => c.trim());
+        if (!cells.every((c) => /^:?-{2,}:?$/.test(c))) rows.push(cells);
+      }
+      const [head, ...body] = rows;
+      blocks.push(
+        <div key={key} className="overflow-x-auto rounded-xl border-2 border-line">
+          <table className="w-full text-left text-[0.98rem]">
+            <thead className="bg-wash font-display">
+              <tr>{head.map((c, j) => <th key={j} scope="col" className="px-4 py-2 font-semibold">{inline(c, `${key}-h${j}`)}</th>)}</tr>
+            </thead>
+            <tbody className="divide-y-2 divide-line">
+              {body.map((r, ri) => <tr key={ri}>{r.map((c, j) => <td key={j} className="px-4 py-2">{inline(c, `${key}-${ri}-${j}`)}</td>)}</tr>)}
+            </tbody>
+          </table>
+        </div>,
+      );
+      continue;
+    }
     const h = line.match(/^(#{1,3})\s+(.*)$/);
     if (h) {
       const level = h[1].length;
@@ -66,7 +87,7 @@ export function Markdown({ source }: { source: string }) {
       continue;
     }
     const para: string[] = [];
-    while (i < lines.length && lines[i].trim() && !/^(#{1,3}\s|```|>|\s*([-*]|\d+\.)\s)/.test(lines[i])) para.push(lines[i++]);
+    while (i < lines.length && lines[i].trim() && !/^(#{1,3}\s|```|>|\s*\||\s*([-*]|\d+\.)\s)/.test(lines[i])) para.push(lines[i++]);
     blocks.push(<p key={key}>{para.map((p, j) => <Fragment key={j}>{j > 0 && <br />}{inline(p, `${key}-${j}`)}</Fragment>)}</p>);
   }
   return <div className="grid gap-4 text-[1.05rem] leading-relaxed">{blocks}</div>;

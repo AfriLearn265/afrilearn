@@ -1,217 +1,131 @@
+import Image from "next/image";
 import Link from "next/link";
-import { CheckCircle2, CircleDot, Flame, Medal, Star, Users, ArrowUpRight } from "lucide-react";
+import clsx from "clsx";
+import { ArrowRight, Flame, Lock, Star } from "lucide-react";
 import { requireRole, firstName } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { getStudentCourses } from "@/lib/learning";
-import { formatDateTime, greeting } from "@/lib/format";
-import { Panel, EmptyState } from "@/components/app/AppShell";
-import { Mascot } from "@/components/brand/Mascot";
-import { VideoCard } from "@/components/app/VideoCard";
-import { ButtonLink } from "@/components/ui/Button";
-import { VIDEO_FIELDS, withMedia, type ClassVideo } from "@/lib/videos";
-import { watchedBy } from "@/components/app/ClassVideos";
-import { ActionForm } from "@/components/app/ActionForm";
-import { CopyButton } from "@/components/app/CopyButton";
-import { TopicMastery, type MasteryRow } from "@/components/app/TopicMastery";
-import { Field, Input, Notice } from "@/components/ui/Field";
-import { joinClassroom, regenerateLinkCode } from "./actions";
+import { greeting } from "@/lib/format";
+import { subjectsForClass } from "@/lib/curriculum";
+import { TERM_NAMES, currentTerm, lookForSubject } from "@/config/subjects";
+import { photos } from "@/config/photos";
+import { SubjectArt } from "@/components/brand/SubjectArt";
+import { PromoCarousel, type Promo } from "@/components/app/PromoCarousel";
 
-export const metadata = { title: "Student dashboard" };
+export const metadata = { title: "My subjects" };
 
-type Enrollment = { classrooms: { id: string; name: string; subjects: { name: string; color: string } | null; profiles: { full_name: string } | null } | null };
-type Due = { id: string; title: string; due_at: string; classrooms: { name: string } | null; assignment_submissions: { status: string }[] };
-type Live = { id: string; title: string; starts_at: string; duration_minutes: number; status: string; classrooms: { name: string } | null };
+const promos: Promo[] = [
+  { title: "Unlock every lesson", text: "Go Premium for all videos, notes and quizzes in your class.", href: "/pricing", cta: "See plans", tone: "grape", art: { kind: "tiko", prop: "star" } },
+  { title: "Is your school on AfriLearn?", text: "Schools across Nigeria are learning with us. Ask your teacher to join.", href: "/teachers", cta: "For schools", tone: "tangerine", art: { kind: "photo", src: photos.classGroup.src, alt: photos.classGroup.alt } },
+  { title: "New lessons every week", text: "Watch, read the notes, then win stars in the quiz.", href: "/student/videos", cta: "Watch now", tone: "sky", art: { kind: "photo", src: photos.laptopGirl.src, alt: photos.laptopGirl.alt } },
+];
 
-const clock = () => Date.now();
-
-export default async function StudentHome({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
+/**
+ * The pupil home: a sliding banner, then just the subjects. Tap a subject to see this term's topics,
+ * tap a topic to watch, read and play the quiz. Everything else lives in the bottom menu.
+ */
+export default async function StudentHome() {
   const { profile, userId } = await requireRole("student");
-  const sp = await searchParams;
   const supabase = await createClient();
-  const now = clock();
-  const [{ data: me }, { data: enrollments }, { count: badgeCount }, learning, { data: mastery }, { data: due }, { data: live }, { data: challenge }] = await Promise.all([
-    supabase.from("students").select("points, streak_days, link_code, class_id, classes(name, education_levels(name))").eq("profile_id", userId).single(),
-    supabase.from("enrollments").select("classrooms(id, name, subjects(name, color), profiles(full_name))").eq("student_id", userId).eq("status", "active"),
-    supabase.from("student_badges").select("badge_id", { count: "exact", head: true }).eq("student_id", userId),
-    getStudentCourses(userId),
-    supabase.rpc("student_topic_mastery", { p_student: userId }),
-    supabase.from("assignments").select("id, title, due_at, classrooms(name), assignment_submissions(status)").gte("due_at", new Date(now - 86400000 * 3).toISOString()).order("due_at").limit(6),
-    supabase.from("live_classes").select("id, title, starts_at, duration_minutes, status, classrooms(name)").neq("status", "cancelled").gte("starts_at", new Date(now - 3600000 * 2).toISOString()).order("starts_at").limit(3),
-    supabase.from("weekly_challenges").select("title, description, target, points, metric, starts_on, ends_on").eq("is_active", true).order("starts_on", { ascending: false }).limit(1).maybeSingle(),
-  ]);
-  const klass = me?.classes as unknown as { name: string; education_levels: { name: string } | null } | null;
-  const { data: vids } = me?.class_id
-    ? await supabase.from("class_videos").select(VIDEO_FIELDS).eq("class_id", me.class_id).eq("is_published", true).order("created_at", { ascending: false }).limit(3)
+  const { data: me } = await supabase.from("students").select("points, streak_days, class_id, classes(name)").eq("profile_id", userId).single();
+  const klass = me?.classes as unknown as { name: string } | null;
+  const term = currentTerm();
+  const subjects = me?.class_id ? await subjectsForClass(me.class_id, userId) : [];
+  const termTopics = subjects.flatMap((s) => s.topics.filter((t) => t.term === term).map((t) => ({ ...t, subject: s })));
+  const { data: doneRows } = termTopics.length
+    ? await supabase.from("topic_progress").select("topic_id").eq("student_id", userId).not("completed_at", "is", null).in("topic_id", termTopics.map((t) => t.id))
     : { data: [] };
-  const videos = await withMedia((vids ?? []) as unknown as ClassVideo[]);
-  const watched = await watchedBy(userId, videos.map((v) => v.id));
-  const nextVideo = videos.find((v) => !watched.has(v.id));
-  const rooms = ((enrollments ?? []) as unknown as Enrollment[]).map((e) => e.classrooms).filter((r): r is NonNullable<Enrollment["classrooms"]> => !!r);
-  const { courses, status } = learning;
-
-  const totalLessons = courses.filter((c) => c.started > 0 || c.class_id || c.classroom_id).reduce((n, c) => n + c.lessons.length, 0);
-  const completed = [...status.values()].filter((s) => s === "completed").length;
-  const inProgress = courses.flatMap((c) => c.lessons.filter((l) => status.get(l.id) === "in_progress").map((l) => ({ ...l, course: c })));
-  const upNext = courses.filter((c) => c.nextLesson && !status.has(c.nextLesson.id)).slice(0, 4).map((c) => ({ ...c.nextLesson!, course: c }));
-  const overall = totalLessons ? Math.round((completed / totalLessons) * 100) : 0;
-  const masteryRows = (mastery ?? []) as MasteryRow[];
-  const mastered = masteryRows.filter((m) => Number(m.percent) >= 70).length;
-  const revise = masteryRows.filter((m) => Number(m.percent) < 70).length;
-  const pending = ((due ?? []) as unknown as Due[]).filter((a) => !a.assignment_submissions?.length);
-  const weekStart = challenge ? new Date(challenge.starts_on).getTime() : 0;
-  const lessonsThisWeek = challenge ? (await supabase.from("lesson_progress").select("lesson_id", { count: "exact", head: true })
-    .eq("student_id", userId).eq("status", "completed").gte("completed_at", new Date(weekStart).toISOString())).count ?? 0 : 0;
+  const done = new Set((doneRows ?? []).map((r) => r.topic_id as string));
+  const next = termTopics.find((t) => !done.has(t.id) && t.subject.code === "mathematics") ?? termTopics.find((t) => !done.has(t.id));
 
   return (
-    <>
-      <section className="relative isolate mb-6 overflow-hidden rounded-[2rem] bg-grape-700 p-6 text-white sm:p-8">
-        <div aria-hidden="true" className="sky-dots absolute inset-0 -z-10" />
-        <div className="grid items-center gap-4 sm:grid-cols-[1fr_auto]">
-          <div>
-            <h1 className="text-[2.1rem] font-semibold leading-[1.05] sm:text-5xl">{greeting()}, {firstName(profile.full_name)}!</h1>
-            <p className="mt-2 max-w-lg text-lg text-grape-100">
-              {klass ? `${klass.name}. ${nextVideo ? "There's a video waiting for you." : "Ready to learn something new today?"}` : "Choose your class on your profile page to see the right lessons."}
-            </p>
-            <div className="mt-5 flex flex-wrap gap-3">
-              {nextVideo ? <ButtonLink href={`/student/videos/${nextVideo.id}`} variant="accent">Watch the next video</ButtonLink>
-                : <ButtonLink href="/student/courses" variant="accent">Start a lesson</ButtonLink>}
-              <ButtonLink href="/student/cbt" variant="onDark">Play a quiz</ButtonLink>
-            </div>
-          </div>
-          <div className="relative hidden w-56 sm:block md:w-64">
-            <span aria-hidden="true" className="absolute inset-[12%] -z-10 rounded-full bg-sun-400" />
-            <Mascot pose="wave" prop="cap" className="w-full" />
-          </div>
+    <div className="grid gap-7">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="font-display text-lg font-semibold text-grape-700">{greeting()},</p>
+          <h1 className="text-3xl font-semibold sm:text-4xl">{firstName(profile.full_name)}</h1>
         </div>
+        <div className="flex gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-sun-100 px-3 py-1.5 font-display text-sm font-semibold text-ink"><Star className="size-4 fill-sun-400 text-sun-600" aria-hidden="true" />{me?.points ?? 0} stars</span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-tangerine-100 px-3 py-1.5 font-display text-sm font-semibold text-ink"><Flame className="size-4 text-tangerine-600" aria-hidden="true" />{me?.streak_days ?? 0} days</span>
+        </div>
+      </div>
+
+      <PromoCarousel slides={promos} />
+
+      <section aria-labelledby="subjects-title">
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 id="subjects-title" className="text-2xl font-semibold">My subjects</h2>
+          <p className="text-sm font-semibold text-muted">{klass?.name ?? "No class yet"} · {TERM_NAMES[term]}</p>
+        </div>
+        {subjects.length === 0 ? (
+          <p className="mt-4 rounded-[1.4rem] bg-wash p-5 text-ink-soft">Your class hasn&apos;t been set yet. Ask your parent or teacher to choose your class in your profile.</p>
+        ) : (
+          <ul className="mt-4 grid gap-4 sm:grid-cols-3">
+            {subjects.map((s) => {
+              const look = lookForSubject(s.code);
+              const total = s.topics.length;
+              const ready = total > 0;
+              const pctDone = total ? Math.round((s.done / total) * 100) : 0;
+              const body = (
+                <>
+                  <span className={clsx("relative grid h-32 place-items-center rounded-[1.4rem] border-2 border-ink sm:h-36", look.bg)}>
+                    <SubjectArt code={s.code} className="h-24 w-auto sm:h-28" />
+                    {!ready && <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-xs font-bold text-ink"><Lock className="size-3.5" aria-hidden="true" />Soon</span>}
+                  </span>
+                  <span className="mt-3 flex items-center justify-between gap-2">
+                    <span className="font-display text-2xl font-semibold">{look.short}</span>
+                    {ready && <ArrowRight className="size-5 text-grape-600 transition-transform group-hover:translate-x-1" aria-hidden="true" />}
+                  </span>
+                  {ready ? (
+                    <>
+                      <span className="mt-1 block text-sm text-muted">{s.topics.filter((t) => t.term === term).length} topics this term · {total} this year</span>
+                      <span className="mt-3 flex items-center gap-2">
+                        <span className="h-2.5 flex-1 overflow-hidden rounded-full bg-wash"><span className={clsx("block h-full rounded-full", look.bg)} style={{ width: `${Math.max(pctDone, 3)}%` }} /></span>
+                        <span className="text-xs font-bold tabular text-ink-soft">{s.done}/{total}</span>
+                      </span>
+                    </>
+                  ) : <span className="mt-1 block text-sm text-muted">Topics are on their way.</span>}
+                </>
+              );
+              return (
+                <li key={s.id}>
+                  {ready ? (
+                    <Link href={`/student/subject/${s.code}`} className="group block rounded-[1.75rem] border-2 border-line bg-white p-3 pb-4 transition hover:-translate-y-1 hover:border-ink hover:shadow-[4px_5px_0_var(--color-ink)]">{body}</Link>
+                  ) : (
+                    <div className="block rounded-[1.75rem] border-2 border-dashed border-line bg-white/70 p-3 pb-4 opacity-80">{body}</div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </section>
 
-      {sp.welcome && <div className="mb-6"><Notice tone="success" title="Your account is ready.">Join your teacher&apos;s classroom with their class code, or start a course for your class below.</Notice></div>}
-      {sp.notice && <div className="mb-6"><Notice tone="warning">{sp.notice}</Notice></div>}
-
-      <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {[{ icon: Star, label: "Learning points", value: me?.points ?? 0, tone: "bg-sun-300" }, { icon: Flame, label: "Day streak", value: me?.streak_days ?? 0, tone: "bg-tangerine-300" },
-          { icon: Users, label: "Classrooms", value: rooms.length, tone: "bg-sky-300" }, { icon: Medal, label: "Badges", value: badgeCount ?? 0, tone: "bg-lime-300" }].map(({ icon: Icon, label, value, tone }) => (
-          <li key={label} className={`rounded-[1.5rem] p-5 ${tone}`}>
-            <span className="grid size-10 place-items-center rounded-full border-2 border-ink bg-white"><Icon className="size-5 text-ink" aria-hidden="true" /></span>
-            <p className="mt-3 font-display text-4xl font-semibold tabular">{value}</p>
-            <p className="text-sm font-semibold text-ink-soft">{label}</p>
-          </li>
-        ))}
-      </ul>
-
-      {videos.length > 0 && (
-        <section aria-labelledby="new-videos" className="mt-8">
-          <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-            <h2 id="new-videos" className="text-2xl font-semibold sm:text-3xl">New videos for {klass?.name ?? "your class"}</h2>
-            <Link href="/student/videos" className="font-display font-semibold text-grape-700 hover:underline">See all videos</Link>
+      {next && (
+        <section aria-labelledby="next-title" className="rounded-[1.75rem] border-2 border-ink bg-sun-100 p-5 shadow-[4px_5px_0_var(--color-ink)] sm:p-6">
+          <p id="next-title" className="font-display text-sm font-semibold uppercase tracking-[0.12em] text-sun-600">Up next in {lookForSubject(next.subject.code).short}</p>
+          <div className="mt-1 flex flex-wrap items-center justify-between gap-4">
+            <p className="font-display text-2xl font-semibold">{next.title}</p>
+            <Link href={`/student/t/${next.code}`} className="inline-flex h-12 items-center gap-2 rounded-full bg-grape-600 px-6 font-display font-semibold text-white shadow-[0_4px_0_var(--color-grape-900)] transition-transform hover:-translate-y-px">
+              Start lesson<ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
           </div>
-          <ul className="grid gap-x-5 gap-y-6 sm:grid-cols-2 xl:grid-cols-3">
-            {videos.map((v) => <VideoCard key={v.id} v={v} href={`/student/videos/${v.id}`} watched={watched.has(v.id)} />)}
-          </ul>
         </section>
       )}
 
-      <section aria-labelledby="journey" className="mt-8 rounded-[2rem] bg-grape-800 p-5 text-white sm:p-6 md:p-8">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h2 id="journey" className="text-2xl font-semibold md:text-3xl">My learning journey</h2>
-            <p className="mt-1 text-adire-100">{completed} lessons completed, {inProgress.length} in progress, {mastered} topics mastered, {revise} to revise.</p>
+      <section className="relative overflow-hidden rounded-[1.75rem] bg-grape-900 text-white">
+        <div className="grid items-center sm:grid-cols-[1fr_1.1fr]">
+          <div className="relative z-10 p-6 sm:p-8">
+            <p className="font-display text-2xl font-semibold leading-tight sm:text-3xl">Learn anywhere, any time.</p>
+            <p className="mt-2 text-grape-100">Short videos, clear notes and fun quizzes, made for Nigerian classrooms.</p>
           </div>
-          <p className="font-display text-5xl font-semibold tabular sm:text-6xl">{overall}%</p>
-        </div>
-        <div className="mt-5 h-3 overflow-hidden rounded-full bg-white/15" role="progressbar" aria-label="Overall progress" aria-valuenow={overall} aria-valuemin={0} aria-valuemax={100}>
-          <div className="h-full rounded-full bg-sun-400" style={{ width: `${Math.max(overall, 2)}%` }} />
-        </div>
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <div className="rounded-2xl bg-white/8 p-4">
-            <p className="text-sm font-semibold text-adire-100">In progress</p>
-            {inProgress.length === 0 ? <p className="mt-2 text-sm text-adire-200">Nothing half-finished. Pick something from Up next.</p> : (
-              <ul className="mt-2 grid gap-2">{inProgress.slice(0, 4).map((l) => (
-                <li key={l.id}><Link href={`/student/lessons/${l.id}`} className="group flex items-start gap-2"><CircleDot className="mt-1 size-4 shrink-0 text-sun-400" aria-hidden="true" /><span className="min-w-0"><span className="block truncate group-hover:underline">{l.title}</span><span className="block text-sm text-adire-200">{l.course.subject?.name}</span></span></Link></li>
-              ))}</ul>
-            )}
-          </div>
-          <div className="rounded-2xl bg-white/8 p-4">
-            <p className="text-sm font-semibold text-adire-100">Up next</p>
-            {upNext.length === 0 ? <p className="mt-2 text-sm text-adire-200">No new lessons waiting. <Link href="/student/courses" className="font-semibold text-white underline">Browse courses</Link></p> : (
-              <ul className="mt-2 grid gap-2">{upNext.map((l) => (
-                <li key={l.id}><Link href={`/student/lessons/${l.id}`} className="group flex items-start gap-2"><ArrowUpRight className="mt-1 size-4 shrink-0 text-sun-400" aria-hidden="true" /><span className="min-w-0"><span className="block truncate group-hover:underline">{l.title}</span><span className="block text-sm text-adire-200">{l.course.subject?.name}</span></span></Link></li>
-              ))}</ul>
-            )}
+          <div className="relative h-52 sm:h-64">
+            <Image src={photos.headphones.src} alt={photos.headphones.alt} fill sizes="(min-width: 640px) 520px, 100vw" className="object-cover object-[50%_30%]" />
+            <span aria-hidden="true" className="absolute inset-y-0 left-0 hidden w-24 bg-gradient-to-r from-grape-900 sm:block" />
+            <span aria-hidden="true" className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-grape-900 sm:hidden" />
           </div>
         </div>
       </section>
-
-      <div className="mt-6 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-        <div className="grid content-start gap-6">
-          <Panel title="Due soon" action={<Link href="/student/assignments" className="text-sm font-semibold text-adire-700">All assignments</Link>}>
-            {pending.length === 0 ? <p className="text-sm text-muted">No assignments waiting for you.</p> : (
-              <ul className="divide-y divide-line">{pending.map((a) => {
-                const overdue = new Date(a.due_at).getTime() < now;
-                return (
-                  <li key={a.id}><Link href={`/student/assignments/${a.id}`} className="flex items-center justify-between gap-3 py-3 hover:opacity-80">
-                    <span><span className="block font-semibold">{a.title}</span><span className="text-sm text-muted">{a.classrooms?.name}</span></span>
-                    <span className={`shrink-0 text-sm font-semibold ${overdue ? "text-coral-700" : "text-ink-soft"}`}>{overdue ? "Overdue" : `Due ${formatDateTime(a.due_at)}`}</span>
-                  </Link></li>
-                );
-              })}</ul>
-            )}
-          </Panel>
-          <Panel title="Topics mastered and to revise" action={<Link href="/student/results" className="text-sm font-semibold text-adire-700">Results</Link>}>
-            <TopicMastery rows={masteryRows} limit={6} />
-          </Panel>
-          <Panel title="My classrooms">
-            {rooms.length === 0 ? (
-              <EmptyState title="You haven't joined a classroom yet.">Ask your teacher for their six-character class code and enter it under Join a classroom.</EmptyState>
-            ) : (
-              <ul className="divide-y divide-line">
-                {rooms.map((r) => (
-                  <li key={r.id}><Link href={`/student/classes/${r.id}`} className="flex items-center gap-4 py-3.5 hover:opacity-80">
-                    <span className="size-3 shrink-0 rounded-full" style={{ background: r.subjects?.color ?? "#4A1FB8" }} aria-hidden="true" />
-                    <span className="min-w-0"><span className="block truncate font-semibold">{r.name}</span><span className="text-sm text-muted">{[r.subjects?.name, r.profiles?.full_name && `with ${r.profiles.full_name}`].filter(Boolean).join(", ")}</span></span>
-                  </Link></li>
-                ))}
-              </ul>
-            )}
-          </Panel>
-        </div>
-
-        <div className="grid content-start gap-6">
-          {(live ?? []).length > 0 && (
-            <Panel title="Live classes" action={<Link href="/student/live" className="text-sm font-semibold text-adire-700">Join</Link>}>
-              <ul className="grid gap-3 text-sm">{((live ?? []) as unknown as Live[]).map((l) => (
-                <li key={l.id}><p className="font-semibold">{l.title}{l.status === "live" && <span className="ml-2 inline-flex rounded-full bg-coral-500 px-2 py-0.5 align-middle text-xs font-bold text-white">Live now</span>}</p><p className="text-muted">{l.classrooms?.name}, {formatDateTime(l.starts_at)}</p></li>
-              ))}</ul>
-            </Panel>
-          )}
-          {challenge && (
-            <Panel title="Weekly challenge">
-              <p className="font-semibold">{challenge.title}</p>
-              <p className="text-sm text-muted">{challenge.description} Worth {challenge.points} points.</p>
-              <div className="mt-3 flex items-center gap-3">
-                <span className="h-2 flex-1 overflow-hidden rounded-full bg-wash"><span className="block h-full rounded-full bg-sun-400" style={{ width: `${Math.min(100, (lessonsThisWeek / challenge.target) * 100)}%` }} /></span>
-                <span className="text-sm font-semibold tabular">{Math.min(lessonsThisWeek, challenge.target)}/{challenge.target}</span>
-              </div>
-              {lessonsThisWeek >= challenge.target && <p className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-leaf-700"><CheckCircle2 className="size-4" />Challenge complete</p>}
-            </Panel>
-          )}
-          <Panel title="Join a classroom">
-            <ActionForm action={joinClassroom} submitLabel="Join classroom" pendingLabel="Joining">
-              <Field label="Class code" htmlFor="code"><Input id="code" name="code" maxLength={12} autoComplete="off" className="uppercase tracking-[0.25em]" placeholder="K7M2QX" /></Field>
-            </ActionForm>
-          </Panel>
-          <Panel title="Link a parent or guardian">
-            <p className="text-sm text-muted">Give this code to your parent or guardian. They enter it on their dashboard to follow your progress.</p>
-            <div className="mt-4 flex flex-wrap items-center gap-3">
-              <p className="rounded-xl bg-wash px-4 py-2 font-display text-2xl font-bold tracking-[0.2em] text-adire-800">{me?.link_code}</p>
-              {me?.link_code && <CopyButton value={me.link_code} />}
-            </div>
-            <ActionForm action={regenerateLinkCode} submitLabel="Make a new code" pendingLabel="Making a new code" variant="outline" className="mt-4" resetOnSuccess={false}>
-              <p className="text-xs text-muted">A new code stops the old one from working. Parents already linked stay linked.</p>
-            </ActionForm>
-          </Panel>
-        </div>
-      </div>
-    </>
+    </div>
   );
 }

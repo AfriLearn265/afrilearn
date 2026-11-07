@@ -3,7 +3,8 @@ import clsx from "clsx";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader, Panel } from "@/components/app/AppShell";
 import { ClassVideoGrid } from "@/components/app/ClassVideos";
-import { VideoUploader, type UploaderClass } from "@/components/app/VideoUploader";
+import { VideoUploader, type UploaderClass, type UploaderTopic } from "@/components/app/VideoUploader";
+import { vdocipherReady } from "@/lib/vdocipher";
 
 type ClassRow = { id: string; code: string; name: string; class_subjects: { subjects: { id: string; name: string; is_active: boolean } | null }[] };
 
@@ -12,9 +13,10 @@ export async function StaffVideos({ userId, basePath, isAdmin, cls, subject, min
   userId: string; basePath: string; isAdmin: boolean; cls?: string; subject?: string; mine?: boolean;
 }) {
   const supabase = await createClient();
-  const [{ data: classes }, { data: taught }] = await Promise.all([
+  const [{ data: classes }, { data: taught }, { data: topics }] = await Promise.all([
     supabase.from("classes").select("id, code, name, class_subjects(subjects(id, name, is_active))").eq("is_active", true).order("sort_order"),
     supabase.from("teacher_classes").select("class_id").eq("teacher_id", userId),
+    supabase.from("curriculum_topics").select("id, class_id, subject_id, term, title").order("sort_order"),
   ]);
   const rows = (classes ?? []) as unknown as ClassRow[];
   const uploaderClasses: UploaderClass[] = rows.map((c) => ({
@@ -32,9 +34,10 @@ export async function StaffVideos({ userId, basePath, isAdmin, cls, subject, min
 
   return (
     <>
-      <PageHeader title="Class videos" intro="Add short videos for each class, subject by subject. Pupils in that class, and their parents, can watch them straight away." />
+      <PageHeader title="Class videos" intro="Add short videos for each class and topic. Pupils in that class, and their parents, can watch them straight away, but can't download them." />
       <Panel title="Add a video" className="mb-8">
-        <VideoUploader userId={userId} classes={uploaderClasses} defaultClassId={rows.find((c) => mineIds.has(c.id))?.id} />
+        <VideoUploader userId={userId} classes={uploaderClasses} topics={(topics ?? []) as UploaderTopic[]} protectedHosting={vdocipherReady()}
+          defaultClassId={rows.find((c) => mineIds.has(c.id))?.id} />
       </Panel>
 
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
